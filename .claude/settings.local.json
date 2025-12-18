@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx @nestjs/cli new . --package-manager npm --skip-git --language ts)",
+      "Bash(npm run build:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh:*)",
+      "Bash(cat:*)",
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run test:*)",
+      "Bash(docker ps:*)",
+      "Bash(npm run test:e2e:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run format:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm rebuild)",
+      "Bash(npx jest:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(timeout 60 npx vitest:*)",
+      "Bash(echo:*)",
+      "Bash(gtimeout 60 npx vitest:*)",
+      "Bash(perl -e 'alarm 60; exec @ARGV' npx vitest run --no-color)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(npm run migration:generate:*)",
+      "Bash(npm run migration:run:*)",
+      "Bash(git gc:*)",
+      "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(GIT_CURL_VERBOSE=1 git push:*)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

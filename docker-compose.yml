@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: bike-area-api
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://bike_area:bike_area_dev@postgres:5432/bike_area
+      - REDIS_URL=redis://redis:6379
+      - JWT_ACCESS_SECRET=dev-access-secret-minimum-32-characters-long
+      - JWT_REFRESH_SECRET=dev-refresh-secret-minimum-32-characters-long
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: bike-area-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: bike_area
+      POSTGRES_PASSWORD: bike_area_dev
+      POSTGRES_DB: bike_area
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bike_area -d bike_area']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: bike-area-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
