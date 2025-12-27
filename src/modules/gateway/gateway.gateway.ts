@@ -8,11 +8,11 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseGuards, Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { createAdapter } from '@socket.io/redis-adapter';
+// import { createAdapter } from '@socket.io/redis-adapter';  // Disabled for now
 import { RedisService } from '@redis/redis.service.js';
 import { GatewayService } from './gateway.service.js';
 import { WsAuthGuard } from './guards/ws-auth.guard.js';
@@ -44,10 +44,10 @@ export class AppGateway
   private readonly logger = new Logger(AppGateway.name);
 
   constructor(
-    private readonly gatewayService: GatewayService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly redisService: RedisService,
+    @Inject(GatewayService) private readonly gatewayService: GatewayService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(RedisService) private readonly redisService: RedisService,
   ) {}
 
   async afterInit(
@@ -55,21 +55,10 @@ export class AppGateway
   ): Promise<void> {
     this.logger.log('WebSocket Gateway initialized');
 
-    // Set up Redis adapter for horizontal scaling
-    try {
-      const pubClient = this.redisService.getClient().duplicate();
-      const subClient = this.redisService.getClient().duplicate();
-
-      await Promise.all([pubClient.connect(), subClient.connect()]);
-
-      server.adapter(createAdapter(pubClient, subClient));
-      this.logger.log('Redis adapter configured for Socket.io');
-    } catch (error) {
-      this.logger.warn(
-        'Failed to set up Redis adapter, running in single-server mode',
-        error,
-      );
-    }
+    // Redis adapter setup is disabled for now (single-server mode)
+    // TODO: Enable for horizontal scaling in production
+    // The ioredis duplicate() requires special handling that was causing startup delays
+    this.logger.log('Running Socket.io in single-server mode (Redis adapter disabled)');
 
     // Pass server to gateway service
     this.gatewayService.setServer(server);
@@ -90,7 +79,10 @@ export class AppGateway
       // Attach user to socket
       (client as AuthenticatedSocket).user = user;
 
-      // Register socket in Redis
+      // Check if this is first connection (user was offline)
+      const wasOffline = !(await this.gatewayService.isUserOnline(user.id));
+
+      // Register socket in Redis (supports multiple devices)
       await this.gatewayService.registerSocket(client.id, user.id);
 
       // Join user's personal room for direct messages
@@ -99,11 +91,14 @@ export class AppGateway
       // Emit success
       client.emit('auth:success', user);
 
-      // Broadcast online status to relevant users (could be followers, contacts, etc.)
-      this.server.emit('user:online', user.id);
+      // Only broadcast online if user was offline (first device connecting)
+      if (wasOffline) {
+        await this.gatewayService.setUserOnline(user.id);
+      }
 
+      const connectionCount = await this.gatewayService.getConnectionCount(user.id);
       this.logger.log(
-        `Client connected: ${client.id} (User: ${user.id}, ${user.email})`,
+        `Client connected: ${client.id} (User: ${user.id}, ${user.email}, connections: ${connectionCount})`,
       );
     } catch (error) {
       this.logger.error(`Connection error for ${client.id}:`, error);
@@ -118,13 +113,16 @@ export class AppGateway
       const userId = authenticatedClient.user?.id;
 
       if (userId) {
-        // Unregister socket and check if user went offline
+        // Unregister socket and check if user went offline (last device disconnecting)
         const wentOffline = await this.gatewayService.unregisterSocket(client.id);
 
         if (wentOffline) {
-          // Broadcast offline status
-          this.server.emit('user:offline', userId);
-          this.logger.log(`User ${userId} went offline`);
+          // Broadcast offline status to followers
+          await this.gatewayService.setUserOffline(userId);
+          this.logger.log(`User ${userId} went offline (all devices disconnected)`);
+        } else {
+          const remaining = await this.gatewayService.getConnectionCount(userId);
+          this.logger.debug(`User ${userId} still has ${remaining} active connection(s)`);
         }
       }
 
@@ -140,21 +138,42 @@ export class AppGateway
   @UseGuards(WsAuthGuard)
   async handlePresenceOnline(
     @ConnectedSocket() client: AuthenticatedSocket,
-  ): Promise<void> {
+  ): Promise<{ success: boolean }> {
     const userId = client.user.id;
-    await this.gatewayService.registerSocket(client.id, userId);
-    this.server.emit('user:online', userId);
+    // Disable "appear offline" mode
+    await this.gatewayService.setAppearOffline(userId, false);
+    return { success: true };
   }
 
   @SubscribeMessage('presence:offline')
   @UseGuards(WsAuthGuard)
   async handlePresenceOffline(
     @ConnectedSocket() client: AuthenticatedSocket,
-  ): Promise<void> {
-    // Don't actually disconnect, just broadcast offline status
-    // This is for when user wants to appear offline
+  ): Promise<{ success: boolean }> {
+    // Don't actually disconnect, just enable "appear offline" mode
+    // This is for when user wants to appear offline while still connected
     const userId = client.user.id;
-    this.server.emit('user:offline', userId);
+    await this.gatewayService.setAppearOffline(userId, true);
+    return { success: true };
+  }
+
+  @SubscribeMessage('presence:status')
+  @UseGuards(WsAuthGuard)
+  async handleGetPresenceStatus(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() userIds: string[],
+  ): Promise<{ statuses: Record<string, { isOnline: boolean; lastSeen?: Date }> }> {
+    const statusMap = await this.gatewayService.getOnlineStatusBatch(userIds);
+    const statuses: Record<string, { isOnline: boolean; lastSeen?: Date }> = {};
+
+    for (const [odUserId, info] of statusMap) {
+      statuses[odUserId] = {
+        isOnline: info.isOnline,
+        lastSeen: info.lastSeen,
+      };
+    }
+
+    return { statuses };
   }
 
   // Room Management Events

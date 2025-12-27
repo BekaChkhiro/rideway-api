@@ -11,14 +11,13 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import {
-  User,
-  UserProfile,
-  RefreshToken,
-  OtpCode,
-  OtpType,
-} from '@database/index.js';
+// Import entities directly to avoid circular dependency from barrel export
+import { User } from '@database/entities/user.entity.js';
+import { UserProfile } from '@database/entities/user-profile.entity.js';
+import { RefreshToken } from '@database/entities/refresh-token.entity.js';
+import { OtpCode, OtpType } from '@database/entities/otp-code.entity.js';
 import { RedisService } from '@redis/index.js';
+import { EmailService } from '@modules/email/email.service.js';
 import {
   RegisterDto,
   LoginDto,
@@ -51,9 +50,10 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(OtpCode)
     private readonly otpCodeRepository: Repository<OtpCode>,
-    private readonly jwtService: JwtService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(RedisService) private readonly redisService: RedisService,
+    @Inject(EmailService) private readonly emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto): Promise<{ user: User; message: string }> {
@@ -96,7 +96,7 @@ export class AuthService {
 
     await this.profileRepository.save(profile);
 
-    await this.generateAndSaveOtp(user.id, OtpType.EMAIL_VERIFY);
+    await this.generateAndSaveOtp(user.id, OtpType.EMAIL_VERIFY, user.email);
 
     this.logger.log(`User registered: ${user.email}`);
 
@@ -141,6 +141,10 @@ export class AuthService {
 
     if (dto.type === OtpType.EMAIL_VERIFY) {
       user.isEmailVerified = true;
+      // Send welcome email
+      if (user.profile?.username) {
+        await this.emailService.sendWelcomeEmail(user.email, user.profile.username);
+      }
     } else if (dto.type === OtpType.PHONE_VERIFY) {
       user.isPhoneVerified = true;
     }
@@ -276,7 +280,7 @@ export class AuthService {
     });
 
     if (user) {
-      await this.generateAndSaveOtp(user.id, OtpType.PASSWORD_RESET);
+      await this.generateAndSaveOtp(user.id, OtpType.PASSWORD_RESET, user.email);
       this.logger.log(`Password reset OTP sent to: ${dto.email}`);
     }
 
@@ -408,6 +412,7 @@ export class AuthService {
   private async generateAndSaveOtp(
     userId: string,
     type: OtpType,
+    email?: string,
   ): Promise<string> {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -420,10 +425,16 @@ export class AuthService {
 
     await this.otpCodeRepository.save(otpCode);
 
-    // TODO: Send OTP via email/SMS service
-    this.logger.debug(
-      `OTP generated for user ${userId}: ${code} (type: ${type})`,
-    );
+    // Send OTP via email
+    if (email && (type === OtpType.EMAIL_VERIFY || type === OtpType.PASSWORD_RESET)) {
+      const emailType = type === OtpType.EMAIL_VERIFY ? 'verify' : 'reset';
+      await this.emailService.sendOtpEmail(email, code, emailType);
+      this.logger.log(`OTP email sent to ${email} (type: ${type})`);
+    } else {
+      this.logger.debug(
+        `OTP generated for user ${userId}: ${code} (type: ${type})`,
+      );
+    }
 
     return code;
   }

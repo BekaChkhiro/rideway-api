@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,7 +20,7 @@ export class PartsCategoriesService {
   constructor(
     @InjectRepository(PartsCategory)
     private readonly categoryRepository: Repository<PartsCategory>,
-    @Inject(RedisService) private readonly redisService: RedisService,
+    private readonly redisService: RedisService,
   ) {}
 
   async create(dto: CreatePartsCategoryDto): Promise<PartsCategory> {

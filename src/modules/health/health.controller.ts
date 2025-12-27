@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
@@ -9,9 +9,9 @@ import { RedisHealthIndicator } from '../../redis/redis.health.js';
 @Controller('health')
 export class HealthController {
   constructor(
-    private readonly health: HealthCheckService,
-    private readonly db: TypeOrmHealthIndicator,
-    private readonly redis: RedisHealthIndicator,
+    @Inject(HealthCheckService) private readonly health: HealthCheckService,
+    @Inject(TypeOrmHealthIndicator) private readonly db: TypeOrmHealthIndicator,
+    @Inject(RedisHealthIndicator) private readonly redis: RedisHealthIndicator,
   ) {}
 
   @Get()

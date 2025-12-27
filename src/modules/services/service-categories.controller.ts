@@ -16,7 +16,7 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard.js';
+import { JwtAuthGuard } from '@modules/auth/index.js';
 import { ServiceCategoriesService } from './service-categories.service.js';
 import { CreateServiceCategoryDto } from './dto/create-service-category.dto.js';
 import { ServiceCategory } from './entities/service-category.entity.js';

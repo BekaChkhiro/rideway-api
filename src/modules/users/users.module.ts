@@ -4,11 +4,13 @@ import { UsersController } from './users.controller.js';
 import { UsersService } from './users.service.js';
 import { User, UserProfile, UserFollow, UserBlock } from '@database/index.js';
 import { MediaModule } from '@modules/media/media.module.js';
+// import { GatewayModule } from '@modules/gateway/gateway.module.js'; // Temporarily disabled
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserProfile, UserFollow, UserBlock]),
     MediaModule,
+    // GatewayModule, // Temporarily disabled
   ],
   controllers: [UsersController],
   providers: [UsersService],

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, Index } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class CreateForumTables1702925000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -385,7 +385,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
     // Create indexes
     await queryRunner.createIndex(
       'forum_threads',
-      new Index({
+      new TableIndex({
         name: 'IDX_forum_threads_category_id',
         columnNames: ['category_id'],
       }),
@@ -393,7 +393,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'forum_threads',
-      new Index({
+      new TableIndex({
         name: 'IDX_forum_threads_user_id',
         columnNames: ['user_id'],
       }),
@@ -401,7 +401,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'forum_threads',
-      new Index({
+      new TableIndex({
         name: 'IDX_forum_threads_is_pinned',
         columnNames: ['is_pinned'],
       }),
@@ -409,7 +409,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'thread_replies',
-      new Index({
+      new TableIndex({
         name: 'IDX_thread_replies_thread_id',
         columnNames: ['thread_id'],
       }),
@@ -417,7 +417,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'thread_replies',
-      new Index({
+      new TableIndex({
         name: 'IDX_thread_replies_user_id',
         columnNames: ['user_id'],
       }),
@@ -425,7 +425,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'thread_likes',
-      new Index({
+      new TableIndex({
         name: 'IDX_thread_likes_unique',
         columnNames: ['thread_id', 'user_id'],
         isUnique: true,
@@ -434,7 +434,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'thread_subscriptions',
-      new Index({
+      new TableIndex({
         name: 'IDX_thread_subscriptions_unique',
         columnNames: ['thread_id', 'user_id'],
         isUnique: true,
@@ -443,7 +443,7 @@ export class CreateForumTables1702925000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'reply_likes',
-      new Index({
+      new TableIndex({
         name: 'IDX_reply_likes_unique',
         columnNames: ['reply_id', 'user_id'],
         isUnique: true,

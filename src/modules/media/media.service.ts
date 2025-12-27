@@ -2,14 +2,14 @@ import { Injectable, BadRequestException, Logger, Inject } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
-import { R2Service } from './r2.service';
+import { R2Service } from './r2.service.js';
 import type { R2Config } from '@config/r2.config';
 import {
   type ImageFolder,
   type ImageProcessingOptions,
   type UploadResult,
   IMAGE_PRESETS,
-} from './interfaces/upload-options.interface';
+} from './interfaces/upload-options.interface.js';
 
 @Injectable()
 export class MediaService {
@@ -18,7 +18,7 @@ export class MediaService {
   private readonly allowedMimeTypes: string[];
 
   constructor(
-    private readonly r2Service: R2Service,
+    @Inject(R2Service) private readonly r2Service: R2Service,
     @Inject(ConfigService) private readonly configService: ConfigService,
   ) {
     const r2Config = this.configService.get<R2Config>('r2');

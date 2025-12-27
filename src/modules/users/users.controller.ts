@@ -28,18 +28,84 @@ import {
   UpdateProfileDto,
   PaginationQueryDto,
   UserSearchQueryDto,
+  UpdatePrivacySettingsDto,
 } from './dto/index.js';
 import {
   JwtAuthGuard,
   OptionalAuthGuard,
   CurrentUser,
 } from '@modules/auth/index.js';
+import { GatewayService } from '@modules/gateway/gateway.service.js';
 import { User } from '@database/index.js';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly gatewayService: GatewayService,
+  ) {}
+
+  @Get('online-status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get online status for multiple users' })
+  @ApiResponse({ status: 200, description: 'Online status for users' })
+  async getOnlineStatus(
+    @Query('userIds') userIds: string,
+  ): Promise<Record<string, { isOnline: boolean; lastSeen?: Date }>> {
+    const ids = userIds ? userIds.split(',').filter((id) => id.trim()) : [];
+
+    if (ids.length === 0) {
+      return {};
+    }
+
+    if (ids.length > 100) {
+      throw new BadRequestException('Maximum 100 user IDs allowed');
+    }
+
+    const statusMap = await this.gatewayService.getOnlineStatusBatch(ids);
+    const result: Record<string, { isOnline: boolean; lastSeen?: Date }> = {};
+
+    for (const [userId, info] of statusMap) {
+      result[userId] = {
+        isOnline: info.isOnline,
+        lastSeen: info.lastSeen,
+      };
+    }
+
+    return result;
+  }
+
+  @Get('privacy-settings')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current user privacy settings' })
+  @ApiResponse({ status: 200, description: 'Privacy settings' })
+  async getPrivacySettings(
+    @CurrentUser() user: User,
+  ): Promise<{ appearOffline: boolean; showLastSeen: boolean }> {
+    const status = await this.gatewayService.getOnlineStatus(user.id);
+    return {
+      appearOffline: status.appearOffline || false,
+      showLastSeen: true,
+    };
+  }
+
+  @Patch('privacy-settings')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update privacy settings' })
+  @ApiResponse({ status: 200, description: 'Privacy settings updated' })
+  async updatePrivacySettings(
+    @CurrentUser() user: User,
+    @Body() dto: UpdatePrivacySettingsDto,
+  ): Promise<{ message: string }> {
+    if (dto.appearOffline !== undefined) {
+      await this.gatewayService.setAppearOffline(user.id, dto.appearOffline);
+    }
+    return { message: 'Privacy settings updated' };
+  }
 
   @Get('search')
   @UseGuards(OptionalAuthGuard)

@@ -40,7 +40,18 @@
       "Bash(npx tsx:*)",
       "Bash(mkdir:*)",
       "Bash(lsof:*)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "Bash(redis-cli:*)",
+      "Bash(PGPASSWORD=IFINuPOWhcVsqJGRbmpIqkriQNxtNSRY psql:*)",
+      "Bash(timeout 45 npm run start:dev:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 90 npm run start:dev:*)",
+      "Bash(gtimeout 45 npm run start:dev:*)",
+      "Bash(npm run start:prod:*)",
+      "Bash(node:*)",
+      "Bash(done)",
+      "Bash(xargs kill:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

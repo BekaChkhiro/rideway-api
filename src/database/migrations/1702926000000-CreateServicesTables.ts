@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, Index } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 export class CreateServicesTables1702926000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -292,7 +292,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
     // Create indexes
     await queryRunner.createIndex(
       'services',
-      new Index({
+      new TableIndex({
         name: 'IDX_services_user_id',
         columnNames: ['user_id'],
       }),
@@ -300,7 +300,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'services',
-      new Index({
+      new TableIndex({
         name: 'IDX_services_category_id',
         columnNames: ['category_id'],
       }),
@@ -308,7 +308,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'services',
-      new Index({
+      new TableIndex({
         name: 'IDX_services_city',
         columnNames: ['city'],
       }),
@@ -316,7 +316,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'services',
-      new Index({
+      new TableIndex({
         name: 'IDX_services_rating',
         columnNames: ['rating_avg'],
       }),
@@ -324,7 +324,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'services',
-      new Index({
+      new TableIndex({
         name: 'IDX_services_location',
         columnNames: ['latitude', 'longitude'],
       }),
@@ -332,7 +332,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'service_images',
-      new Index({
+      new TableIndex({
         name: 'IDX_service_images_service_id',
         columnNames: ['service_id'],
       }),
@@ -340,7 +340,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'service_reviews',
-      new Index({
+      new TableIndex({
         name: 'IDX_service_reviews_service_id',
         columnNames: ['service_id'],
       }),
@@ -348,7 +348,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'service_reviews',
-      new Index({
+      new TableIndex({
         name: 'IDX_service_reviews_user_id',
         columnNames: ['user_id'],
       }),
@@ -356,7 +356,7 @@ export class CreateServicesTables1702926000000 implements MigrationInterface {
 
     await queryRunner.createIndex(
       'service_reviews',
-      new Index({
+      new TableIndex({
         name: 'IDX_service_reviews_unique',
         columnNames: ['service_id', 'user_id'],
         isUnique: true,

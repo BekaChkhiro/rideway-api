@@ -460,6 +460,7 @@ export class ForumThreadsService {
   }
 
   private async syncViewCounts(): Promise<void> {
+    if (!this.redisService) return;
     const keys = await this.redisService.keys(`${this.VIEWS_CACHE_KEY}*`);
 
     if (keys.length === 0) return;

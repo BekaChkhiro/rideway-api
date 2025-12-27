@@ -18,9 +18,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard.js';
-import { OptionalAuthGuard } from '@auth/guards/optional-auth.guard.js';
-import { CurrentUser } from '@common/decorators/current-user.decorator.js';
+import { JwtAuthGuard, OptionalAuthGuard, CurrentUser } from '@modules/auth/index.js';
 import { ServicesService } from './services.service.js';
 import { CreateServiceDto } from './dto/create-service.dto.js';
 import { UpdateServiceDto } from './dto/update-service.dto.js';

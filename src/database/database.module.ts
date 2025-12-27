@@ -18,7 +18,8 @@ import { ConfigService } from '@nestjs/config';
         synchronize: false,
         logging: configService.get<boolean>('database.logging'),
         autoLoadEntities: true,
-        entities: [__dirname + '/entities/**/*.entity{.ts,.js}'],
+        // Don't use explicit entities path when autoLoadEntities is true
+        // entities: [__dirname + '/entities/**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
       }),
     }),

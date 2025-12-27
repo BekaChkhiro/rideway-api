@@ -8,19 +8,16 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy.js';
-import { User, UserProfile, RefreshToken, OtpCode } from '@database/index.js';
+// Import entities directly to avoid circular dependency from barrel export
+import { User } from '@database/entities/user.entity.js';
+import { UserProfile } from '@database/entities/user-profile.entity.js';
+import { RefreshToken } from '@database/entities/refresh-token.entity.js';
+import { OtpCode } from '@database/entities/otp-code.entity.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, UserProfile, RefreshToken, OtpCode]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    ThrottlerModule.forRoot([
-      {
-        name: 'auth',
-        ttl: 60000, // 1 minute
-        limit: 5, // 5 attempts per minute
-      },
-    ]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -30,9 +27,14 @@ import { User, UserProfile, RefreshToken, OtpCode } from '@database/index.js';
         },
       }),
     }),
+    ThrottlerModule.forRoot([{
+      name: 'auth',
+      ttl: 60000,
+      limit: 10,
+    }]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  exports: [AuthService, PassportModule, JwtModule],
 })
 export class AuthModule {}

@@ -4,12 +4,14 @@ import * as Joi from 'joi';
 import appConfig from './app.config.js';
 import databaseConfig from './database.config.js';
 import redisConfig from './redis.config.js';
+import firebaseConfig from './firebase.config.js';
+import r2Config from './r2.config.js';
 
 @Module({
   imports: [
     NestConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig],
+      load: [appConfig, databaseConfig, redisConfig, firebaseConfig, r2Config],
       validationSchema: Joi.object({
         // App
         NODE_ENV: Joi.string()
