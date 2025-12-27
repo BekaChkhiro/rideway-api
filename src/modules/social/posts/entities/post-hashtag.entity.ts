@@ -5,8 +5,8 @@ import {
   PrimaryColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Post } from './post.entity.js';
-import { Hashtag } from './hashtag.entity.js';
+import type { Post } from './post.entity.js';
+import type { Hashtag } from './hashtag.entity.js';
 
 @Entity('post_hashtags')
 export class PostHashtag {
@@ -19,11 +19,11 @@ export class PostHashtag {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => Post, (post) => post.postHashtags, { onDelete: 'CASCADE' })
+  @ManyToOne('Post', 'postHashtags', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post!: Post;
 
-  @ManyToOne(() => Hashtag, (hashtag) => hashtag.postHashtags, { onDelete: 'CASCADE' })
+  @ManyToOne('Hashtag', 'postHashtags', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'hashtag_id' })
   hashtag!: Hashtag;
 }

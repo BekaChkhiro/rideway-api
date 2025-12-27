@@ -33,13 +33,10 @@ export class ListingCategory {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => ListingCategory, (category) => category.children, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne('ListingCategory', 'children', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'parent_id' })
   parent?: ListingCategory;
 
-  @OneToMany(() => ListingCategory, (category) => category.parent)
+  @OneToMany('ListingCategory', 'parent')
   children?: ListingCategory[];
 }

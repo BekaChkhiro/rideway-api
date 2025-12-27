@@ -10,10 +10,10 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { ServiceCategory } from './service-category.entity.js';
-import { ServiceImage } from './service-image.entity.js';
-import { ServiceReview } from './service-review.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { ServiceCategory } from './service-category.entity.js';
+import type { ServiceImage } from './service-image.entity.js';
+import type { ServiceReview } from './service-review.entity.js';
 
 export enum ServiceStatus {
   ACTIVE = 'active',
@@ -113,18 +113,18 @@ export class Service {
   deletedAt?: Date;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user?: User;
 
-  @ManyToOne(() => ServiceCategory, (category) => category.services)
+  @ManyToOne('ServiceCategory', 'services')
   @JoinColumn({ name: 'category_id' })
   category?: ServiceCategory;
 
-  @OneToMany(() => ServiceImage, (image) => image.service)
+  @OneToMany('ServiceImage', 'service')
   images?: ServiceImage[];
 
-  @OneToMany(() => ServiceReview, (review) => review.service)
+  @OneToMany('ServiceReview', 'service')
   reviews?: ServiceReview[];
 
   // Virtual fields

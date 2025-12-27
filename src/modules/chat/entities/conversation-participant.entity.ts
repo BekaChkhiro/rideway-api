@@ -8,8 +8,8 @@ import {
   CreateDateColumn,
   Unique,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Conversation } from './conversation.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Conversation } from './conversation.entity.js';
 
 @Entity('conversation_participants')
 @Unique(['conversationId', 'userId'])
@@ -37,13 +37,11 @@ export class ConversationParticipant {
   @Column({ name: 'left_at', type: 'timestamp', nullable: true })
   leftAt?: Date;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.participants, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('Conversation', 'participants', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'conversation_id' })
   conversation!: Conversation;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

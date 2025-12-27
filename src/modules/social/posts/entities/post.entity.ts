@@ -7,11 +7,11 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { PostImage } from './post-image.entity.js';
-import { PostLike } from './post-like.entity.js';
-import { PostHashtag } from './post-hashtag.entity.js';
-import { PostMention } from './post-mention.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { PostImage } from './post-image.entity.js';
+import type { PostLike } from './post-like.entity.js';
+import type { PostHashtag } from './post-hashtag.entity.js';
+import type { PostMention } from './post-mention.entity.js';
 
 export enum PostVisibility {
   PUBLIC = 'public',
@@ -52,24 +52,24 @@ export class Post extends BaseEntity {
   originalPostId?: string;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Post, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne('Post', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'original_post_id' })
   originalPost?: Post;
 
-  @OneToMany(() => PostImage, (image) => image.post, { cascade: true })
+  @OneToMany('PostImage', 'post', { cascade: true })
   images?: PostImage[];
 
-  @OneToMany(() => PostLike, (like) => like.post)
+  @OneToMany('PostLike', 'post')
   likes?: PostLike[];
 
-  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.post, { cascade: true })
+  @OneToMany('PostHashtag', 'post', { cascade: true })
   postHashtags?: PostHashtag[];
 
-  @OneToMany(() => PostMention, (mention) => mention.post, { cascade: true })
+  @OneToMany('PostMention', 'post', { cascade: true })
   mentions?: PostMention[];
 
   // Virtual fields

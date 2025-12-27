@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   Index,
 } from 'typeorm';
-import { ForumThread } from './forum-thread.entity.js';
+import type { ForumThread } from './forum-thread.entity.js';
 
 @Entity('forum_categories')
 export class ForumCategory {
@@ -38,6 +38,6 @@ export class ForumCategory {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @OneToMany(() => ForumThread, (thread) => thread.category)
+  @OneToMany('ForumThread', 'category')
   threads?: ForumThread[];
 }

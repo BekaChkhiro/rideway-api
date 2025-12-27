@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
+import type { User } from '@database/entities/user.entity.js';
 import { NotificationType } from '../constants/notification-types.constant.js';
 
 @Entity('notifications')
@@ -48,11 +48,11 @@ export class Notification {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne('User', { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'sender_id' })
   sender?: User;
 }

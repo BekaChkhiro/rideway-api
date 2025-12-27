@@ -7,11 +7,11 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { ForumCategory } from './forum-category.entity.js';
-import { ThreadReply } from './thread-reply.entity.js';
-import { ThreadLike } from './thread-like.entity.js';
-import { ThreadSubscription } from './thread-subscription.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { ForumCategory } from './forum-category.entity.js';
+import type { ThreadReply } from './thread-reply.entity.js';
+import type { ThreadLike } from './thread-like.entity.js';
+import type { ThreadSubscription } from './thread-subscription.entity.js';
 
 @Entity('forum_threads')
 export class ForumThread extends BaseEntity {
@@ -52,27 +52,25 @@ export class ForumThread extends BaseEntity {
   lastReplyUserId?: string;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => ForumCategory, (category) => category.threads, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('ForumCategory', 'threads', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'category_id' })
   category!: ForumCategory;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne('User', { nullable: true })
   @JoinColumn({ name: 'last_reply_user_id' })
   lastReplyUser?: User;
 
-  @OneToMany(() => ThreadReply, (reply) => reply.thread)
+  @OneToMany('ThreadReply', 'thread')
   replies?: ThreadReply[];
 
-  @OneToMany(() => ThreadLike, (like) => like.thread)
+  @OneToMany('ThreadLike', 'thread')
   likes?: ThreadLike[];
 
-  @OneToMany(() => ThreadSubscription, (sub) => sub.thread)
+  @OneToMany('ThreadSubscription', 'thread')
   subscriptions?: ThreadSubscription[];
 
   // Virtual fields

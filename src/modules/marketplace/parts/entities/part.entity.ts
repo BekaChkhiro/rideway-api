@@ -7,9 +7,9 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { PartsCategory } from './parts-category.entity.js';
-import { PartImage } from './part-image.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { PartsCategory } from './parts-category.entity.js';
+import type { PartImage } from './part-image.entity.js';
 
 export enum PartCondition {
   NEW = 'new',
@@ -87,14 +87,14 @@ export class Part extends BaseEntity {
   viewsCount!: number;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => PartsCategory, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne('PartsCategory', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category?: PartsCategory;
 
-  @OneToMany(() => PartImage, (image) => image.part, { cascade: true })
+  @OneToMany('PartImage', 'part', { cascade: true })
   images?: PartImage[];
 }

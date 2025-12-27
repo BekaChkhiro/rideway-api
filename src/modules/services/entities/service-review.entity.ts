@@ -9,8 +9,8 @@ import {
   Index,
   Unique,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Service } from './service.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Service } from './service.entity.js';
 
 @Entity('service_reviews')
 @Unique(['serviceId', 'userId'])
@@ -39,11 +39,11 @@ export class ServiceReview {
   updatedAt!: Date;
 
   // Relations
-  @ManyToOne(() => Service, (service) => service.reviews, { onDelete: 'CASCADE' })
+  @ManyToOne('Service', 'reviews', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'service_id' })
   service?: Service;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user?: User;
 

@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Post } from './post.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Post } from './post.entity.js';
 
 @Entity('post_likes')
 @Unique(['userId', 'postId'])
@@ -28,11 +28,11 @@ export class PostLike {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Post, (post) => post.likes, { onDelete: 'CASCADE' })
+  @ManyToOne('Post', 'likes', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post!: Post;
 }

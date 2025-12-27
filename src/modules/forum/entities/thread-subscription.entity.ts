@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { ForumThread } from './forum-thread.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { ForumThread } from './forum-thread.entity.js';
 
 @Entity('thread_subscriptions')
 @Unique(['userId', 'threadId'])
@@ -28,13 +28,11 @@ export class ThreadSubscription {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => ForumThread, (thread) => thread.subscriptions, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('ForumThread', 'subscriptions', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'thread_id' })
   thread!: ForumThread;
 }

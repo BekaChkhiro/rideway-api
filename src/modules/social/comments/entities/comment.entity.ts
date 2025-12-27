@@ -7,9 +7,9 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { Post } from '../../posts/entities/post.entity.js';
-import { CommentLike } from './comment-like.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Post } from '../../posts/entities/post.entity.js';
+import type { CommentLike } from './comment-like.entity.js';
 
 @Entity('comments')
 export class Comment extends BaseEntity {
@@ -38,25 +38,22 @@ export class Comment extends BaseEntity {
   isEdited!: boolean;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Post, { onDelete: 'CASCADE' })
+  @ManyToOne('Post', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post!: Post;
 
-  @ManyToOne(() => Comment, (comment) => comment.replies, {
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('Comment', 'replies', { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'parent_id' })
   parent?: Comment;
 
-  @OneToMany(() => Comment, (comment) => comment.parent)
+  @OneToMany('Comment', 'parent')
   replies?: Comment[];
 
-  @OneToMany(() => CommentLike, (like) => like.comment)
+  @OneToMany('CommentLike', 'comment')
   likes?: CommentLike[];
 
   // Virtual fields

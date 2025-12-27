@@ -7,10 +7,10 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { ListingCategory } from './listing-category.entity.js';
-import { ListingImage } from './listing-image.entity.js';
-import { ListingFavorite } from './listing-favorite.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { ListingCategory } from './listing-category.entity.js';
+import type { ListingImage } from './listing-image.entity.js';
+import type { ListingFavorite } from './listing-favorite.entity.js';
 
 export enum ListingCondition {
   NEW = 'new',
@@ -91,18 +91,18 @@ export class Listing extends BaseEntity {
   expiresAt?: Date;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => ListingCategory, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne('ListingCategory', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'category_id' })
   category?: ListingCategory;
 
-  @OneToMany(() => ListingImage, (image) => image.listing, { cascade: true })
+  @OneToMany('ListingImage', 'listing', { cascade: true })
   images?: ListingImage[];
 
-  @OneToMany(() => ListingFavorite, (favorite) => favorite.listing)
+  @OneToMany('ListingFavorite', 'listing')
   favorites?: ListingFavorite[];
 
   // Virtual field for checking if current user favorited

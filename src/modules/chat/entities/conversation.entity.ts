@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ConversationParticipant } from './conversation-participant.entity.js';
-import { Message } from './message.entity.js';
+import type { ConversationParticipant } from './conversation-participant.entity.js';
+import type { Message } from './message.entity.js';
 
 export enum ConversationType {
   PRIVATE = 'private',
@@ -32,9 +32,9 @@ export class Conversation {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @OneToMany(() => ConversationParticipant, (participant) => participant.conversation)
+  @OneToMany('ConversationParticipant', 'conversation')
   participants!: ConversationParticipant[];
 
-  @OneToMany(() => Message, (message) => message.conversation)
+  @OneToMany('Message', 'conversation')
   messages!: Message[];
 }

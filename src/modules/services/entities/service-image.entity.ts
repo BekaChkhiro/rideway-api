@@ -7,7 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Service } from './service.entity.js';
+import type { Service } from './service.entity.js';
 
 @Entity('service_images')
 export class ServiceImage {
@@ -31,7 +31,7 @@ export class ServiceImage {
   createdAt!: Date;
 
   // Relations
-  @ManyToOne(() => Service, (service) => service.images, { onDelete: 'CASCADE' })
+  @ManyToOne('Service', 'images', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'service_id' })
   service?: Service;
 }

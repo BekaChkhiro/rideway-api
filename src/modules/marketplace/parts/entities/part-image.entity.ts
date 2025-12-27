@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Part } from './part.entity.js';
+import type { Part } from './part.entity.js';
 
 @Entity('part_images')
 export class PartImage {
@@ -33,9 +33,7 @@ export class PartImage {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => Part, (part) => part.images, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('Part', 'images', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'part_id' })
   part!: Part;
 }

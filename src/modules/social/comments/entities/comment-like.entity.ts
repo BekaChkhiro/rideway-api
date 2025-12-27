@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Comment } from './comment.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Comment } from './comment.entity.js';
 
 @Entity('comment_likes')
 @Unique(['userId', 'commentId'])
@@ -28,11 +28,11 @@ export class CommentLike {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Comment, (comment) => comment.likes, { onDelete: 'CASCADE' })
+  @ManyToOne('Comment', 'likes', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'comment_id' })
   comment!: Comment;
 }

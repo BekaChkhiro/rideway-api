@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Story } from './story.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Story } from './story.entity.js';
 
 @Entity('story_views')
 @Unique(['storyId', 'userId'])
@@ -28,11 +28,11 @@ export class StoryView {
   @CreateDateColumn({ name: 'viewed_at' })
   viewedAt!: Date;
 
-  @ManyToOne(() => Story, (story) => story.views, { onDelete: 'CASCADE' })
+  @ManyToOne('Story', 'views', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'story_id' })
   story!: Story;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

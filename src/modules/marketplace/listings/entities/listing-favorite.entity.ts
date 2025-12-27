@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Listing } from './listing.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Listing } from './listing.entity.js';
 
 @Entity('listing_favorites')
 @Unique(['userId', 'listingId'])
@@ -28,13 +28,11 @@ export class ListingFavorite {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => Listing, (listing) => listing.favorites, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('Listing', 'favorites', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'listing_id' })
   listing!: Listing;
 }

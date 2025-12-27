@@ -8,8 +8,8 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { StoryView } from './story-view.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { StoryView } from './story-view.entity.js';
 
 export enum StoryMediaType {
   IMAGE = 'image',
@@ -53,11 +53,11 @@ export class Story {
   createdAt!: Date;
 
   // Relations
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @OneToMany(() => StoryView, (view) => view.story)
+  @OneToMany('StoryView', 'story')
   views?: StoryView[];
 
   // Virtual fields

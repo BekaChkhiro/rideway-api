@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   Index,
 } from 'typeorm';
-import { PostHashtag } from './post-hashtag.entity.js';
+import type { PostHashtag } from './post-hashtag.entity.js';
 
 @Entity('hashtags')
 export class Hashtag {
@@ -23,6 +23,6 @@ export class Hashtag {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @OneToMany(() => PostHashtag, (postHashtag) => postHashtag.hashtag)
+  @OneToMany('PostHashtag', 'hashtag')
   postHashtags?: PostHashtag[];
 }

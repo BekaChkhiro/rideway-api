@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Conversation } from './conversation.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Conversation } from './conversation.entity.js';
 
 export enum MessageType {
   TEXT = 'text',
@@ -57,13 +57,11 @@ export class Message {
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt?: Date;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.messages, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('Conversation', 'messages', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'conversation_id' })
   conversation!: Conversation;
 
-  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne('User', { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'sender_id' })
   sender?: User;
 }

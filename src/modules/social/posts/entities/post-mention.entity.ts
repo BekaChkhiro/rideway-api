@@ -8,8 +8,8 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
-import { Post } from './post.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { Post } from './post.entity.js';
 
 @Entity('post_mentions')
 @Unique(['postId', 'mentionedUserId'])
@@ -28,11 +28,11 @@ export class PostMention {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => Post, (post) => post.mentions, { onDelete: 'CASCADE' })
+  @ManyToOne('Post', 'mentions', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post!: Post;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'mentioned_user_id' })
   mentionedUser!: User;
 }

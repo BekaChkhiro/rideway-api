@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '@database/entities/user.entity.js';
+import type { User } from '@database/entities/user.entity.js';
 
 @Entity('notification_preferences')
 export class NotificationPreferences {
@@ -55,7 +55,7 @@ export class NotificationPreferences {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
+  @OneToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

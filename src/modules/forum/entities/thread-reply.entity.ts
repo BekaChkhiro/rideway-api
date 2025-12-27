@@ -7,8 +7,8 @@ import {
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@database/entities/base.entity.js';
-import { User } from '@database/entities/user.entity.js';
-import { ForumThread } from './forum-thread.entity.js';
+import type { User } from '@database/entities/user.entity.js';
+import type { ForumThread } from './forum-thread.entity.js';
 
 @Entity('thread_replies')
 export class ThreadReply extends BaseEntity {
@@ -34,24 +34,19 @@ export class ThreadReply extends BaseEntity {
   isEdited!: boolean;
 
   // Relations
-  @ManyToOne(() => ForumThread, (thread) => thread.replies, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('ForumThread', 'replies', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'thread_id' })
   thread!: ForumThread;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne(() => ThreadReply, (reply) => reply.childReplies, {
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne('ThreadReply', 'childReplies', { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'parent_id' })
   parent?: ThreadReply;
 
-  @OneToMany(() => ThreadReply, (reply) => reply.parent)
+  @OneToMany('ThreadReply', 'parent')
   childReplies?: ThreadReply[];
 
   // Virtual fields

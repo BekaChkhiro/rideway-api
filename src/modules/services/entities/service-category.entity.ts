@@ -6,7 +6,7 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { Service } from './service.entity.js';
+import type { Service } from './service.entity.js';
 
 @Entity('service_categories')
 export class ServiceCategory {
@@ -29,6 +29,6 @@ export class ServiceCategory {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @OneToMany(() => Service, (service) => service.category)
+  @OneToMany('Service', 'category')
   services?: Service[];
 }
