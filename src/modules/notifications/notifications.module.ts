@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GatewayModule } from '@modules/gateway/gateway.module.js';
 import { QueueModule } from '@modules/queue/queue.module.js';
+import { AuthModule } from '@modules/auth/auth.module.js';
 import { DeviceToken } from '@database/index.js';
 import { Notification, NotificationPreferences } from './entities/index.js';
 import { NotificationsController } from './notifications.controller.js';
@@ -14,6 +15,7 @@ import { FCMService, DeviceTokensService } from './fcm/index.js';
     TypeOrmModule.forFeature([Notification, NotificationPreferences, DeviceToken]),
     GatewayModule,
     forwardRef(() => QueueModule),
+    AuthModule,
   ],
   controllers: [NotificationsController],
   providers: [
