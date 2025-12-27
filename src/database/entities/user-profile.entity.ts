@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 @Entity('user_profiles')
 export class UserProfile {
@@ -52,7 +52,7 @@ export class UserProfile {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
+  @OneToOne('User', 'profile', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

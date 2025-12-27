@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 @Entity('user_activity')
 export class UserActivity {
@@ -31,7 +31,7 @@ export class UserActivity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   Unique,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 @Entity('user_follows')
 @Unique(['followerId', 'followingId'])
@@ -27,11 +27,11 @@ export class UserFollow {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'follower_id' })
   follower!: User;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'following_id' })
   following!: User;
 }

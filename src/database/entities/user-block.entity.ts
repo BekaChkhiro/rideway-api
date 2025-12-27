@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   Unique,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 @Entity('user_blocks')
 @Unique(['blockerId', 'blockedId'])
@@ -27,11 +27,11 @@ export class UserBlock {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'blocker_id' })
   blocker!: User;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'blocked_id' })
   blocked!: User;
 }

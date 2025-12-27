@@ -1,7 +1,7 @@
 import { Entity, Column, OneToOne, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity.js';
-import { UserProfile } from './user-profile.entity.js';
-import { RefreshToken } from './refresh-token.entity.js';
+import type { UserProfile } from './user-profile.entity.js';
+import type { RefreshToken } from './refresh-token.entity.js';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -28,9 +28,9 @@ export class User extends BaseEntity {
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
 
-  @OneToOne(() => UserProfile, (profile) => profile.user, { cascade: true })
+  @OneToOne('UserProfile', 'user', { cascade: true })
   profile?: UserProfile;
 
-  @OneToMany(() => RefreshToken, (token) => token.user)
+  @OneToMany('RefreshToken', 'user')
   refreshTokens?: RefreshToken[];
 }

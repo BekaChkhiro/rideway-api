@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 export enum OtpType {
   EMAIL_VERIFY = 'email_verify',
@@ -39,7 +39,7 @@ export class OtpCode {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }

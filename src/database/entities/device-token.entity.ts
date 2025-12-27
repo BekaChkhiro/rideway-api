@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 export enum DeviceType {
   IOS = 'ios',
@@ -57,7 +57,7 @@ export class DeviceToken {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 }
