@@ -3,6 +3,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis, { RedisOptions } from 'ioredis';
@@ -13,7 +14,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private subscriber!: Redis;
   private readonly logger = new Logger(RedisService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
 
   onModuleInit(): void {
     const url = this.configService.get<string>('redis.url')!;

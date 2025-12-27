@@ -1,0 +1,10 @@
+export { ForumModule } from './forum.module.js';
+export { ForumCategoriesService } from './forum-categories.service.js';
+export { ForumThreadsService } from './forum-threads.service.js';
+export { ForumCategory } from './entities/forum-category.entity.js';
+export { ForumThread } from './entities/forum-thread.entity.js';
+export { ThreadReply } from './entities/thread-reply.entity.js';
+export { ThreadLike } from './entities/thread-like.entity.js';
+export { ThreadSubscription } from './entities/thread-subscription.entity.js';
+export { ReplyLike } from './entities/reply-like.entity.js';
+export * from './dto/index.js';

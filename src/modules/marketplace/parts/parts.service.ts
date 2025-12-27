@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, In } from 'typeorm';
@@ -42,8 +43,8 @@ export class PartsService {
     private readonly partRepository: Repository<Part>,
     @InjectRepository(PartImage)
     private readonly imageRepository: Repository<PartImage>,
-    private readonly redisService: RedisService,
-    private readonly mediaService: MediaService,
+    @Inject(RedisService) private readonly redisService: RedisService,
+    @Inject(MediaService) private readonly mediaService: MediaService,
   ) {
     this.startViewsSync();
   }

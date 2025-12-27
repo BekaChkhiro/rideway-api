@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -51,8 +52,8 @@ export class AuthService {
     @InjectRepository(OtpCode)
     private readonly otpCodeRepository: Repository<OtpCode>,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly redisService: RedisService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(RedisService) private readonly redisService: RedisService,
   ) {}
 
   async register(dto: RegisterDto): Promise<{ user: User; message: string }> {

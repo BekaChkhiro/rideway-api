@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -72,8 +73,8 @@ export class PostsService {
     private readonly blockRepository: Repository<UserBlock>,
     @InjectRepository(UserProfile)
     private readonly profileRepository: Repository<UserProfile>,
-    private readonly redisService: RedisService,
-    private readonly mediaService: MediaService,
+    @Inject(RedisService) private readonly redisService: RedisService,
+    @Inject(MediaService) private readonly mediaService: MediaService,
   ) {}
 
   async create(

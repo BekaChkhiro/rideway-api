@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +19,7 @@ export class MediaService {
 
   constructor(
     private readonly r2Service: R2Service,
-    private readonly configService: ConfigService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
   ) {
     const r2Config = this.configService.get<R2Config>('r2');
     this.maxFileSize = r2Config?.maxFileSize || 10485760;

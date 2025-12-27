@@ -10,6 +10,8 @@ import { UsersModule } from './modules/users/users.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module.js';
 import { SocialModule } from './modules/social/social.module.js';
+import { ForumModule } from './modules/forum/forum.module.js';
+import { ServicesModule } from './modules/services/services.module.js';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { SocialModule } from './modules/social/social.module.js';
     MediaModule,
     MarketplaceModule,
     SocialModule,
+    ForumModule,
+    ServicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

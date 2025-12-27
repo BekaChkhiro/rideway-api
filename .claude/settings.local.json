@@ -34,7 +34,13 @@
       "Bash(git remote:*)",
       "Bash(GIT_CURL_VERBOSE=1 git push:*)",
       "Bash(git init:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(npm run start:dev:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx tsx:*)",
+      "Bash(mkdir:*)",
+      "Bash(lsof:*)",
+      "Bash(pgrep:*)"
     ],
     "deny": [],
     "ask": []

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, In } from 'typeorm';
@@ -46,8 +47,8 @@ export class ListingsService {
     private readonly imageRepository: Repository<ListingImage>,
     @InjectRepository(ListingFavorite)
     private readonly favoriteRepository: Repository<ListingFavorite>,
-    private readonly redisService: RedisService,
-    private readonly mediaService: MediaService,
+    @Inject(RedisService) private readonly redisService: RedisService,
+    @Inject(MediaService) private readonly mediaService: MediaService,
   ) {
     // Start periodic view count sync
     this.startViewsSync();

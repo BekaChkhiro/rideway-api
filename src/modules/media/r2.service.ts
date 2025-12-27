@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   S3Client,
@@ -17,7 +17,7 @@ export class R2Service {
   private readonly bucketName: string;
   private readonly publicUrl: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     const r2Config = this.configService.get<R2Config>('r2');
 
     if (!r2Config) {
