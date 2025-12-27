@@ -25,6 +25,6 @@ import { WsAuthGuard } from './guards/ws-auth.guard.js';
     }),
   ],
   providers: [AppGateway, GatewayService, WsAuthGuard],
-  exports: [GatewayService],
+  exports: [GatewayService, WsAuthGuard, JwtModule],
 })
 export class GatewayModule {}
