@@ -51,7 +51,10 @@
       "Bash(node:*)",
       "Bash(done)",
       "Bash(xargs kill:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "Bash(npm --version:*)"
     ],
     "deny": [],
     "ask": []
