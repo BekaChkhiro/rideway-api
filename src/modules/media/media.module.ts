@@ -6,9 +6,7 @@ import { R2Service } from './r2.service';
 import r2Config from '@config/r2.config';
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(r2Config),
-  ],
+  imports: [ConfigModule.forFeature(r2Config)],
   controllers: [MediaController],
   providers: [MediaService, R2Service],
   exports: [MediaService, R2Service],

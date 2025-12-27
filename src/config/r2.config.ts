@@ -21,11 +21,6 @@ export default registerAs(
     publicUrl: process.env.R2_PUBLIC_URL || '',
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB default
-    allowedMimeTypes: [
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-    ],
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   }),
 );

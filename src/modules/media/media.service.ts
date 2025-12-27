@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
@@ -47,7 +43,10 @@ export class MediaService {
     const processedImage = await this.processImage(file.buffer, options);
 
     // Generate unique filename
-    const filename = this.generateFilename(userId, options.convertToWebp ? 'webp' : this.getExtension(file.mimetype));
+    const filename = this.generateFilename(
+      userId,
+      options.convertToWebp ? 'webp' : this.getExtension(file.mimetype),
+    );
     const key = `${folder}/${filename}`;
 
     // Upload main image

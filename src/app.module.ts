@@ -8,6 +8,8 @@ import { HealthModule } from './modules/health/health.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { MediaModule } from './modules/media/media.module.js';
+import { MarketplaceModule } from './modules/marketplace/marketplace.module.js';
+import { SocialModule } from './modules/social/social.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { MediaModule } from './modules/media/media.module.js';
     AuthModule,
     UsersModule,
     MediaModule,
+    MarketplaceModule,
+    SocialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

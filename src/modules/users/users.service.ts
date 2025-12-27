@@ -8,13 +8,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+import { User, UserProfile, UserFollow, UserBlock } from '@database/index.js';
 import {
-  User,
-  UserProfile,
-  UserFollow,
-  UserBlock,
-} from '@database/index.js';
-import { UpdateProfileDto, PaginationQueryDto, UserSearchQueryDto } from './dto/index.js';
+  UpdateProfileDto,
+  PaginationQueryDto,
+  UserSearchQueryDto,
+} from './dto/index.js';
 import {
   UserProfileResponse,
   UserListItemResponse,
@@ -121,7 +120,9 @@ export class UsersService {
 
     Object.assign(profile, {
       ...dto,
-      dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : profile.dateOfBirth,
+      dateOfBirth: dto.dateOfBirth
+        ? new Date(dto.dateOfBirth)
+        : profile.dateOfBirth,
     });
 
     await this.profileRepository.save(profile);
@@ -322,8 +323,14 @@ export class UsersService {
     }
 
     await this.dataSource.transaction(async (manager) => {
-      await manager.delete(UserFollow, { followerId: blockerId, followingId: blockedId });
-      await manager.delete(UserFollow, { followerId: blockedId, followingId: blockerId });
+      await manager.delete(UserFollow, {
+        followerId: blockerId,
+        followingId: blockedId,
+      });
+      await manager.delete(UserFollow, {
+        followerId: blockedId,
+        followingId: blockerId,
+      });
 
       const block = manager.create(UserBlock, {
         blockerId,
@@ -410,9 +417,11 @@ export class UsersService {
     };
   }
 
-  private async getUserCounts(
-    userId: string,
-  ): Promise<{ followersCount: number; followingCount: number; postsCount: number }> {
+  private async getUserCounts(userId: string): Promise<{
+    followersCount: number;
+    followingCount: number;
+    postsCount: number;
+  }> {
     const [followersCount, followingCount] = await Promise.all([
       this.followRepository.count({ where: { followingId: userId } }),
       this.followRepository.count({ where: { followerId: userId } }),
@@ -475,7 +484,11 @@ export class UsersService {
 
   private mapToProfileResponse(
     user: User,
-    counts: { followersCount: number; followingCount: number; postsCount: number },
+    counts: {
+      followersCount: number;
+      followingCount: number;
+      postsCount: number;
+    },
     isFollowing?: boolean,
   ): UserProfileResponse {
     return {

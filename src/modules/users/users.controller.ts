@@ -29,7 +29,11 @@ import {
   PaginationQueryDto,
   UserSearchQueryDto,
 } from './dto/index.js';
-import { JwtAuthGuard, OptionalAuthGuard, CurrentUser } from '@modules/auth/index.js';
+import {
+  JwtAuthGuard,
+  OptionalAuthGuard,
+  CurrentUser,
+} from '@modules/auth/index.js';
 import { User } from '@database/index.js';
 
 @ApiTags('users')
@@ -205,7 +209,12 @@ export class UsersController {
         if (allowedMimeTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {
-          callback(new BadRequestException('Only jpeg, png, and webp images are allowed'), false);
+          callback(
+            new BadRequestException(
+              'Only jpeg, png, and webp images are allowed',
+            ),
+            false,
+          );
         }
       },
     }),
@@ -260,7 +269,12 @@ export class UsersController {
         if (allowedMimeTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {
-          callback(new BadRequestException('Only jpeg, png, and webp images are allowed'), false);
+          callback(
+            new BadRequestException(
+              'Only jpeg, png, and webp images are allowed',
+            ),
+            false,
+          );
         }
       },
     }),

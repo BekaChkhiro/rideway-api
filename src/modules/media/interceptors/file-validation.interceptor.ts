@@ -21,7 +21,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export class FileValidationInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
-    const file = request.file as Express.Multer.File | undefined;
+    const file = request.file;
     const files = request.files as Express.Multer.File[] | undefined;
 
     if (file) {

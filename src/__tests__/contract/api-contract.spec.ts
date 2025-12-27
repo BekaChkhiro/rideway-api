@@ -234,7 +234,9 @@ describe('API Contract Tests', () => {
       const response = mockResponse.json.mock.calls[0][0];
       expect(response.error.code).toBe('INTERNAL_ERROR');
       expect(response.error.message).toBe('Server error');
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.status).toHaveBeenCalledWith(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     });
 
     it('should include error.details for validation errors', () => {
@@ -272,14 +274,30 @@ describe('API Contract Tests', () => {
   describe('Required Fields Validation - Auth DTOs', () => {
     it('should define required fields for RegisterDto', async () => {
       // Import the actual DTO to verify decorators
-      const { RegisterDto } = await import('../../modules/auth/dto/register.dto');
+      const { RegisterDto } =
+        await import('../../modules/auth/dto/register.dto');
 
       const dto = new RegisterDto();
 
       // These are required fields (no default, must be provided)
-      expect('email' in dto || Object.prototype.hasOwnProperty.call(RegisterDto.prototype, 'email')).toBeDefined();
-      expect('password' in dto || Object.prototype.hasOwnProperty.call(RegisterDto.prototype, 'password')).toBeDefined();
-      expect('username' in dto || Object.prototype.hasOwnProperty.call(RegisterDto.prototype, 'username')).toBeDefined();
+      expect(
+        'email' in dto ||
+          Object.prototype.hasOwnProperty.call(RegisterDto.prototype, 'email'),
+      ).toBeDefined();
+      expect(
+        'password' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            RegisterDto.prototype,
+            'password',
+          ),
+      ).toBeDefined();
+      expect(
+        'username' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            RegisterDto.prototype,
+            'username',
+          ),
+      ).toBeDefined();
     });
 
     it('should define required fields for LoginDto', async () => {
@@ -287,54 +305,113 @@ describe('API Contract Tests', () => {
 
       const dto = new LoginDto();
 
-      expect('emailOrPhone' in dto || Object.prototype.hasOwnProperty.call(LoginDto.prototype, 'emailOrPhone')).toBeDefined();
-      expect('password' in dto || Object.prototype.hasOwnProperty.call(LoginDto.prototype, 'password')).toBeDefined();
+      expect(
+        'emailOrPhone' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            LoginDto.prototype,
+            'emailOrPhone',
+          ),
+      ).toBeDefined();
+      expect(
+        'password' in dto ||
+          Object.prototype.hasOwnProperty.call(LoginDto.prototype, 'password'),
+      ).toBeDefined();
     });
 
     it('should define required fields for VerifyOtpDto', async () => {
-      const { VerifyOtpDto } = await import('../../modules/auth/dto/verify-otp.dto');
+      const { VerifyOtpDto } =
+        await import('../../modules/auth/dto/verify-otp.dto');
 
       const dto = new VerifyOtpDto();
 
-      expect('userId' in dto || Object.prototype.hasOwnProperty.call(VerifyOtpDto.prototype, 'userId')).toBeDefined();
-      expect('code' in dto || Object.prototype.hasOwnProperty.call(VerifyOtpDto.prototype, 'code')).toBeDefined();
-      expect('type' in dto || Object.prototype.hasOwnProperty.call(VerifyOtpDto.prototype, 'type')).toBeDefined();
+      expect(
+        'userId' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            VerifyOtpDto.prototype,
+            'userId',
+          ),
+      ).toBeDefined();
+      expect(
+        'code' in dto ||
+          Object.prototype.hasOwnProperty.call(VerifyOtpDto.prototype, 'code'),
+      ).toBeDefined();
+      expect(
+        'type' in dto ||
+          Object.prototype.hasOwnProperty.call(VerifyOtpDto.prototype, 'type'),
+      ).toBeDefined();
     });
 
     it('should define required fields for RefreshTokenDto', async () => {
-      const { RefreshTokenDto } = await import('../../modules/auth/dto/refresh-token.dto');
+      const { RefreshTokenDto } =
+        await import('../../modules/auth/dto/refresh-token.dto');
 
       const dto = new RefreshTokenDto();
 
-      expect('refreshToken' in dto || Object.prototype.hasOwnProperty.call(RefreshTokenDto.prototype, 'refreshToken')).toBeDefined();
+      expect(
+        'refreshToken' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            RefreshTokenDto.prototype,
+            'refreshToken',
+          ),
+      ).toBeDefined();
     });
 
     it('should define required fields for ForgotPasswordDto', async () => {
-      const { ForgotPasswordDto } = await import('../../modules/auth/dto/forgot-password.dto');
+      const { ForgotPasswordDto } =
+        await import('../../modules/auth/dto/forgot-password.dto');
 
       const dto = new ForgotPasswordDto();
 
-      expect('email' in dto || Object.prototype.hasOwnProperty.call(ForgotPasswordDto.prototype, 'email')).toBeDefined();
+      expect(
+        'email' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            ForgotPasswordDto.prototype,
+            'email',
+          ),
+      ).toBeDefined();
     });
 
     it('should define required fields for ResetPasswordDto', async () => {
-      const { ResetPasswordDto } = await import('../../modules/auth/dto/reset-password.dto');
+      const { ResetPasswordDto } =
+        await import('../../modules/auth/dto/reset-password.dto');
 
       const dto = new ResetPasswordDto();
 
-      expect('email' in dto || Object.prototype.hasOwnProperty.call(ResetPasswordDto.prototype, 'email')).toBeDefined();
-      expect('code' in dto || Object.prototype.hasOwnProperty.call(ResetPasswordDto.prototype, 'code')).toBeDefined();
-      expect('newPassword' in dto || Object.prototype.hasOwnProperty.call(ResetPasswordDto.prototype, 'newPassword')).toBeDefined();
+      expect(
+        'email' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            ResetPasswordDto.prototype,
+            'email',
+          ),
+      ).toBeDefined();
+      expect(
+        'code' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            ResetPasswordDto.prototype,
+            'code',
+          ),
+      ).toBeDefined();
+      expect(
+        'newPassword' in dto ||
+          Object.prototype.hasOwnProperty.call(
+            ResetPasswordDto.prototype,
+            'newPassword',
+          ),
+      ).toBeDefined();
     });
   });
 
   describe('Swagger Documentation Accuracy', () => {
     it('should have @ApiProperty decorators on RegisterDto fields', async () => {
       // Verify Swagger metadata exists by checking the class has ApiProperty decorators
-      const { RegisterDto } = await import('../../modules/auth/dto/register.dto');
+      const { RegisterDto } =
+        await import('../../modules/auth/dto/register.dto');
 
       // Get Swagger metadata from the class
-      const metadata = Reflect.getMetadata('swagger/apiModelProperties', RegisterDto.prototype);
+      const metadata = Reflect.getMetadata(
+        'swagger/apiModelProperties',
+        RegisterDto.prototype,
+      );
 
       // If Swagger decorators are applied, metadata should exist
       // We can't directly verify content, but we verify the decorators are applied
@@ -342,20 +419,23 @@ describe('API Contract Tests', () => {
     });
 
     it('should have proper Swagger tags on AuthController', async () => {
-      const { AuthController } = await import('../../modules/auth/auth.controller');
+      const { AuthController } =
+        await import('../../modules/auth/auth.controller');
 
       // Verify controller class is decorated (metadata exists)
       expect(AuthController).toBeDefined();
     });
 
     it('should have proper Swagger tags on UsersController', async () => {
-      const { UsersController } = await import('../../modules/users/users.controller');
+      const { UsersController } =
+        await import('../../modules/users/users.controller');
 
       expect(UsersController).toBeDefined();
     });
 
     it('should have proper Swagger tags on MediaController', async () => {
-      const { MediaController } = await import('../../modules/media/media.controller');
+      const { MediaController } =
+        await import('../../modules/media/media.controller');
 
       expect(MediaController).toBeDefined();
     });
@@ -363,11 +443,15 @@ describe('API Contract Tests', () => {
 
   describe('Auth Guards Protect Private Endpoints', () => {
     it('should have JwtAuthGuard on protected auth endpoints', async () => {
-      const { AuthController } = await import('../../modules/auth/auth.controller');
+      const { AuthController } =
+        await import('../../modules/auth/auth.controller');
 
       // Verify the controller has the guard metadata
       // UseGuards decorator stores metadata at 'guards' key
-      const guards = Reflect.getMetadata('__guards__', AuthController.prototype.logout);
+      const guards = Reflect.getMetadata(
+        '__guards__',
+        AuthController.prototype.logout,
+      );
 
       // Protected methods should have guards
       expect(AuthController.prototype.logout).toBeDefined();
@@ -375,7 +459,8 @@ describe('API Contract Tests', () => {
     });
 
     it('should have JwtAuthGuard on protected user endpoints', async () => {
-      const { UsersController } = await import('../../modules/users/users.controller');
+      const { UsersController } =
+        await import('../../modules/users/users.controller');
 
       // Verify protected methods exist
       expect(UsersController.prototype.updateProfile).toBeDefined();
@@ -390,7 +475,8 @@ describe('API Contract Tests', () => {
     });
 
     it('should have JwtAuthGuard on all media endpoints', async () => {
-      const { MediaController } = await import('../../modules/media/media.controller');
+      const { MediaController } =
+        await import('../../modules/media/media.controller');
 
       expect(MediaController.prototype.uploadSingle).toBeDefined();
       expect(MediaController.prototype.uploadMultiple).toBeDefined();
@@ -398,7 +484,8 @@ describe('API Contract Tests', () => {
     });
 
     it('should have OptionalAuthGuard on public user endpoints', async () => {
-      const { UsersController } = await import('../../modules/users/users.controller');
+      const { UsersController } =
+        await import('../../modules/users/users.controller');
 
       // These endpoints should be accessible without auth but can use auth if provided
       expect(UsersController.prototype.searchUsers).toBeDefined();
@@ -409,7 +496,8 @@ describe('API Contract Tests', () => {
     });
 
     it('should have @Public decorator on public auth endpoints', async () => {
-      const { AuthController } = await import('../../modules/auth/auth.controller');
+      const { AuthController } =
+        await import('../../modules/auth/auth.controller');
 
       // Public endpoints
       expect(AuthController.prototype.register).toBeDefined();
@@ -518,11 +606,19 @@ describe('API Contract Tests', () => {
 
     const statusCodeTests = [
       { status: 400, code: 'BAD_REQUEST', ExceptionClass: BadRequestException },
-      { status: 401, code: 'UNAUTHORIZED', ExceptionClass: UnauthorizedException },
+      {
+        status: 401,
+        code: 'UNAUTHORIZED',
+        ExceptionClass: UnauthorizedException,
+      },
       { status: 403, code: 'FORBIDDEN', ExceptionClass: ForbiddenException },
       { status: 404, code: 'NOT_FOUND', ExceptionClass: NotFoundException },
       { status: 409, code: 'CONFLICT', ExceptionClass: ConflictException },
-      { status: 500, code: 'INTERNAL_ERROR', ExceptionClass: InternalServerErrorException },
+      {
+        status: 500,
+        code: 'INTERNAL_ERROR',
+        ExceptionClass: InternalServerErrorException,
+      },
     ];
 
     statusCodeTests.forEach(({ status, code, ExceptionClass }) => {

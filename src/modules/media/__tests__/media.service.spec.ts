@@ -5,7 +5,9 @@ import { MediaService } from '../media.service.js';
 // Mock sharp
 vi.mock('sharp', () => {
   const mockSharp = vi.fn().mockReturnValue({
-    metadata: vi.fn().mockResolvedValue({ format: 'jpeg', width: 1000, height: 800 }),
+    metadata: vi
+      .fn()
+      .mockResolvedValue({ format: 'jpeg', width: 1000, height: 800 }),
     resize: vi.fn().mockReturnThis(),
     webp: vi.fn().mockReturnThis(),
     jpeg: vi.fn().mockReturnThis(),
@@ -47,7 +49,9 @@ describe('MediaService', () => {
     vi.clearAllMocks();
 
     mockR2Service = {
-      upload: vi.fn().mockResolvedValue('https://example.com/uploaded-image.webp'),
+      upload: vi
+        .fn()
+        .mockResolvedValue('https://example.com/uploaded-image.webp'),
       delete: vi.fn().mockResolvedValue(undefined),
       exists: vi.fn().mockResolvedValue(false),
       extractKeyFromUrl: vi.fn().mockReturnValue('avatars/test-key.webp'),
@@ -58,15 +62,16 @@ describe('MediaService', () => {
       get: vi.fn().mockReturnValue(mockR2Config),
     };
 
-    service = new MediaService(
-      mockR2Service as any,
-      mockConfigService as any,
-    );
+    service = new MediaService(mockR2Service as any, mockConfigService as any);
   });
 
   describe('uploadImage', () => {
     it('should upload single image successfully', async () => {
-      const result = await service.uploadImage(mockFile, 'avatars', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'avatars',
+        'user-uuid-1234',
+      );
 
       expect(result.url).toBe('https://example.com/uploaded-image.webp');
       expect(result.key).toContain('avatars/');
@@ -87,7 +92,11 @@ describe('MediaService', () => {
     });
 
     it('should generate unique filename', async () => {
-      const result = await service.uploadImage(mockFile, 'posts', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'posts',
+        'user-uuid-1234',
+      );
 
       expect(result.key).toMatch(/^posts\/user-uui_\d+_12345678\.webp$/);
     });
@@ -103,7 +112,11 @@ describe('MediaService', () => {
     it('should upload multiple images successfully', async () => {
       const files = [mockFile, { ...mockFile, originalname: 'test2.jpg' }];
 
-      const results = await service.uploadImages(files, 'avatars', 'user-uuid-1234');
+      const results = await service.uploadImages(
+        files,
+        'avatars',
+        'user-uuid-1234',
+      );
 
       expect(results).toHaveLength(2);
       // Each avatar upload creates one file (no thumbnails for avatars)
@@ -134,7 +147,11 @@ describe('MediaService', () => {
       };
 
       await expect(
-        service.uploadImage(invalidFile as Express.Multer.File, 'avatars', 'user-uuid-1234'),
+        service.uploadImage(
+          invalidFile as Express.Multer.File,
+          'avatars',
+          'user-uuid-1234',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -145,7 +162,11 @@ describe('MediaService', () => {
       };
 
       await expect(
-        service.uploadImage(largeFile as Express.Multer.File, 'avatars', 'user-uuid-1234'),
+        service.uploadImage(
+          largeFile as Express.Multer.File,
+          'avatars',
+          'user-uuid-1234',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -155,7 +176,11 @@ describe('MediaService', () => {
       for (const mimetype of validTypes) {
         const file = { ...mockFile, mimetype };
         await expect(
-          service.uploadImage(file as Express.Multer.File, 'avatars', 'user-uuid-1234'),
+          service.uploadImage(
+            file as Express.Multer.File,
+            'avatars',
+            'user-uuid-1234',
+          ),
         ).resolves.toBeDefined();
       }
     });
@@ -167,7 +192,11 @@ describe('MediaService', () => {
       };
 
       await expect(
-        service.uploadImage(validFile as Express.Multer.File, 'avatars', 'user-uuid-1234'),
+        service.uploadImage(
+          validFile as Express.Multer.File,
+          'avatars',
+          'user-uuid-1234',
+        ),
       ).resolves.toBeDefined();
     });
   });
@@ -183,14 +212,22 @@ describe('MediaService', () => {
     });
 
     it('should convert to WebP when preset requires', async () => {
-      const result = await service.uploadImage(mockFile, 'avatars', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'avatars',
+        'user-uuid-1234',
+      );
 
       // Avatar preset converts to webp
       expect(result.mimetype).toBe('image/webp');
     });
 
     it('should return processed dimensions', async () => {
-      const result = await service.uploadImage(mockFile, 'avatars', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'avatars',
+        'user-uuid-1234',
+      );
 
       expect(result.width).toBeDefined();
       expect(result.height).toBeDefined();
@@ -202,7 +239,9 @@ describe('MediaService', () => {
       await service.deleteImage('https://example.com/avatars/test-image.webp');
 
       expect(mockR2Service.extractKeyFromUrl).toHaveBeenCalled();
-      expect(mockR2Service.delete).toHaveBeenCalledWith('avatars/test-key.webp');
+      expect(mockR2Service.delete).toHaveBeenCalledWith(
+        'avatars/test-key.webp',
+      );
     });
 
     it('should also delete thumbnail if exists', async () => {
@@ -218,9 +257,9 @@ describe('MediaService', () => {
     it('should throw BadRequestException for invalid URL', async () => {
       mockR2Service.extractKeyFromUrl.mockReturnValue(null);
 
-      await expect(
-        service.deleteImage('invalid-url'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.deleteImage('invalid-url')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should not fail if thumbnail does not exist', async () => {
@@ -236,32 +275,50 @@ describe('MediaService', () => {
     it('should delete file by key directly', async () => {
       await service.deleteByKey('avatars/test-key.webp');
 
-      expect(mockR2Service.delete).toHaveBeenCalledWith('avatars/test-key.webp');
+      expect(mockR2Service.delete).toHaveBeenCalledWith(
+        'avatars/test-key.webp',
+      );
     });
   });
 
   describe('folder presets', () => {
     it('should use avatar preset for avatars folder', async () => {
-      const result = await service.uploadImage(mockFile, 'avatars', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'avatars',
+        'user-uuid-1234',
+      );
 
       expect(result.key).toContain('avatars/');
       expect(result.mimetype).toBe('image/webp');
     });
 
     it('should use cover preset for covers folder', async () => {
-      const result = await service.uploadImage(mockFile, 'covers', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'covers',
+        'user-uuid-1234',
+      );
 
       expect(result.key).toContain('covers/');
     });
 
     it('should use posts preset for posts folder', async () => {
-      const result = await service.uploadImage(mockFile, 'posts', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'posts',
+        'user-uuid-1234',
+      );
 
       expect(result.key).toContain('posts/');
     });
 
     it('should use listings preset for listings folder', async () => {
-      const result = await service.uploadImage(mockFile, 'listings', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'listings',
+        'user-uuid-1234',
+      );
 
       expect(result.key).toContain('listings/');
     });
@@ -272,7 +329,11 @@ describe('MediaService', () => {
       // Posts preset generates thumbnails
       mockR2Service.upload.mockResolvedValue('https://example.com/image.webp');
 
-      const result = await service.uploadImage(mockFile, 'posts', 'user-uuid-1234');
+      const result = await service.uploadImage(
+        mockFile,
+        'posts',
+        'user-uuid-1234',
+      );
 
       // Should have called upload twice (main + thumbnail)
       // Note: thumbnails are optional based on preset

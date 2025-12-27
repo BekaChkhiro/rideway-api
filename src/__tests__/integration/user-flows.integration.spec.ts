@@ -2,7 +2,15 @@ import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { AuthService } from '@modules/auth/auth.service.js';
 import { UsersService } from '@modules/users/users.service.js';
 import { MediaService } from '@modules/media/media.service.js';
-import { User, UserProfile, UserFollow, UserBlock, RefreshToken, OtpCode, OtpType } from '@database/index.js';
+import {
+  User,
+  UserProfile,
+  UserFollow,
+  UserBlock,
+  RefreshToken,
+  OtpCode,
+  OtpType,
+} from '@database/index.js';
 
 // Mock bcrypt at module level
 vi.mock('bcrypt', () => ({
@@ -14,7 +22,9 @@ vi.mock('bcrypt', () => ({
 // Mock sharp
 vi.mock('sharp', () => {
   const mockSharp = vi.fn().mockReturnValue({
-    metadata: vi.fn().mockResolvedValue({ format: 'jpeg', width: 1000, height: 800 }),
+    metadata: vi
+      .fn()
+      .mockResolvedValue({ format: 'jpeg', width: 1000, height: 800 }),
     resize: vi.fn().mockReturnThis(),
     webp: vi.fn().mockReturnThis(),
     jpeg: vi.fn().mockReturnThis(),
@@ -249,7 +259,10 @@ describe('Integration Tests - User Flows', () => {
       mockUserRepo.save.mockResolvedValue({ ...testUser, id: 'new-user-id' });
       mockProfileRepo.create.mockReturnValue(testProfile);
       mockProfileRepo.save.mockResolvedValue(testProfile);
-      mockOtpCodeRepo.create.mockReturnValue({ code: '123456', type: OtpType.EMAIL_VERIFY });
+      mockOtpCodeRepo.create.mockReturnValue({
+        code: '123456',
+        type: OtpType.EMAIL_VERIFY,
+      });
       mockOtpCodeRepo.save.mockResolvedValue({ code: '123456' });
 
       const registerResult = await authService.register({
@@ -275,13 +288,19 @@ describe('Integration Tests - User Flows', () => {
         usedAt: null,
       };
       mockOtpCodeRepo.findOne.mockResolvedValue(validOtp);
-      mockOtpCodeRepo.save.mockResolvedValue({ ...validOtp, usedAt: new Date() });
+      mockOtpCodeRepo.save.mockResolvedValue({
+        ...validOtp,
+        usedAt: new Date(),
+      });
       mockUserRepo.findOne.mockResolvedValue({
         ...testUser,
         id: 'new-user-id',
         profile: testProfile,
       });
-      mockUserRepo.save.mockResolvedValue({ ...testUser, isEmailVerified: true });
+      mockUserRepo.save.mockResolvedValue({
+        ...testUser,
+        isEmailVerified: true,
+      });
       mockRefreshTokenRepo.create.mockReturnValue({});
       mockRefreshTokenRepo.save.mockResolvedValue({ id: 'token-id' });
 
@@ -337,7 +356,10 @@ describe('Integration Tests - User Flows', () => {
   describe('Full Password Reset Flow', () => {
     it('should complete full password reset flow', async () => {
       // Step 1: Request password reset
-      mockUserRepo.findOne.mockResolvedValue({ ...testUser, isEmailVerified: true });
+      mockUserRepo.findOne.mockResolvedValue({
+        ...testUser,
+        isEmailVerified: true,
+      });
       mockOtpCodeRepo.create.mockReturnValue({
         code: '654321',
         type: OtpType.PASSWORD_RESET,
@@ -360,10 +382,19 @@ describe('Integration Tests - User Flows', () => {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         usedAt: null,
       };
-      mockUserRepo.findOne.mockResolvedValue({ ...testUser, isEmailVerified: true });
+      mockUserRepo.findOne.mockResolvedValue({
+        ...testUser,
+        isEmailVerified: true,
+      });
       mockOtpCodeRepo.findOne.mockResolvedValue(validResetOtp);
-      mockOtpCodeRepo.save.mockResolvedValue({ ...validResetOtp, usedAt: new Date() });
-      mockUserRepo.save.mockResolvedValue({ ...testUser, passwordHash: '$2b$12$newhash' });
+      mockOtpCodeRepo.save.mockResolvedValue({
+        ...validResetOtp,
+        usedAt: new Date(),
+      });
+      mockUserRepo.save.mockResolvedValue({
+        ...testUser,
+        passwordHash: '$2b$12$newhash',
+      });
       mockRefreshTokenRepo.update.mockResolvedValue({ affected: 1 });
 
       const resetResult = await authService.resetPassword({
@@ -416,7 +447,10 @@ describe('Integration Tests - User Flows', () => {
         size: 1024,
       } as Express.Multer.File;
 
-      const uploadResult = await usersService.uploadAvatar('user-uuid-1234', mockFile);
+      const uploadResult = await usersService.uploadAvatar(
+        'user-uuid-1234',
+        mockFile,
+      );
 
       expect(uploadResult.avatarUrl).toBe('https://example.com/avatar.webp');
       expect(mockMediaService.uploadImage).toHaveBeenCalled();
@@ -499,9 +533,14 @@ describe('Integration Tests - User Flows', () => {
           },
         },
       ];
-      mockFollowRepo.createQueryBuilder().getManyAndCount.mockResolvedValue([mockFollows, 1]);
+      mockFollowRepo
+        .createQueryBuilder()
+        .getManyAndCount.mockResolvedValue([mockFollows, 1]);
 
-      const followers = await usersService.getFollowers('user-uuid-5678', { page: 1, limit: 20 });
+      const followers = await usersService.getFollowers('user-uuid-5678', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(followers.items).toHaveLength(1);
       expect(followers.items[0].username).toBe('testuser');
@@ -523,9 +562,14 @@ describe('Integration Tests - User Flows', () => {
       expect(mockFollowRepo.remove).toHaveBeenCalledWith(existingFollow);
 
       // Verify not in followers list
-      mockFollowRepo.createQueryBuilder().getManyAndCount.mockResolvedValue([[], 0]);
+      mockFollowRepo
+        .createQueryBuilder()
+        .getManyAndCount.mockResolvedValue([[], 0]);
 
-      const followers = await usersService.getFollowers('user-uuid-5678', { page: 1, limit: 20 });
+      const followers = await usersService.getFollowers('user-uuid-5678', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(followers.items).toHaveLength(0);
     });
@@ -545,10 +589,12 @@ describe('Integration Tests - User Flows', () => {
       mockBlockRepo.find.mockResolvedValue([
         { blockerId: 'user-uuid-1234', blockedId: 'user-uuid-5678' },
       ]);
-      mockUsersProfileRepo.createQueryBuilder().getManyAndCount.mockResolvedValue([
-        [{ userId: 'user-uuid-9999', username: 'anotheruser' }], // Different user
-        1,
-      ]);
+      mockUsersProfileRepo
+        .createQueryBuilder()
+        .getManyAndCount.mockResolvedValue([
+          [{ userId: 'user-uuid-9999', username: 'anotheruser' }], // Different user
+          1,
+        ]);
 
       const searchResults = await usersService.searchUsers(
         { q: 'user', page: 1, limit: 20 },
@@ -556,7 +602,9 @@ describe('Integration Tests - User Flows', () => {
       );
 
       // Blocked user should not appear
-      expect(searchResults.items.every((item) => item.id !== 'user-uuid-5678')).toBe(true);
+      expect(
+        searchResults.items.every((item) => item.id !== 'user-uuid-5678'),
+      ).toBe(true);
     });
 
     it('should block user and unfollow both directions', async () => {

@@ -24,7 +24,10 @@ export class UploadResponseDto {
 }
 
 export class MultipleUploadResponseDto {
-  @ApiProperty({ type: [UploadResponseDto], description: 'Array of upload results' })
+  @ApiProperty({
+    type: [UploadResponseDto],
+    description: 'Array of upload results',
+  })
   uploads!: UploadResponseDto[];
 
   @ApiProperty({ description: 'Number of successfully uploaded files' })

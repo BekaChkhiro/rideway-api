@@ -1,7 +1,17 @@
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
-import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from '../auth.service.js';
-import { User, UserProfile, RefreshToken, OtpCode, OtpType } from '@database/index.js';
+import {
+  User,
+  UserProfile,
+  RefreshToken,
+  OtpCode,
+  OtpType,
+} from '@database/index.js';
 
 // Mock bcrypt at module level
 vi.mock('bcrypt', () => ({
@@ -133,8 +143,14 @@ describe('AuthService', () => {
     it('should create user and profile successfully', async () => {
       mockUserRepo.findOne.mockResolvedValue(null);
       mockProfileRepo.findOne.mockResolvedValue(null);
-      mockUserRepo.create.mockReturnValue({ id: 'new-uuid', ...registerDto } as unknown as User);
-      mockUserRepo.save.mockResolvedValue({ id: 'new-uuid', ...registerDto } as unknown as User);
+      mockUserRepo.create.mockReturnValue({
+        id: 'new-uuid',
+        ...registerDto,
+      } as unknown as User);
+      mockUserRepo.save.mockResolvedValue({
+        id: 'new-uuid',
+        ...registerDto,
+      } as unknown as User);
       mockProfileRepo.create.mockReturnValue({
         userId: 'new-uuid',
         username: registerDto.username,
@@ -150,29 +166,43 @@ describe('AuthService', () => {
 
       const result = await service.register(registerDto);
 
-      expect(result.message).toBe('Registration successful. Please verify your email.');
+      expect(result.message).toBe(
+        'Registration successful. Please verify your email.',
+      );
       expect(mockUserRepo.save).toHaveBeenCalled();
       expect(mockProfileRepo.save).toHaveBeenCalled();
       expect(mockOtpCodeRepo.save).toHaveBeenCalled();
     });
 
     it('should fail with duplicate email', async () => {
-      mockUserRepo.findOne.mockResolvedValue({ email: registerDto.email } as User);
+      mockUserRepo.findOne.mockResolvedValue({
+        email: registerDto.email,
+      } as User);
 
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should fail with duplicate phone', async () => {
-      mockUserRepo.findOne.mockResolvedValue({ phone: registerDto.phone } as User);
+      mockUserRepo.findOne.mockResolvedValue({
+        phone: registerDto.phone,
+      } as User);
 
-      await expect(service.register({ ...registerDto, email: 'other@example.com' })).rejects.toThrow(ConflictException);
+      await expect(
+        service.register({ ...registerDto, email: 'other@example.com' }),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should fail with duplicate username', async () => {
       mockUserRepo.findOne.mockResolvedValue(null);
-      mockProfileRepo.findOne.mockResolvedValue({ username: registerDto.username } as UserProfile);
+      mockProfileRepo.findOne.mockResolvedValue({
+        username: registerDto.username,
+      } as UserProfile);
 
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(registerDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -188,8 +218,12 @@ describe('AuthService', () => {
       mockOtpCodeRepo.save.mockResolvedValue({} as OtpCode);
       mockUserRepo.findOne.mockResolvedValue(mockUser as User);
       mockUserRepo.save.mockResolvedValue(mockUser as User);
-      mockRefreshTokenRepo.create.mockReturnValue(mockRefreshToken as RefreshToken);
-      mockRefreshTokenRepo.save.mockResolvedValue(mockRefreshToken as RefreshToken);
+      mockRefreshTokenRepo.create.mockReturnValue(
+        mockRefreshToken as RefreshToken,
+      );
+      mockRefreshTokenRepo.save.mockResolvedValue(
+        mockRefreshToken as RefreshToken,
+      );
       (bcrypt.hash as Mock).mockResolvedValue('$2b$12$hashedtoken');
 
       const result = await service.verifyOtp(verifyDto);
@@ -202,7 +236,9 @@ describe('AuthService', () => {
     it('should fail with invalid OTP', async () => {
       mockOtpCodeRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should fail with already used OTP', async () => {
@@ -211,7 +247,9 @@ describe('AuthService', () => {
         usedAt: new Date(),
       } as OtpCode);
 
-      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should fail with expired OTP', async () => {
@@ -220,7 +258,9 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() - 1000),
       } as OtpCode);
 
-      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(BadRequestException);
+      await expect(service.verifyOtp(verifyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -233,8 +273,12 @@ describe('AuthService', () => {
     it('should return tokens for verified user', async () => {
       mockUserRepo.findOne.mockResolvedValue(mockUser as User);
       mockUserRepo.save.mockResolvedValue(mockUser as User);
-      mockRefreshTokenRepo.create.mockReturnValue(mockRefreshToken as RefreshToken);
-      mockRefreshTokenRepo.save.mockResolvedValue(mockRefreshToken as RefreshToken);
+      mockRefreshTokenRepo.create.mockReturnValue(
+        mockRefreshToken as RefreshToken,
+      );
+      mockRefreshTokenRepo.save.mockResolvedValue(
+        mockRefreshToken as RefreshToken,
+      );
       (bcrypt.compare as Mock).mockResolvedValue(true);
       (bcrypt.hash as Mock).mockResolvedValue('$2b$12$hashedtoken');
 
@@ -252,20 +296,26 @@ describe('AuthService', () => {
       } as User);
       (bcrypt.compare as Mock).mockResolvedValue(true);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should fail with wrong password', async () => {
       mockUserRepo.findOne.mockResolvedValue(mockUser as User);
       (bcrypt.compare as Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should fail for non-existent user', async () => {
       mockUserRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should fail for deactivated user', async () => {
@@ -275,16 +325,24 @@ describe('AuthService', () => {
       } as User);
       (bcrypt.compare as Mock).mockResolvedValue(true);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
   describe('refreshTokens', () => {
     it('should return new tokens with valid refresh token', async () => {
-      mockRefreshTokenRepo.findOne.mockResolvedValue(mockRefreshToken as RefreshToken);
-      mockRefreshTokenRepo.save.mockResolvedValue(mockRefreshToken as RefreshToken);
+      mockRefreshTokenRepo.findOne.mockResolvedValue(
+        mockRefreshToken as RefreshToken,
+      );
+      mockRefreshTokenRepo.save.mockResolvedValue(
+        mockRefreshToken as RefreshToken,
+      );
       mockUserRepo.findOne.mockResolvedValue(mockUser as User);
-      mockRefreshTokenRepo.create.mockReturnValue(mockRefreshToken as RefreshToken);
+      mockRefreshTokenRepo.create.mockReturnValue(
+        mockRefreshToken as RefreshToken,
+      );
       (bcrypt.compare as Mock).mockResolvedValue(true);
       (bcrypt.hash as Mock).mockResolvedValue('$2b$12$hashedtoken');
 
@@ -305,7 +363,11 @@ describe('AuthService', () => {
       } as RefreshToken);
 
       await expect(
-        service.refreshTokens('user-uuid-1234', 'token-uuid-1234', 'revoked-token'),
+        service.refreshTokens(
+          'user-uuid-1234',
+          'token-uuid-1234',
+          'revoked-token',
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -316,7 +378,11 @@ describe('AuthService', () => {
       } as RefreshToken);
 
       await expect(
-        service.refreshTokens('user-uuid-1234', 'token-uuid-1234', 'expired-token'),
+        service.refreshTokens(
+          'user-uuid-1234',
+          'token-uuid-1234',
+          'expired-token',
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -360,7 +426,9 @@ describe('AuthService', () => {
       mockOtpCodeRepo.create.mockReturnValue({} as OtpCode);
       mockOtpCodeRepo.save.mockResolvedValue({} as OtpCode);
 
-      const result = await service.forgotPassword({ email: 'test@example.com' });
+      const result = await service.forgotPassword({
+        email: 'test@example.com',
+      });
 
       expect(result.message).toContain('If an account exists');
       expect(mockOtpCodeRepo.save).toHaveBeenCalled();
@@ -369,7 +437,9 @@ describe('AuthService', () => {
     it('should return same message for non-existent user (security)', async () => {
       mockUserRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.forgotPassword({ email: 'nonexistent@example.com' });
+      const result = await service.forgotPassword({
+        email: 'nonexistent@example.com',
+      });
 
       expect(result.message).toContain('If an account exists');
       expect(mockOtpCodeRepo.save).not.toHaveBeenCalled();
@@ -408,7 +478,9 @@ describe('AuthService', () => {
       mockUserRepo.findOne.mockResolvedValue(mockUser as User);
       mockOtpCodeRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.resetPassword(resetDto)).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword(resetDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should fail with expired OTP', async () => {
@@ -419,7 +491,9 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() - 1000),
       } as OtpCode);
 
-      await expect(service.resetPassword(resetDto)).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword(resetDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -440,7 +514,9 @@ describe('AuthService', () => {
       const result = await service.isTokenBlacklisted('blacklisted-token');
 
       expect(result).toBe(true);
-      expect(mockRedisService.exists).toHaveBeenCalledWith('token:blacklist:blacklisted-token');
+      expect(mockRedisService.exists).toHaveBeenCalledWith(
+        'token:blacklist:blacklisted-token',
+      );
     });
   });
 });

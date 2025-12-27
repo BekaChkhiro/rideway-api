@@ -141,7 +141,10 @@ describe('UsersService', () => {
     };
 
     mockMediaService = {
-      uploadImage: vi.fn().mockResolvedValue({ url: 'https://example.com/new-image.jpg', key: 'new-image-key' }),
+      uploadImage: vi.fn().mockResolvedValue({
+        url: 'https://example.com/new-image.jpg',
+        key: 'new-image-key',
+      }),
       deleteImage: vi.fn().mockResolvedValue(undefined),
     };
 
@@ -220,8 +223,14 @@ describe('UsersService', () => {
 
   describe('updateProfile', () => {
     it('should update profile fields correctly', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, user: mockUser });
-      mockProfileRepo.save.mockResolvedValue({ ...mockProfile, fullName: 'Updated Name' });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        user: mockUser,
+      });
+      mockProfileRepo.save.mockResolvedValue({
+        ...mockProfile,
+        fullName: 'Updated Name',
+      });
       mockFollowRepo.count.mockResolvedValue(0);
 
       const result = await service.updateProfile('user-uuid-1234', {
@@ -244,7 +253,10 @@ describe('UsersService', () => {
     });
 
     it('should allow same username if unchanged', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, user: mockUser });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        user: mockUser,
+      });
       mockProfileRepo.save.mockResolvedValue(mockProfile);
       mockFollowRepo.count.mockResolvedValue(0);
 
@@ -349,7 +361,10 @@ describe('UsersService', () => {
       const mockQueryBuilder = mockFollowRepo.createQueryBuilder();
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockFollows, 1]);
 
-      const result = await service.getFollowers('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getFollowers('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.items).toHaveLength(1);
       expect(result.meta.total).toBe(1);
@@ -361,7 +376,10 @@ describe('UsersService', () => {
       const mockQueryBuilder = mockFollowRepo.createQueryBuilder();
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
-      const result = await service.getFollowers('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getFollowers('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.items).toHaveLength(0);
       expect(result.meta.total).toBe(0);
@@ -382,7 +400,10 @@ describe('UsersService', () => {
       const mockQueryBuilder = mockFollowRepo.createQueryBuilder();
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockFollows, 1]);
 
-      const result = await service.getFollowing('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getFollowing('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.items).toHaveLength(1);
       expect(result.meta.total).toBe(1);
@@ -456,18 +477,22 @@ describe('UsersService', () => {
         take: vi.fn().mockReturnThis(),
         getManyAndCount: vi.fn().mockResolvedValue([mockProfiles, 1]),
       };
-      mockProfileRepo.createQueryBuilder = vi.fn().mockReturnValue(mockQueryBuilder);
+      mockProfileRepo.createQueryBuilder = vi
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
 
-      const result = await service.searchUsers({ q: 'search', page: 1, limit: 20 });
+      const result = await service.searchUsers({
+        q: 'search',
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].username).toBe('searchuser1');
     });
 
     it('should exclude blocked users from search', async () => {
-      const mockProfiles = [
-        { userId: 'user-1', username: 'user1' },
-      ];
+      const mockProfiles = [{ userId: 'user-1', username: 'user1' }];
       const mockQueryBuilder = {
         innerJoin: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
@@ -477,7 +502,9 @@ describe('UsersService', () => {
         take: vi.fn().mockReturnThis(),
         getManyAndCount: vi.fn().mockResolvedValue([mockProfiles, 1]),
       };
-      mockProfileRepo.createQueryBuilder = vi.fn().mockReturnValue(mockQueryBuilder);
+      mockProfileRepo.createQueryBuilder = vi
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
       mockBlockRepo.find.mockResolvedValue([
         { blockerId: 'current-user', blockedId: 'blocked-user' },
       ]);
@@ -501,9 +528,15 @@ describe('UsersService', () => {
         take: vi.fn().mockReturnThis(),
         getManyAndCount: vi.fn().mockResolvedValue([[], 0]),
       };
-      mockProfileRepo.createQueryBuilder = vi.fn().mockReturnValue(mockQueryBuilder);
+      mockProfileRepo.createQueryBuilder = vi
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
 
-      const result = await service.searchUsers({ q: 'nonexistent', page: 1, limit: 20 });
+      const result = await service.searchUsers({
+        q: 'nonexistent',
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.items).toHaveLength(0);
       expect(result.meta.total).toBe(0);
@@ -512,8 +545,14 @@ describe('UsersService', () => {
 
   describe('uploadAvatar', () => {
     it('should upload avatar and update profile', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, avatarUrl: null });
-      mockProfileRepo.save.mockResolvedValue({ ...mockProfile, avatarUrl: 'https://example.com/new-avatar.jpg' });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: null,
+      });
+      mockProfileRepo.save.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: 'https://example.com/new-avatar.jpg',
+      });
 
       const mockFile = {
         buffer: Buffer.from('test'),
@@ -529,7 +568,10 @@ describe('UsersService', () => {
     });
 
     it('should delete old avatar before uploading new one', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, avatarUrl: 'https://example.com/old-avatar.jpg' });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: 'https://example.com/old-avatar.jpg',
+      });
       mockProfileRepo.save.mockResolvedValue(mockProfile);
 
       const mockFile = {
@@ -540,7 +582,9 @@ describe('UsersService', () => {
 
       await service.uploadAvatar('user-uuid-1234', mockFile);
 
-      expect(mockMediaService.deleteImage).toHaveBeenCalledWith('https://example.com/old-avatar.jpg');
+      expect(mockMediaService.deleteImage).toHaveBeenCalledWith(
+        'https://example.com/old-avatar.jpg',
+      );
     });
 
     it('should throw NotFoundException for non-existent profile', async () => {
@@ -559,8 +603,14 @@ describe('UsersService', () => {
 
   describe('deleteAvatar', () => {
     it('should delete avatar', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, avatarUrl: 'https://example.com/avatar.jpg' });
-      mockProfileRepo.save.mockResolvedValue({ ...mockProfile, avatarUrl: undefined });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: 'https://example.com/avatar.jpg',
+      });
+      mockProfileRepo.save.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: undefined,
+      });
 
       await service.deleteAvatar('user-uuid-1234');
 
@@ -569,7 +619,10 @@ describe('UsersService', () => {
     });
 
     it('should throw BadRequestException when no avatar to delete', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, avatarUrl: null });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        avatarUrl: null,
+      });
 
       await expect(service.deleteAvatar('user-uuid-1234')).rejects.toThrow(
         BadRequestException,
@@ -579,8 +632,14 @@ describe('UsersService', () => {
 
   describe('uploadCover', () => {
     it('should upload cover and update profile', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, coverUrl: null });
-      mockProfileRepo.save.mockResolvedValue({ ...mockProfile, coverUrl: 'https://example.com/new-cover.jpg' });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        coverUrl: null,
+      });
+      mockProfileRepo.save.mockResolvedValue({
+        ...mockProfile,
+        coverUrl: 'https://example.com/new-cover.jpg',
+      });
 
       const mockFile = {
         buffer: Buffer.from('test'),
@@ -597,8 +656,14 @@ describe('UsersService', () => {
 
   describe('deleteCover', () => {
     it('should delete cover', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, coverUrl: 'https://example.com/cover.jpg' });
-      mockProfileRepo.save.mockResolvedValue({ ...mockProfile, coverUrl: undefined });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        coverUrl: 'https://example.com/cover.jpg',
+      });
+      mockProfileRepo.save.mockResolvedValue({
+        ...mockProfile,
+        coverUrl: undefined,
+      });
 
       await service.deleteCover('user-uuid-1234');
 
@@ -606,7 +671,10 @@ describe('UsersService', () => {
     });
 
     it('should throw BadRequestException when no cover to delete', async () => {
-      mockProfileRepo.findOne.mockResolvedValue({ ...mockProfile, coverUrl: null });
+      mockProfileRepo.findOne.mockResolvedValue({
+        ...mockProfile,
+        coverUrl: null,
+      });
 
       await expect(service.deleteCover('user-uuid-1234')).rejects.toThrow(
         BadRequestException,

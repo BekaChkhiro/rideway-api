@@ -23,7 +23,11 @@ import {
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
 import { MediaService } from './media.service';
-import { UploadResponseDto, MultipleUploadResponseDto, DeleteResponseDto } from './dto';
+import {
+  UploadResponseDto,
+  MultipleUploadResponseDto,
+  DeleteResponseDto,
+} from './dto';
 import type { ImageFolder } from './interfaces/upload-options.interface';
 
 interface JwtUser {
@@ -58,7 +62,11 @@ export class MediaController {
     required: false,
     description: 'Folder to upload to (default: general)',
   })
-  @ApiResponse({ status: 201, description: 'File uploaded successfully', type: UploadResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'File uploaded successfully',
+    type: UploadResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Invalid file or file type' })
   @UseInterceptors(
     FileInterceptor('file', {
@@ -77,10 +85,19 @@ export class MediaController {
     }
 
     const targetFolder = folder || 'general';
-    const validFolders: ImageFolder[] = ['avatars', 'covers', 'posts', 'listings', 'thumbnails', 'general'];
+    const validFolders: ImageFolder[] = [
+      'avatars',
+      'covers',
+      'posts',
+      'listings',
+      'thumbnails',
+      'general',
+    ];
 
     if (!validFolders.includes(targetFolder)) {
-      throw new BadRequestException(`Invalid folder. Allowed: ${validFolders.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid folder. Allowed: ${validFolders.join(', ')}`,
+      );
     }
 
     return this.mediaService.uploadImage(file, targetFolder, user.sub);
@@ -111,7 +128,11 @@ export class MediaController {
     required: false,
     description: 'Folder to upload to (default: general)',
   })
-  @ApiResponse({ status: 201, description: 'Files uploaded successfully', type: MultipleUploadResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Files uploaded successfully',
+    type: MultipleUploadResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Invalid files or too many files' })
   @UseInterceptors(
     FilesInterceptor('files', 10, {
@@ -130,13 +151,26 @@ export class MediaController {
     }
 
     const targetFolder = folder || 'general';
-    const validFolders: ImageFolder[] = ['avatars', 'covers', 'posts', 'listings', 'thumbnails', 'general'];
+    const validFolders: ImageFolder[] = [
+      'avatars',
+      'covers',
+      'posts',
+      'listings',
+      'thumbnails',
+      'general',
+    ];
 
     if (!validFolders.includes(targetFolder)) {
-      throw new BadRequestException(`Invalid folder. Allowed: ${validFolders.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid folder. Allowed: ${validFolders.join(', ')}`,
+      );
     }
 
-    const uploads = await this.mediaService.uploadImages(files, targetFolder, user.sub);
+    const uploads = await this.mediaService.uploadImages(
+      files,
+      targetFolder,
+      user.sub,
+    );
 
     return {
       uploads,
@@ -148,7 +182,11 @@ export class MediaController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a file by key' })
-  @ApiResponse({ status: 200, description: 'File deleted successfully', type: DeleteResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'File deleted successfully',
+    type: DeleteResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'File not found' })
   async deleteFile(
     @Param('key') key: string,
