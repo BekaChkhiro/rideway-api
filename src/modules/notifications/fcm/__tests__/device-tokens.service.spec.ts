@@ -29,7 +29,9 @@ describe('DeviceTokensService', () => {
     mockDeviceTokenRepo = {
       findOne: vi.fn().mockResolvedValue(null),
       find: vi.fn().mockResolvedValue([mockDeviceToken]),
-      create: vi.fn().mockImplementation((data) => ({ ...mockDeviceToken, ...data })),
+      create: vi
+        .fn()
+        .mockImplementation((data) => ({ ...mockDeviceToken, ...data })),
       save: vi.fn().mockImplementation((data) => Promise.resolve(data)),
       update: vi.fn().mockResolvedValue({ affected: 1 }),
       delete: vi.fn().mockResolvedValue({ affected: 1 }),
@@ -251,7 +253,12 @@ describe('DeviceTokensService', () => {
       // Arrange
       mockDeviceTokenRepo.find.mockResolvedValue([
         mockDeviceToken,
-        { ...mockDeviceToken, id: 'dt-2', deviceType: DeviceType.ANDROID, isActive: false },
+        {
+          ...mockDeviceToken,
+          id: 'dt-2',
+          deviceType: DeviceType.ANDROID,
+          isActive: false,
+        },
       ]);
 
       // Act

@@ -334,10 +334,7 @@ export class StoriesService {
     return { success: true };
   }
 
-  async getViewers(
-    storyId: string,
-    userId: string,
-  ): Promise<ViewerInfo[]> {
+  async getViewers(storyId: string, userId: string): Promise<ViewerInfo[]> {
     const story = await this.storyRepository.findOne({
       where: { id: storyId },
     });
@@ -396,7 +393,10 @@ export class StoriesService {
     try {
       await this.mediaService.deleteImage(story.mediaUrl);
     } catch (error) {
-      this.logger.warn(`Failed to delete story media: ${story.mediaUrl}`, error);
+      this.logger.warn(
+        `Failed to delete story media: ${story.mediaUrl}`,
+        error,
+      );
     }
 
     await this.storyRepository.delete(id);
@@ -455,10 +455,7 @@ export class StoriesService {
     return Array.from(blockedIds);
   }
 
-  private async isBlocked(
-    userId1: string,
-    userId2: string,
-  ): Promise<boolean> {
+  private async isBlocked(userId1: string, userId2: string): Promise<boolean> {
     const block = await this.blockRepository.findOne({
       where: [
         { blockerId: userId1, blockedId: userId2 },

@@ -143,7 +143,10 @@ export class AuthService {
       user.isEmailVerified = true;
       // Send welcome email
       if (user.profile?.username) {
-        await this.emailService.sendWelcomeEmail(user.email, user.profile.username);
+        await this.emailService.sendWelcomeEmail(
+          user.email,
+          user.profile.username,
+        );
       }
     } else if (dto.type === OtpType.PHONE_VERIFY) {
       user.isPhoneVerified = true;
@@ -280,7 +283,11 @@ export class AuthService {
     });
 
     if (user) {
-      await this.generateAndSaveOtp(user.id, OtpType.PASSWORD_RESET, user.email);
+      await this.generateAndSaveOtp(
+        user.id,
+        OtpType.PASSWORD_RESET,
+        user.email,
+      );
       this.logger.log(`Password reset OTP sent to: ${dto.email}`);
     }
 
@@ -426,7 +433,10 @@ export class AuthService {
     await this.otpCodeRepository.save(otpCode);
 
     // Send OTP via email
-    if (email && (type === OtpType.EMAIL_VERIFY || type === OtpType.PASSWORD_RESET)) {
+    if (
+      email &&
+      (type === OtpType.EMAIL_VERIFY || type === OtpType.PASSWORD_RESET)
+    ) {
       const emailType = type === OtpType.EMAIL_VERIFY ? 'verify' : 'reset';
       await this.emailService.sendOtpEmail(email, code, emailType);
       this.logger.log(`OTP email sent to ${email} (type: ${type})`);

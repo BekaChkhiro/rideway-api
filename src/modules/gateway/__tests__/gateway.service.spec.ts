@@ -228,9 +228,7 @@ describe('GatewayService', () => {
 
     it('should broadcast offline status to followers', async () => {
       // Arrange
-      mockUserFollowRepo.find.mockResolvedValue([
-        { followerId: 'follower-1' },
-      ]);
+      mockUserFollowRepo.find.mockResolvedValue([{ followerId: 'follower-1' }]);
 
       // Act
       await service.setUserOffline(userId);
@@ -435,7 +433,9 @@ describe('GatewayService', () => {
 
       // Assert
       expect(mockServer.to).toHaveBeenCalledWith(`user:${userId}`);
-      expect(emitMock).toHaveBeenCalledWith('notification:new', { test: 'data' });
+      expect(emitMock).toHaveBeenCalledWith('notification:new', {
+        test: 'data',
+      });
     });
   });
 
@@ -451,7 +451,9 @@ describe('GatewayService', () => {
 
       // Assert
       expect(mockServer.to).toHaveBeenCalledWith(room);
-      expect(emitMock).toHaveBeenCalledWith('message:new', { content: 'Hello' });
+      expect(emitMock).toHaveBeenCalledWith('message:new', {
+        content: 'Hello',
+      });
     });
   });
 

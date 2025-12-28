@@ -50,7 +50,9 @@ export class GatewayService {
     const redis = this.redisService.getClient();
 
     // Check how many connections user already has
-    const existingSockets = await redis.smembers(`${REDIS_KEYS.USER_SOCKETS}${userId}`);
+    const existingSockets = await redis.smembers(
+      `${REDIS_KEYS.USER_SOCKETS}${userId}`,
+    );
     const wasOffline = existingSockets.length === 0;
 
     await Promise.all([
@@ -61,10 +63,7 @@ export class GatewayService {
       // Add to online users set
       redis.sadd(REDIS_KEYS.ONLINE_USERS, userId),
       // Update last seen
-      redis.set(
-        `${REDIS_KEYS.USER_LAST_SEEN}${userId}`,
-        Date.now().toString(),
-      ),
+      redis.set(`${REDIS_KEYS.USER_LAST_SEEN}${userId}`, Date.now().toString()),
     ]);
 
     // Update database if coming online
@@ -94,7 +93,9 @@ export class GatewayService {
     await redis.del(`${REDIS_KEYS.SOCKET_TO_USER}${socketId}`);
 
     // Check if user has any remaining connections
-    const remainingSockets = await redis.smembers(`${REDIS_KEYS.USER_SOCKETS}${userId}`);
+    const remainingSockets = await redis.smembers(
+      `${REDIS_KEYS.USER_SOCKETS}${userId}`,
+    );
     const wentOffline = remainingSockets.length === 0;
 
     if (wentOffline) {
@@ -165,7 +166,10 @@ export class GatewayService {
     await this.broadcastPresenceToFollowers(userId, false);
   }
 
-  async setAppearOffline(userId: string, appearOffline: boolean): Promise<void> {
+  async setAppearOffline(
+    userId: string,
+    appearOffline: boolean,
+  ): Promise<void> {
     const redis = this.redisService.getClient();
 
     if (appearOffline) {
@@ -175,10 +179,9 @@ export class GatewayService {
     }
 
     // Update database
-    await this.userActivityRepository.upsert(
-      { userId, appearOffline },
-      ['userId'],
-    );
+    await this.userActivityRepository.upsert({ userId, appearOffline }, [
+      'userId',
+    ]);
 
     // Broadcast current status to followers
     const isOnline = await this.isUserOnline(userId);
@@ -212,7 +215,9 @@ export class GatewayService {
     ]);
 
     const isOnline = isOnlineMember === 1 && !appearOffline;
-    const lastSeen = lastSeenStr ? new Date(parseInt(lastSeenStr, 10)) : undefined;
+    const lastSeen = lastSeenStr
+      ? new Date(parseInt(lastSeenStr, 10))
+      : undefined;
 
     return {
       isOnline,
@@ -457,7 +462,9 @@ export class GatewayService {
         });
       }
     } catch (error) {
-      this.logger.error(`Failed to update user activity: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to update user activity: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -469,7 +476,9 @@ export class GatewayService {
         1,
       );
     } catch (error) {
-      this.logger.error(`Failed to increment connection count: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to increment connection count: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -481,7 +490,9 @@ export class GatewayService {
         1,
       );
     } catch (error) {
-      this.logger.error(`Failed to decrement connection count: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to decrement connection count: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -507,7 +518,9 @@ export class GatewayService {
         `Broadcast ${event} for user ${userId} to ${followers.length} followers`,
       );
     } catch (error) {
-      this.logger.error(`Failed to broadcast presence: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to broadcast presence: ${(error as Error).message}`,
+      );
       // Fallback to global broadcast if followers query fails
       this.server.emit(isOnline ? 'user:online' : 'user:offline', userId);
     }

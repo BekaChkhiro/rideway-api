@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach, vi, Mock, afterEach } from 'vitest';
 import { Server, Socket } from 'socket.io';
 import { AppGateway } from '../gateway.gateway.js';
 import { GatewayService } from '../gateway.service.js';
-import { AuthenticatedSocket, SocketUser } from '../interfaces/authenticated-socket.interface.js';
+import {
+  AuthenticatedSocket,
+  SocketUser,
+} from '../interfaces/authenticated-socket.interface.js';
 
 describe('AppGateway', () => {
   let gateway: AppGateway;
@@ -101,10 +104,13 @@ describe('AppGateway', () => {
         mockUser.id,
       );
       expect(mockSocket.join).toHaveBeenCalledWith(`user:${mockUser.id}`);
-      expect(mockSocket.emit).toHaveBeenCalledWith('auth:success', expect.objectContaining({
-        id: mockUser.id,
-        email: mockUser.email,
-      }));
+      expect(mockSocket.emit).toHaveBeenCalledWith(
+        'auth:success',
+        expect.objectContaining({
+          id: mockUser.id,
+          email: mockUser.email,
+        }),
+      );
       expect(mockSocket.disconnect).not.toHaveBeenCalled();
     });
 
@@ -176,7 +182,9 @@ describe('AppGateway', () => {
       await gateway.handleConnection(mockSocket);
 
       // Assert
-      expect(mockGatewayService.setUserOnline).toHaveBeenCalledWith(mockUser.id);
+      expect(mockGatewayService.setUserOnline).toHaveBeenCalledWith(
+        mockUser.id,
+      );
     });
 
     it('should NOT mark user as online if already online (multi-device)', async () => {
@@ -250,8 +258,12 @@ describe('AppGateway', () => {
       await gateway.handleDisconnect(mockSocket);
 
       // Assert
-      expect(mockGatewayService.unregisterSocket).toHaveBeenCalledWith(mockSocket.id);
-      expect(mockGatewayService.setUserOffline).toHaveBeenCalledWith(mockUser.id);
+      expect(mockGatewayService.unregisterSocket).toHaveBeenCalledWith(
+        mockSocket.id,
+      );
+      expect(mockGatewayService.setUserOffline).toHaveBeenCalledWith(
+        mockUser.id,
+      );
     });
 
     it('should NOT mark user as offline when other devices still connected', async () => {
@@ -263,7 +275,9 @@ describe('AppGateway', () => {
       await gateway.handleDisconnect(mockSocket);
 
       // Assert
-      expect(mockGatewayService.unregisterSocket).toHaveBeenCalledWith(mockSocket.id);
+      expect(mockGatewayService.unregisterSocket).toHaveBeenCalledWith(
+        mockSocket.id,
+      );
       expect(mockGatewayService.setUserOffline).not.toHaveBeenCalled();
     });
 
@@ -367,10 +381,15 @@ describe('AppGateway', () => {
       const conversationId = 'conv-uuid-1234';
 
       // Act
-      const result = await gateway.handleJoinConversation(mockSocket, conversationId);
+      const result = await gateway.handleJoinConversation(
+        mockSocket,
+        conversationId,
+      );
 
       // Assert
-      expect(mockSocket.join).toHaveBeenCalledWith(`conversation:${conversationId}`);
+      expect(mockSocket.join).toHaveBeenCalledWith(
+        `conversation:${conversationId}`,
+      );
       expect(result).toEqual({ success: true });
     });
   });
@@ -382,10 +401,15 @@ describe('AppGateway', () => {
       const conversationId = 'conv-uuid-1234';
 
       // Act
-      const result = await gateway.handleLeaveConversation(mockSocket, conversationId);
+      const result = await gateway.handleLeaveConversation(
+        mockSocket,
+        conversationId,
+      );
 
       // Assert
-      expect(mockSocket.leave).toHaveBeenCalledWith(`conversation:${conversationId}`);
+      expect(mockSocket.leave).toHaveBeenCalledWith(
+        `conversation:${conversationId}`,
+      );
       expect(result).toEqual({ success: true });
     });
   });

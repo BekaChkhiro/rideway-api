@@ -72,10 +72,7 @@ export class PostsController {
   @ApiOperation({ summary: 'Get personalized feed' })
   @ApiResponse({ status: 200, description: 'Feed retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getFeed(
-    @CurrentUser() user: JwtPayload,
-    @Query() query: FeedQueryDto,
-  ) {
+  async getFeed(@CurrentUser() user: JwtPayload, @Query() query: FeedQueryDto) {
     const result = await this.postsService.getFeed(user.sub, query);
     return {
       success: true,

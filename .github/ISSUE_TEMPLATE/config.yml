@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://api.bikearea.ge/api/docs
+    about: Check the API documentation for usage information
+  - name: Discussions
+    url: https://github.com/your-org/bike-area-api/discussions
+    about: Ask questions and discuss features

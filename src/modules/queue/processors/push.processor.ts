@@ -1,7 +1,10 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Logger, Inject, forwardRef, Optional } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { FCMService, DeviceTokensService } from '@modules/notifications/fcm/index.js';
+import {
+  FCMService,
+  DeviceTokensService,
+} from '@modules/notifications/fcm/index.js';
 import {
   QUEUE_NAMES,
   PushJobData,
@@ -26,11 +29,14 @@ export class PushProcessor extends WorkerHost {
   async process(job: Job<PushJobData>): Promise<PushJobResult> {
     this.logger.debug(`Processing push notification job ${job.id}`);
 
-    const { userId, title, body, data, badge, sound, imageUrl, tokens } = job.data;
+    const { userId, title, body, data, badge, sound, imageUrl, tokens } =
+      job.data;
 
     // Check if services are available
     if (!this.fcmService || !this.deviceTokensService) {
-      this.logger.warn('FCM services not available, skipping push notification');
+      this.logger.warn(
+        'FCM services not available, skipping push notification',
+      );
       return {
         successCount: 0,
         failureCount: 0,
@@ -50,7 +56,8 @@ export class PushProcessor extends WorkerHost {
       }
 
       // Get device tokens if not provided
-      const deviceTokens = tokens || await this.deviceTokensService.getActiveTokens(userId);
+      const deviceTokens =
+        tokens || (await this.deviceTokensService.getActiveTokens(userId));
 
       if (deviceTokens.length === 0) {
         this.logger.debug(`No device tokens for user ${userId}`);

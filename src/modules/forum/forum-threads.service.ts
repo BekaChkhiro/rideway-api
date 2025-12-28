@@ -450,12 +450,10 @@ export class ForumThreadsService {
   }
 
   private startViewsSync(): void {
-    setInterval(async () => {
-      try {
-        await this.syncViewCounts();
-      } catch (error) {
+    setInterval(() => {
+      this.syncViewCounts().catch((error) => {
         console.error('Failed to sync forum view counts', error);
-      }
+      });
     }, this.VIEWS_SYNC_INTERVAL);
   }
 

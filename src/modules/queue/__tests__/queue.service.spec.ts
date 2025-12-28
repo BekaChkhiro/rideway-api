@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi, Mock, afterEach } from 'vitest';
 import { QueueService } from '../queue.service.js';
-import { QUEUE_NAMES, CLEANUP_JOBS, NotificationType } from '../interfaces/job-data.interface.js';
+import {
+  QUEUE_NAMES,
+  CLEANUP_JOBS,
+  NotificationType,
+} from '../interfaces/job-data.interface.js';
 
 describe('QueueService', () => {
   let service: QueueService;
@@ -210,7 +214,10 @@ describe('QueueService', () => {
       mockNotificationsQueue.getJob.mockResolvedValue(mockJob);
 
       // Act
-      const result = await service.getJobStatus(QUEUE_NAMES.NOTIFICATIONS, jobId);
+      const result = await service.getJobStatus(
+        QUEUE_NAMES.NOTIFICATIONS,
+        jobId,
+      );
 
       // Assert
       expect(result).toEqual({
@@ -223,7 +230,10 @@ describe('QueueService', () => {
 
     it('should return null for non-existent job', async () => {
       // Act
-      const result = await service.getJobStatus(QUEUE_NAMES.PUSH, 'non-existent');
+      const result = await service.getJobStatus(
+        QUEUE_NAMES.PUSH,
+        'non-existent',
+      );
 
       // Assert
       expect(result).toBeNull();

@@ -1,8 +1,5 @@
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
-import {
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CommentsService } from '../comments.service.js';
 import { Comment } from '../entities/comment.entity.js';
 import { CommentLike } from '../entities/comment-like.entity.js';
@@ -133,7 +130,11 @@ describe('CommentsService', () => {
         content: dto.content,
       });
 
-      const result = await service.create('user-uuid-1234', 'post-uuid-1234', dto);
+      const result = await service.create(
+        'user-uuid-1234',
+        'post-uuid-1234',
+        dto,
+      );
 
       expect(mockCommentRepo.create).toHaveBeenCalledWith({
         userId: 'user-uuid-1234',
@@ -192,7 +193,11 @@ describe('CommentsService', () => {
         content: dto.content,
       });
 
-      const result = await service.create('user-uuid-5678', 'post-uuid-1234', dto);
+      const result = await service.create(
+        'user-uuid-5678',
+        'post-uuid-1234',
+        dto,
+      );
 
       expect(mockCommentRepo.create).toHaveBeenCalledWith({
         userId: 'user-uuid-5678',
@@ -303,7 +308,10 @@ describe('CommentsService', () => {
       mockCommentRepo.findOne.mockResolvedValue({ ...mockComment });
       mockLikeRepo.findOne.mockResolvedValue(mockCommentLike);
 
-      const result = await service.findOne('comment-uuid-1234', 'user-uuid-1234');
+      const result = await service.findOne(
+        'comment-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isLiked).toBe(true);
     });
@@ -312,7 +320,10 @@ describe('CommentsService', () => {
       mockCommentRepo.findOne.mockResolvedValue({ ...mockComment });
       mockLikeRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.findOne('comment-uuid-1234', 'user-uuid-1234');
+      const result = await service.findOne(
+        'comment-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isLiked).toBe(false);
     });
@@ -373,7 +384,9 @@ describe('CommentsService', () => {
     it('should sort by newest by default', async () => {
       mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      await service.findByPost('post-uuid-1234', { sortBy: CommentSortBy.NEWEST });
+      await service.findByPost('post-uuid-1234', {
+        sortBy: CommentSortBy.NEWEST,
+      });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
         'comment.created_at',
@@ -384,7 +397,9 @@ describe('CommentsService', () => {
     it('should sort by oldest when specified', async () => {
       mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      await service.findByPost('post-uuid-1234', { sortBy: CommentSortBy.OLDEST });
+      await service.findByPost('post-uuid-1234', {
+        sortBy: CommentSortBy.OLDEST,
+      });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
         'comment.created_at',
@@ -395,7 +410,9 @@ describe('CommentsService', () => {
     it('should sort by popular when specified', async () => {
       mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      await service.findByPost('post-uuid-1234', { sortBy: CommentSortBy.POPULAR });
+      await service.findByPost('post-uuid-1234', {
+        sortBy: CommentSortBy.POPULAR,
+      });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
         'comment.likes_count',
@@ -404,11 +421,16 @@ describe('CommentsService', () => {
     });
 
     it('should support cursor pagination', async () => {
-      const cursorComment = { ...mockComment, createdAt: new Date('2024-01-15') };
+      const cursorComment = {
+        ...mockComment,
+        createdAt: new Date('2024-01-15'),
+      };
       mockCommentRepo.findOne.mockResolvedValue(cursorComment);
       mockQueryBuilder.getMany.mockResolvedValue([]);
 
-      await service.findByPost('post-uuid-1234', { cursor: 'comment-uuid-1234' });
+      await service.findByPost('post-uuid-1234', {
+        cursor: 'comment-uuid-1234',
+      });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'comment.created_at < :cursorDate',
@@ -436,7 +458,9 @@ describe('CommentsService', () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[mockReply], 1]);
       mockLikeRepo.find.mockResolvedValue([]);
 
-      const result = await service.findReplies('comment-uuid-1234', { page: 1 });
+      const result = await service.findReplies('comment-uuid-1234', {
+        page: 1,
+      });
 
       expect(result.data).toHaveLength(1);
       expect(result.meta.total).toBe(1);
@@ -445,9 +469,9 @@ describe('CommentsService', () => {
     it('should throw NotFoundException if parent comment not found', async () => {
       mockCommentRepo.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.findReplies('non-existent-id', {}),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findReplies('non-existent-id', {})).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -518,7 +542,9 @@ describe('CommentsService', () => {
 
       await service.delete('comment-uuid-1234', 'user-uuid-1234');
 
-      expect(mockCommentRepo.softDelete).toHaveBeenCalledWith('comment-uuid-1234');
+      expect(mockCommentRepo.softDelete).toHaveBeenCalledWith(
+        'comment-uuid-1234',
+      );
     });
 
     it('should decrement post commentsCount on delete', async () => {

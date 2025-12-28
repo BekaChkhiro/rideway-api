@@ -36,16 +36,22 @@ describe('NotificationsGateway', () => {
 
   describe('handleGetUnreadCount', () => {
     it('should return unread notification count', async () => {
-      const result = await gateway.handleGetUnreadCount(mockClient as AuthenticatedSocket);
+      const result = await gateway.handleGetUnreadCount(
+        mockClient as AuthenticatedSocket,
+      );
 
       expect(result).toEqual({ unreadCount: 5 });
-      expect(mockNotificationsService.getUnreadCount).toHaveBeenCalledWith(userId);
+      expect(mockNotificationsService.getUnreadCount).toHaveBeenCalledWith(
+        userId,
+      );
     });
 
     it('should return zero when no unread notifications', async () => {
       mockNotificationsService.getUnreadCount.mockResolvedValue(0);
 
-      const result = await gateway.handleGetUnreadCount(mockClient as AuthenticatedSocket);
+      const result = await gateway.handleGetUnreadCount(
+        mockClient as AuthenticatedSocket,
+      );
 
       expect(result).toEqual({ unreadCount: 0 });
     });
@@ -100,16 +106,22 @@ describe('NotificationsGateway', () => {
 
   describe('handleMarkAllAsRead', () => {
     it('should mark all notifications as read', async () => {
-      const result = await gateway.handleMarkAllAsRead(mockClient as AuthenticatedSocket);
+      const result = await gateway.handleMarkAllAsRead(
+        mockClient as AuthenticatedSocket,
+      );
 
       expect(result).toEqual({ success: true, markedCount: 3 });
-      expect(mockNotificationsService.markAllAsRead).toHaveBeenCalledWith(userId);
+      expect(mockNotificationsService.markAllAsRead).toHaveBeenCalledWith(
+        userId,
+      );
     });
 
     it('should return zero when no notifications to mark', async () => {
       mockNotificationsService.markAllAsRead.mockResolvedValue(0);
 
-      const result = await gateway.handleMarkAllAsRead(mockClient as AuthenticatedSocket);
+      const result = await gateway.handleMarkAllAsRead(
+        mockClient as AuthenticatedSocket,
+      );
 
       expect(result).toEqual({ success: true, markedCount: 0 });
     });
@@ -117,7 +129,9 @@ describe('NotificationsGateway', () => {
     it('should handle many unread notifications', async () => {
       mockNotificationsService.markAllAsRead.mockResolvedValue(100);
 
-      const result = await gateway.handleMarkAllAsRead(mockClient as AuthenticatedSocket);
+      const result = await gateway.handleMarkAllAsRead(
+        mockClient as AuthenticatedSocket,
+      );
 
       expect(result).toEqual({ success: true, markedCount: 100 });
     });

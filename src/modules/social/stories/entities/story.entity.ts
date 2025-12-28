@@ -28,7 +28,12 @@ export class Story {
   @Column({ name: 'media_url', type: 'varchar', length: 500 })
   mediaUrl!: string;
 
-  @Column({ name: 'thumbnail_url', type: 'varchar', length: 500, nullable: true })
+  @Column({
+    name: 'thumbnail_url',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
   thumbnailUrl?: string;
 
   @Column({

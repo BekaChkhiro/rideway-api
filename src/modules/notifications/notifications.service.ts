@@ -40,7 +40,9 @@ export class NotificationsService {
     @InjectRepository(NotificationPreferences)
     private readonly preferencesRepository: Repository<NotificationPreferences>,
     @Inject(RedisService) private readonly redisService: RedisService,
-    @Optional() @Inject(GatewayService) private readonly gatewayService: GatewayService | null,
+    @Optional()
+    @Inject(GatewayService)
+    private readonly gatewayService: GatewayService | null,
     @Inject(forwardRef(() => QueueService))
     private readonly queueService: QueueService,
   ) {}
@@ -67,8 +69,10 @@ export class NotificationsService {
 
     // Generate title and body from template
     const template = NotificationTemplates[type];
-    const title = payload.title || this.interpolate(template.title, variables || {});
-    const body = payload.body || this.interpolate(template.body, variables || {});
+    const title =
+      payload.title || this.interpolate(template.title, variables || {});
+    const body =
+      payload.body || this.interpolate(template.body, variables || {});
 
     // Create notification
     const notification = this.notificationRepository.create({
@@ -92,7 +96,9 @@ export class NotificationsService {
 
     // Queue push notification if user is offline
     if (!options.skipPushNotification) {
-      const isOnline = this.gatewayService ? await this.gatewayService.isUserOnline(recipientId) : false;
+      const isOnline = this.gatewayService
+        ? await this.gatewayService.isUserOnline(recipientId)
+        : false;
       if (!isOnline) {
         await this.queueService.addPushJob({
           userId: recipientId,
@@ -138,13 +144,14 @@ export class NotificationsService {
       whereConditions.type = type;
     }
 
-    const [notifications, total] = await this.notificationRepository.findAndCount({
-      where: whereConditions,
-      relations: ['sender', 'sender.profile'],
-      order: { createdAt: 'DESC' },
-      take: limit + 1, // Fetch one extra to check hasMore
-      skip: offset,
-    });
+    const [notifications, total] =
+      await this.notificationRepository.findAndCount({
+        where: whereConditions,
+        relations: ['sender', 'sender.profile'],
+        order: { createdAt: 'DESC' },
+        take: limit + 1, // Fetch one extra to check hasMore
+        skip: offset,
+      });
 
     const hasMore = notifications.length > limit;
     if (hasMore) {
@@ -153,8 +160,8 @@ export class NotificationsService {
 
     const unreadCount = await this.getUnreadCount(userId);
 
-    const notificationResponses: NotificationResponse[] = notifications.map((n) =>
-      this.mapToResponse(n),
+    const notificationResponses: NotificationResponse[] = notifications.map(
+      (n) => this.mapToResponse(n),
     );
 
     return {
@@ -326,7 +333,11 @@ export class NotificationsService {
   // Helper methods for specific notification types
   // ==========================================
 
-  async notifyNewFollower(followerId: string, followedId: string, followerUsername: string): Promise<void> {
+  async notifyNewFollower(
+    followerId: string,
+    followedId: string,
+    followerUsername: string,
+  ): Promise<void> {
     await this.create({
       type: NotificationType.NEW_FOLLOWER,
       recipientId: followedId,
@@ -353,7 +364,10 @@ export class NotificationsService {
       type: NotificationType.POST_LIKE,
       recipientId: postOwnerId,
       senderId: likerId,
-      variables: { username: likerUsername, postPreview: postPreview.substring(0, 50) },
+      variables: {
+        username: likerUsername,
+        postPreview: postPreview.substring(0, 50),
+      },
       data: {
         entityType: 'post',
         entityId: postId,
@@ -376,7 +390,10 @@ export class NotificationsService {
       type: NotificationType.POST_COMMENT,
       recipientId: postOwnerId,
       senderId: commenterId,
-      variables: { username: commenterUsername, commentPreview: commentPreview.substring(0, 50) },
+      variables: {
+        username: commenterUsername,
+        commentPreview: commentPreview.substring(0, 50),
+      },
       data: {
         entityType: 'comment',
         entityId: commentId,
@@ -401,7 +418,10 @@ export class NotificationsService {
       type: NotificationType.COMMENT_REPLY,
       recipientId: commentOwnerId,
       senderId: replierId,
-      variables: { username: replierUsername, replyPreview: replyPreview.substring(0, 50) },
+      variables: {
+        username: replierUsername,
+        replyPreview: replyPreview.substring(0, 50),
+      },
       data: {
         entityType: 'comment',
         entityId: replyId,
@@ -425,7 +445,10 @@ export class NotificationsService {
       type: NotificationType.NEW_MESSAGE,
       recipientId,
       senderId,
-      variables: { username: senderUsername, messagePreview: messagePreview.substring(0, 50) },
+      variables: {
+        username: senderUsername,
+        messagePreview: messagePreview.substring(0, 50),
+      },
       data: {
         entityType: 'conversation',
         entityId: conversationId,
@@ -448,7 +471,10 @@ export class NotificationsService {
       type: NotificationType.THREAD_REPLY,
       recipientId: threadOwnerId,
       senderId: replierId,
-      variables: { username: replierUsername, replyPreview: replyPreview.substring(0, 50) },
+      variables: {
+        username: replierUsername,
+        replyPreview: replyPreview.substring(0, 50),
+      },
       data: {
         entityType: 'thread_reply',
         entityId: replyId,
@@ -471,7 +497,10 @@ export class NotificationsService {
       type: NotificationType.LISTING_INQUIRY,
       recipientId: listingOwnerId,
       senderId: inquirerId,
-      variables: { username: inquirerUsername, listingTitle: listingTitle.substring(0, 50) },
+      variables: {
+        username: inquirerUsername,
+        listingTitle: listingTitle.substring(0, 50),
+      },
       data: {
         entityType: 'listing',
         entityId: listingId,
@@ -505,8 +534,14 @@ export class NotificationsService {
     return true;
   }
 
-  private interpolate(template: string, variables: Record<string, string>): string {
-    return template.replace(/\{(\w+)\}/g, (match, key) => variables[key] || match);
+  private interpolate(
+    template: string,
+    variables: Record<string, string>,
+  ): string {
+    return template.replace(
+      /\{(\w+)\}/g,
+      (match, key) => variables[key] || match,
+    );
   }
 
   private async invalidateUnreadCache(userId: string): Promise<void> {
@@ -518,7 +553,9 @@ export class NotificationsService {
       return; // Gateway not available
     }
 
-    const isOnline = await this.gatewayService.isUserOnline(notification.userId);
+    const isOnline = await this.gatewayService.isUserOnline(
+      notification.userId,
+    );
 
     if (isOnline) {
       // Load sender info
@@ -547,7 +584,7 @@ export class NotificationsService {
   private mapToResponse(notification: Notification): NotificationResponse {
     return {
       id: notification.id,
-      type: notification.type as NotificationType,
+      type: notification.type,
       title: notification.title,
       body: notification.body,
       data: notification.data,

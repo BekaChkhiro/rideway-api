@@ -132,7 +132,10 @@ export class PostsService {
     }
 
     // Check visibility
-    if (post.visibility === PostVisibility.PRIVATE && post.userId !== currentUserId) {
+    if (
+      post.visibility === PostVisibility.PRIVATE &&
+      post.userId !== currentUserId
+    ) {
       throw new ForbiddenException('This post is private');
     }
 
@@ -244,7 +247,10 @@ export class PostsService {
     await this.postRepository.softDelete(id);
   }
 
-  async like(postId: string, userId: string): Promise<{ isLiked: boolean; likesCount: number }> {
+  async like(
+    postId: string,
+    userId: string,
+  ): Promise<{ isLiked: boolean; likesCount: number }> {
     // Verify post exists and user can access it
     await this.findOne(postId, userId);
 
@@ -256,7 +262,9 @@ export class PostsService {
       // Unlike
       await this.likeRepository.delete(existingLike.id);
       await this.postRepository.decrement({ id: postId }, 'likesCount', 1);
-      const updated = await this.postRepository.findOne({ where: { id: postId } });
+      const updated = await this.postRepository.findOne({
+        where: { id: postId },
+      });
       return { isLiked: false, likesCount: updated?.likesCount || 0 };
     }
 
@@ -264,7 +272,9 @@ export class PostsService {
     const like = this.likeRepository.create({ postId, userId });
     await this.likeRepository.save(like);
     await this.postRepository.increment({ id: postId }, 'likesCount', 1);
-    const updated = await this.postRepository.findOne({ where: { id: postId } });
+    const updated = await this.postRepository.findOne({
+      where: { id: postId },
+    });
     return { isLiked: true, likesCount: updated?.likesCount || 0 };
   }
 
@@ -315,7 +325,9 @@ export class PostsService {
 
     // Exclude blocked users
     if (blockedUsers.length > 0) {
-      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', { blockedUsers });
+      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', {
+        blockedUsers,
+      });
     }
 
     // Feed logic: following + popular public posts
@@ -351,9 +363,7 @@ export class PostsService {
     }
 
     // Order by engagement score + recency
-    queryBuilder
-      .orderBy('post.created_at', 'DESC')
-      .take(limit + 1);
+    queryBuilder.orderBy('post.created_at', 'DESC').take(limit + 1);
 
     const posts = await queryBuilder.getMany();
     const hasMore = posts.length > limit;
@@ -396,7 +406,14 @@ export class PostsService {
       if (blocked) {
         return {
           data: [],
-          meta: { page, limit, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
+          meta: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          },
         };
       }
     }
@@ -482,11 +499,20 @@ export class PostsService {
     if (!hashtag) {
       return {
         data: [],
-        meta: { page, limit, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
+        meta: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
       };
     }
 
-    const blockedUsers = currentUserId ? await this.getBlockedUserIds(currentUserId) : [];
+    const blockedUsers = currentUserId
+      ? await this.getBlockedUserIds(currentUserId)
+      : [];
 
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
@@ -494,11 +520,15 @@ export class PostsService {
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.images', 'images')
       .where('ph.hashtag_id = :hashtagId', { hashtagId: hashtag.id })
-      .andWhere('post.visibility = :visibility', { visibility: PostVisibility.PUBLIC })
+      .andWhere('post.visibility = :visibility', {
+        visibility: PostVisibility.PUBLIC,
+      })
       .andWhere('post.deleted_at IS NULL');
 
     if (blockedUsers.length > 0) {
-      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', { blockedUsers });
+      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', {
+        blockedUsers,
+      });
     }
 
     queryBuilder.orderBy('post.created_at', 'DESC');
@@ -562,23 +592,32 @@ export class PostsService {
     const since = new Date();
     since.setHours(since.getHours() - 24);
 
-    const blockedUsers = currentUserId ? await this.getBlockedUserIds(currentUserId) : [];
+    const blockedUsers = currentUserId
+      ? await this.getBlockedUserIds(currentUserId)
+      : [];
 
     const queryBuilder = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.images', 'images')
-      .where('post.visibility = :visibility', { visibility: PostVisibility.PUBLIC })
+      .where('post.visibility = :visibility', {
+        visibility: PostVisibility.PUBLIC,
+      })
       .andWhere('post.created_at >= :since', { since })
       .andWhere('post.deleted_at IS NULL');
 
     if (blockedUsers.length > 0) {
-      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', { blockedUsers });
+      queryBuilder.andWhere('post.user_id NOT IN (:...blockedUsers)', {
+        blockedUsers,
+      });
     }
 
     // Score: likes + comments*2 + shares*3
     queryBuilder
-      .orderBy('(post.likes_count + post.comments_count * 2 + post.shares_count * 3)', 'DESC')
+      .orderBy(
+        '(post.likes_count + post.comments_count * 2 + post.shares_count * 3)',
+        'DESC',
+      )
       .addOrderBy('post.created_at', 'DESC');
 
     const [posts, total] = await queryBuilder
@@ -621,10 +660,15 @@ export class PostsService {
   private extractMentions(content: string): string[] {
     const matches = content.match(this.MENTION_REGEX);
     if (!matches) return [];
-    return [...new Set(matches.map((mention) => mention.slice(1).toLowerCase()))];
+    return [
+      ...new Set(matches.map((mention) => mention.slice(1).toLowerCase())),
+    ];
   }
 
-  private async processHashtags(postId: string, content: string): Promise<void> {
+  private async processHashtags(
+    postId: string,
+    content: string,
+  ): Promise<void> {
     const hashtags = this.extractHashtags(content);
 
     for (const tag of hashtags) {
@@ -645,7 +689,11 @@ export class PostsService {
       await this.postHashtagRepository.save(postHashtag);
 
       // Increment count
-      await this.hashtagRepository.increment({ id: hashtag.id }, 'postsCount', 1);
+      await this.hashtagRepository.increment(
+        { id: hashtag.id },
+        'postsCount',
+        1,
+      );
     }
   }
 
@@ -655,13 +703,20 @@ export class PostsService {
     });
 
     for (const ph of postHashtags) {
-      await this.hashtagRepository.decrement({ id: ph.hashtagId }, 'postsCount', 1);
+      await this.hashtagRepository.decrement(
+        { id: ph.hashtagId },
+        'postsCount',
+        1,
+      );
     }
 
     await this.postHashtagRepository.delete({ postId });
   }
 
-  private async processMentions(postId: string, content: string): Promise<void> {
+  private async processMentions(
+    postId: string,
+    content: string,
+  ): Promise<void> {
     const usernames = this.extractMentions(content);
 
     for (const username of usernames) {
@@ -685,7 +740,11 @@ export class PostsService {
     userId: string,
     files: Express.Multer.File[],
   ): Promise<PostImage[]> {
-    const results = await this.mediaService.uploadImages(files, 'posts', userId);
+    const results = await this.mediaService.uploadImages(
+      files,
+      'posts',
+      userId,
+    );
 
     const images = results.map((result, index) =>
       this.imageRepository.create({
@@ -701,7 +760,10 @@ export class PostsService {
     return this.imageRepository.save(images);
   }
 
-  private async saveImageUrls(postId: string, urls: string[]): Promise<PostImage[]> {
+  private async saveImageUrls(
+    postId: string,
+    urls: string[],
+  ): Promise<PostImage[]> {
     const existingCount = await this.imageRepository.count({
       where: { postId },
     });
@@ -717,7 +779,10 @@ export class PostsService {
     return this.imageRepository.save(images);
   }
 
-  private async deleteImages(imageIds: string[], userId: string): Promise<void> {
+  private async deleteImages(
+    imageIds: string[],
+    userId: string,
+  ): Promise<void> {
     const images = await this.imageRepository.find({
       where: { id: In(imageIds) },
       relations: ['post'],
@@ -757,7 +822,9 @@ export class PostsService {
     });
 
     for (const follower of followers) {
-      await this.redisService.del(`${this.FEED_CACHE_KEY}${follower.followerId}`);
+      await this.redisService.del(
+        `${this.FEED_CACHE_KEY}${follower.followerId}`,
+      );
     }
   }
 }

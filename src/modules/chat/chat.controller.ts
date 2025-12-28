@@ -44,7 +44,10 @@ export class ChatController {
   @Post('conversations')
   @ApiOperation({ summary: 'Create or get existing conversation' })
   @ApiResponse({ status: 201, description: 'Conversation created or found' })
-  @ApiResponse({ status: 403, description: 'Cannot create conversation with blocked user' })
+  @ApiResponse({
+    status: 403,
+    description: 'Cannot create conversation with blocked user',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async createConversation(
     @CurrentUser() user: User,
@@ -140,7 +143,10 @@ export class ChatController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a message' })
   @ApiResponse({ status: 204, description: 'Message deleted' })
-  @ApiResponse({ status: 404, description: 'Message not found or not the sender' })
+  @ApiResponse({
+    status: 404,
+    description: 'Message not found or not the sender',
+  })
   async deleteMessage(
     @CurrentUser() user: User,
     @Param('id', ParseUUIDPipe) id: string,

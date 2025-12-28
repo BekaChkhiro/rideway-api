@@ -163,8 +163,14 @@ describe('ForumThreadsService', () => {
       };
 
       mockThreadRepo.create.mockReturnValue({ ...mockThread, ...dto });
-      mockThreadRepo.save.mockResolvedValue({ ...mockThread, id: 'new-thread-id' });
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, id: 'new-thread-id' });
+      mockThreadRepo.save.mockResolvedValue({
+        ...mockThread,
+        id: 'new-thread-id',
+      });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        id: 'new-thread-id',
+      });
       mockSubscriptionRepo.findOne.mockResolvedValue(null);
       mockSubscriptionRepo.create.mockReturnValue(mockSubscription);
       mockSubscriptionRepo.save.mockResolvedValue(mockSubscription);
@@ -172,7 +178,9 @@ describe('ForumThreadsService', () => {
 
       const result = await service.create('user-uuid-1234', dto);
 
-      expect(mockCategoriesService.findOne).toHaveBeenCalledWith('category-uuid-1234');
+      expect(mockCategoriesService.findOne).toHaveBeenCalledWith(
+        'category-uuid-1234',
+      );
       expect(mockThreadRepo.save).toHaveBeenCalled();
       expect(mockCategoriesService.incrementThreadsCount).toHaveBeenCalledWith(
         'category-uuid-1234',
@@ -188,8 +196,14 @@ describe('ForumThreadsService', () => {
       };
 
       mockThreadRepo.create.mockReturnValue(mockThread);
-      mockThreadRepo.save.mockResolvedValue({ ...mockThread, id: 'new-thread-id' });
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, id: 'new-thread-id' });
+      mockThreadRepo.save.mockResolvedValue({
+        ...mockThread,
+        id: 'new-thread-id',
+      });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        id: 'new-thread-id',
+      });
       mockSubscriptionRepo.findOne.mockResolvedValue(null);
       mockSubscriptionRepo.create.mockReturnValue(mockSubscription);
       mockSubscriptionRepo.save.mockResolvedValue(mockSubscription);
@@ -282,7 +296,10 @@ describe('ForumThreadsService', () => {
     });
 
     it('should mark liked and subscribed for current user', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[{ ...mockThread }], 1]);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([
+        [{ ...mockThread }],
+        1,
+      ]);
       mockLikeRepo.find.mockResolvedValue([mockLike]);
       mockSubscriptionRepo.find.mockResolvedValue([mockSubscription]);
 
@@ -315,7 +332,10 @@ describe('ForumThreadsService', () => {
       mockLikeRepo.findOne.mockResolvedValue(mockLike);
       mockSubscriptionRepo.findOne.mockResolvedValue(mockSubscription);
 
-      const result = await service.findOne('thread-uuid-1234', 'user-uuid-1234');
+      const result = await service.findOne(
+        'thread-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isLiked).toBe(true);
       expect(result.isSubscribed).toBe(true);
@@ -328,9 +348,13 @@ describe('ForumThreadsService', () => {
       mockLikeRepo.findOne.mockResolvedValue(null);
       mockSubscriptionRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.update('thread-uuid-1234', 'user-uuid-1234', {
-        title: 'Updated title',
-      });
+      const result = await service.update(
+        'thread-uuid-1234',
+        'user-uuid-1234',
+        {
+          title: 'Updated title',
+        },
+      );
 
       expect(mockThreadRepo.update).toHaveBeenCalledWith('thread-uuid-1234', {
         title: 'Updated title',
@@ -353,7 +377,9 @@ describe('ForumThreadsService', () => {
 
       await service.delete('thread-uuid-1234', 'user-uuid-1234');
 
-      expect(mockThreadRepo.softDelete).toHaveBeenCalledWith('thread-uuid-1234');
+      expect(mockThreadRepo.softDelete).toHaveBeenCalledWith(
+        'thread-uuid-1234',
+      );
       expect(mockCategoriesService.decrementThreadsCount).toHaveBeenCalledWith(
         'category-uuid-1234',
       );
@@ -428,7 +454,10 @@ describe('ForumThreadsService', () => {
 
   describe('pin', () => {
     it('should toggle pin status', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isPinned: false });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isPinned: false,
+      });
 
       await service.pin('thread-uuid-1234');
 
@@ -438,7 +467,10 @@ describe('ForumThreadsService', () => {
     });
 
     it('should unpin a pinned thread', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isPinned: true });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isPinned: true,
+      });
 
       await service.pin('thread-uuid-1234');
 
@@ -450,7 +482,10 @@ describe('ForumThreadsService', () => {
 
   describe('lock', () => {
     it('should toggle lock status', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isLocked: false });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isLocked: false,
+      });
 
       await service.lock('thread-uuid-1234');
 
@@ -460,7 +495,10 @@ describe('ForumThreadsService', () => {
     });
 
     it('should unlock a locked thread', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isLocked: true });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isLocked: true,
+      });
 
       await service.lock('thread-uuid-1234');
 
@@ -477,7 +515,10 @@ describe('ForumThreadsService', () => {
       mockSubscriptionRepo.create.mockReturnValue(mockSubscription);
       mockSubscriptionRepo.save.mockResolvedValue(mockSubscription);
 
-      const result = await service.subscribe('thread-uuid-1234', 'user-uuid-1234');
+      const result = await service.subscribe(
+        'thread-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isSubscribed).toBe(true);
       expect(mockSubscriptionRepo.save).toHaveBeenCalled();
@@ -487,10 +528,15 @@ describe('ForumThreadsService', () => {
       mockThreadRepo.findOne.mockResolvedValue(mockThread);
       mockSubscriptionRepo.findOne.mockResolvedValue(mockSubscription);
 
-      const result = await service.subscribe('thread-uuid-1234', 'user-uuid-1234');
+      const result = await service.subscribe(
+        'thread-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isSubscribed).toBe(false);
-      expect(mockSubscriptionRepo.delete).toHaveBeenCalledWith(mockSubscription.id);
+      expect(mockSubscriptionRepo.delete).toHaveBeenCalledWith(
+        mockSubscription.id,
+      );
     });
   });
 
@@ -509,10 +555,19 @@ describe('ForumThreadsService', () => {
 
   describe('createReply', () => {
     it('should create reply and update thread', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isLocked: false });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isLocked: false,
+      });
       mockReplyRepo.create.mockReturnValue(mockReply);
-      mockReplyRepo.save.mockResolvedValue({ ...mockReply, id: 'new-reply-id' });
-      mockReplyRepo.findOne.mockResolvedValue({ ...mockReply, id: 'new-reply-id' });
+      mockReplyRepo.save.mockResolvedValue({
+        ...mockReply,
+        id: 'new-reply-id',
+      });
+      mockReplyRepo.findOne.mockResolvedValue({
+        ...mockReply,
+        id: 'new-reply-id',
+      });
       mockReplyLikeRepo.findOne.mockResolvedValue(null);
       mockLikeRepo.findOne.mockResolvedValue(null);
       mockSubscriptionRepo.findOne.mockResolvedValue(null);
@@ -533,7 +588,10 @@ describe('ForumThreadsService', () => {
     });
 
     it('should throw BadRequestException if thread is locked', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isLocked: true });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isLocked: true,
+      });
 
       await expect(
         service.createReply('thread-uuid-1234', 'user-uuid-1234', {
@@ -543,12 +601,18 @@ describe('ForumThreadsService', () => {
     });
 
     it('should support nested replies with parentId', async () => {
-      mockThreadRepo.findOne.mockResolvedValue({ ...mockThread, isLocked: false });
+      mockThreadRepo.findOne.mockResolvedValue({
+        ...mockThread,
+        isLocked: false,
+      });
       mockReplyRepo.create.mockReturnValue({
         ...mockReply,
         parentId: 'parent-reply-id',
       });
-      mockReplyRepo.save.mockResolvedValue({ ...mockReply, id: 'nested-reply-id' });
+      mockReplyRepo.save.mockResolvedValue({
+        ...mockReply,
+        id: 'nested-reply-id',
+      });
       mockReplyRepo.findOne.mockResolvedValue({
         ...mockReply,
         id: 'nested-reply-id',
@@ -584,7 +648,9 @@ describe('ForumThreadsService', () => {
 
     it('should mark liked replies for current user', async () => {
       mockReplyRepo.findAndCount.mockResolvedValue([[{ ...mockReply }], 1]);
-      mockReplyLikeRepo.find.mockResolvedValue([{ replyId: 'reply-uuid-1234' }]);
+      mockReplyLikeRepo.find.mockResolvedValue([
+        { replyId: 'reply-uuid-1234' },
+      ]);
 
       const result = await service.findReplies(
         'thread-uuid-1234',
@@ -616,7 +682,9 @@ describe('ForumThreadsService', () => {
       mockReplyRepo.findOne.mockResolvedValue(mockReply);
 
       await expect(
-        service.updateReply('reply-uuid-1234', 'other-user', { content: 'Test' }),
+        service.updateReply('reply-uuid-1234', 'other-user', {
+          content: 'Test',
+        }),
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -657,7 +725,10 @@ describe('ForumThreadsService', () => {
       mockReplyLikeRepo.create.mockReturnValue({ replyId: 'reply-uuid-1234' });
       mockReplyLikeRepo.save.mockResolvedValue({ id: 'like-id' });
 
-      const result = await service.likeReply('reply-uuid-1234', 'user-uuid-1234');
+      const result = await service.likeReply(
+        'reply-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isLiked).toBe(true);
       expect(result.likesCount).toBe(6);
@@ -679,7 +750,10 @@ describe('ForumThreadsService', () => {
       });
       mockReplyLikeRepo.findOne.mockResolvedValue(existingLike);
 
-      const result = await service.likeReply('reply-uuid-1234', 'user-uuid-1234');
+      const result = await service.likeReply(
+        'reply-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isLiked).toBe(false);
       expect(result.likesCount).toBe(4);

@@ -14,7 +14,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private subscriber!: Redis;
   private readonly logger = new Logger(RedisService.name);
 
-  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {}
 
   onModuleInit(): void {
     const url = this.configService.get<string>('redis.url')!;

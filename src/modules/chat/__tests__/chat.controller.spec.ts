@@ -52,7 +52,9 @@ describe('ChatController', () => {
 
     mockChatService = {
       getConversations: vi.fn().mockResolvedValue([mockConversation]),
-      findOrCreateConversation: vi.fn().mockResolvedValue({ id: conversationId }),
+      findOrCreateConversation: vi
+        .fn()
+        .mockResolvedValue({ id: conversationId }),
       getConversation: vi.fn().mockResolvedValue(mockConversation),
       getMessages: vi.fn().mockResolvedValue({
         messages: [mockMessage],
@@ -63,7 +65,9 @@ describe('ChatController', () => {
       markAsRead: vi.fn().mockResolvedValue(undefined),
       muteConversation: vi.fn().mockResolvedValue(undefined),
       deleteMessage: vi.fn().mockResolvedValue(undefined),
-      getUnreadCount: vi.fn().mockResolvedValue({ total: 5, byConversation: {} }),
+      getUnreadCount: vi
+        .fn()
+        .mockResolvedValue({ total: 5, byConversation: {} }),
     };
 
     controller = new ChatController(mockChatService as any);
@@ -79,7 +83,9 @@ describe('ChatController', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(conversationId);
-      expect(mockChatService.getConversations).toHaveBeenCalledWith(mockUser.id);
+      expect(mockChatService.getConversations).toHaveBeenCalledWith(
+        mockUser.id,
+      );
     });
 
     it('should return empty array if no conversations', async () => {
@@ -111,7 +117,10 @@ describe('ChatController', () => {
 
   describe('getConversation', () => {
     it('should return conversation details', async () => {
-      const result = await controller.getConversation(mockUser as User, conversationId);
+      const result = await controller.getConversation(
+        mockUser as User,
+        conversationId,
+      );
 
       expect(result.id).toBe(conversationId);
       expect(result.participants).toHaveLength(2);
@@ -126,7 +135,11 @@ describe('ChatController', () => {
     it('should return paginated messages', async () => {
       const query = { limit: 20, offset: 0 };
 
-      const result = await controller.getMessages(mockUser as User, conversationId, query);
+      const result = await controller.getMessages(
+        mockUser as User,
+        conversationId,
+        query,
+      );
 
       expect(result.messages).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -155,7 +168,11 @@ describe('ChatController', () => {
     it('should send text message', async () => {
       const dto = { content: 'Hello!' };
 
-      const result = await controller.sendMessage(mockUser as User, conversationId, dto);
+      const result = await controller.sendMessage(
+        mockUser as User,
+        conversationId,
+        dto,
+      );
 
       expect(result.id).toBe(messageId);
       expect(result.content).toBe('Hello!');
@@ -179,7 +196,11 @@ describe('ChatController', () => {
         ...dto,
       });
 
-      const result = await controller.sendMessage(mockUser as User, conversationId, dto);
+      const result = await controller.sendMessage(
+        mockUser as User,
+        conversationId,
+        dto,
+      );
 
       expect(result.messageType).toBe(MessageType.IMAGE);
       expect(result.mediaUrl).toBe(dto.mediaUrl);
@@ -188,7 +209,11 @@ describe('ChatController', () => {
     it('should format sender info in response', async () => {
       const dto = { content: 'Hello!' };
 
-      const result = await controller.sendMessage(mockUser as User, conversationId, dto);
+      const result = await controller.sendMessage(
+        mockUser as User,
+        conversationId,
+        dto,
+      );
 
       expect(result.sender).toEqual({
         id: mockUser.id,
@@ -222,7 +247,9 @@ describe('ChatController', () => {
 
   describe('muteConversation', () => {
     it('should mute conversation', async () => {
-      await controller.muteConversation(mockUser as User, conversationId, { muted: true });
+      await controller.muteConversation(mockUser as User, conversationId, {
+        muted: true,
+      });
 
       expect(mockChatService.muteConversation).toHaveBeenCalledWith(
         conversationId,
@@ -232,7 +259,9 @@ describe('ChatController', () => {
     });
 
     it('should unmute conversation', async () => {
-      await controller.muteConversation(mockUser as User, conversationId, { muted: false });
+      await controller.muteConversation(mockUser as User, conversationId, {
+        muted: false,
+      });
 
       expect(mockChatService.muteConversation).toHaveBeenCalledWith(
         conversationId,
@@ -246,7 +275,10 @@ describe('ChatController', () => {
     it('should delete message', async () => {
       await controller.deleteMessage(mockUser as User, messageId);
 
-      expect(mockChatService.deleteMessage).toHaveBeenCalledWith(messageId, mockUser.id);
+      expect(mockChatService.deleteMessage).toHaveBeenCalledWith(
+        messageId,
+        mockUser.id,
+      );
     });
   });
 
@@ -259,7 +291,10 @@ describe('ChatController', () => {
     });
 
     it('should return zero when no unread messages', async () => {
-      mockChatService.getUnreadCount.mockResolvedValue({ total: 0, byConversation: {} });
+      mockChatService.getUnreadCount.mockResolvedValue({
+        total: 0,
+        byConversation: {},
+      });
 
       const result = await controller.getUnreadCount(mockUser as User);
 

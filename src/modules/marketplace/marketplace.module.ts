@@ -11,11 +11,7 @@ import {
 } from './listings/entities/index.js';
 
 // Parts Entities
-import {
-  Part,
-  PartsCategory,
-  PartImage,
-} from './parts/entities/index.js';
+import { Part, PartsCategory, PartImage } from './parts/entities/index.js';
 
 // Listings Services
 import { ListingsService } from './listings/listings.service.js';

@@ -8,6 +8,8 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy.js';
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { OptionalAuthGuard } from './guards/optional-auth.guard.js';
 // Import entities directly to avoid circular dependency from barrel export
 import { User } from '@database/entities/user.entity.js';
 import { UserProfile } from '@database/entities/user-profile.entity.js';
@@ -27,14 +29,28 @@ import { OtpCode } from '@database/entities/otp-code.entity.js';
         },
       }),
     }),
-    ThrottlerModule.forRoot([{
-      name: 'auth',
-      ttl: 60000,
-      limit: 10,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        name: 'auth',
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
-  exports: [AuthService, PassportModule, JwtModule],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JwtRefreshStrategy,
+    JwtAuthGuard,
+    OptionalAuthGuard,
+  ],
+  exports: [
+    AuthService,
+    PassportModule,
+    JwtModule,
+    JwtAuthGuard,
+    OptionalAuthGuard,
+  ],
 })
 export class AuthModule {}

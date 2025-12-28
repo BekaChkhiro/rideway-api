@@ -58,7 +58,11 @@ describe('FCMService', () => {
       // FCM is not initialized, so it should return empty result
       const result = await service.sendToUser(userId, mockPayload);
 
-      expect(result).toEqual({ successCount: 0, failureCount: 0, failedTokens: [] });
+      expect(result).toEqual({
+        successCount: 0,
+        failureCount: 0,
+        failedTokens: [],
+      });
     });
   });
 
@@ -66,13 +70,21 @@ describe('FCMService', () => {
     it('should return empty result if FCM not initialized', async () => {
       const result = await service.sendToTokens(tokens, mockPayload);
 
-      expect(result).toEqual({ successCount: 0, failureCount: 0, failedTokens: [] });
+      expect(result).toEqual({
+        successCount: 0,
+        failureCount: 0,
+        failedTokens: [],
+      });
     });
 
     it('should return empty result for empty token list', async () => {
       const result = await service.sendToTokens([], mockPayload);
 
-      expect(result).toEqual({ successCount: 0, failureCount: 0, failedTokens: [] });
+      expect(result).toEqual({
+        successCount: 0,
+        failureCount: 0,
+        failedTokens: [],
+      });
     });
   });
 

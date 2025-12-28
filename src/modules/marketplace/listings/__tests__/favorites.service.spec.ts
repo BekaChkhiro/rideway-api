@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { NotFoundException } from '@nestjs/common';
 import { FavoritesService } from '../favorites.service.js';
-import { Listing, ListingStatus, ListingCondition } from '../entities/listing.entity.js';
+import {
+  Listing,
+  ListingStatus,
+  ListingCondition,
+} from '../entities/listing.entity.js';
 import { ListingFavorite } from '../entities/listing-favorite.entity.js';
 
 describe('FavoritesService', () => {
@@ -43,7 +47,10 @@ describe('FavoritesService', () => {
       findOne: vi.fn(),
     };
 
-    service = new FavoritesService(mockFavoriteRepo as any, mockListingRepo as any);
+    service = new FavoritesService(
+      mockFavoriteRepo as any,
+      mockListingRepo as any,
+    );
   });
 
   describe('toggle', () => {
@@ -53,7 +60,10 @@ describe('FavoritesService', () => {
       mockFavoriteRepo.create.mockReturnValue(mockFavorite);
       mockFavoriteRepo.save.mockResolvedValue(mockFavorite);
 
-      const result = await service.toggle('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.toggle(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isFavorited).toBe(true);
       expect(mockFavoriteRepo.save).toHaveBeenCalled();
@@ -64,7 +74,10 @@ describe('FavoritesService', () => {
       mockFavoriteRepo.findOne.mockResolvedValue(mockFavorite);
       mockFavoriteRepo.delete.mockResolvedValue({ affected: 1 });
 
-      const result = await service.toggle('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.toggle(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isFavorited).toBe(false);
       expect(mockFavoriteRepo.delete).toHaveBeenCalledWith(mockFavorite.id);
@@ -139,7 +152,10 @@ describe('FavoritesService', () => {
         listing: mockListing,
       };
 
-      mockFavoriteRepo.findAndCount.mockResolvedValue([[favoriteWithListing], 1]);
+      mockFavoriteRepo.findAndCount.mockResolvedValue([
+        [favoriteWithListing],
+        1,
+      ]);
 
       const result = await service.getUserFavorites('user-uuid-1234', 1, 20);
 
@@ -154,7 +170,10 @@ describe('FavoritesService', () => {
         listing: { ...mockListing, deletedAt: new Date() },
       };
 
-      mockFavoriteRepo.findAndCount.mockResolvedValue([[favoriteWithDeletedListing], 1]);
+      mockFavoriteRepo.findAndCount.mockResolvedValue([
+        [favoriteWithDeletedListing],
+        1,
+      ]);
 
       const result = await service.getUserFavorites('user-uuid-1234', 1, 20);
 
@@ -167,7 +186,10 @@ describe('FavoritesService', () => {
         listing: { ...mockListing, status: ListingStatus.SOLD },
       };
 
-      mockFavoriteRepo.findAndCount.mockResolvedValue([[favoriteWithSoldListing], 1]);
+      mockFavoriteRepo.findAndCount.mockResolvedValue([
+        [favoriteWithSoldListing],
+        1,
+      ]);
 
       const result = await service.getUserFavorites('user-uuid-1234', 1, 20);
 
@@ -180,7 +202,10 @@ describe('FavoritesService', () => {
         listing: mockListing,
       });
 
-      mockFavoriteRepo.findAndCount.mockResolvedValue([favorites.slice(0, 20), 50]);
+      mockFavoriteRepo.findAndCount.mockResolvedValue([
+        favorites.slice(0, 20),
+        50,
+      ]);
 
       const result = await service.getUserFavorites('user-uuid-1234', 1, 20);
 
@@ -194,7 +219,10 @@ describe('FavoritesService', () => {
     it('should return true if favorited', async () => {
       mockFavoriteRepo.findOne.mockResolvedValue(mockFavorite);
 
-      const result = await service.isFavorited('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.isFavorited(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toBe(true);
     });
@@ -202,7 +230,10 @@ describe('FavoritesService', () => {
     it('should return false if not favorited', async () => {
       mockFavoriteRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.isFavorited('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.isFavorited(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toBe(false);
     });

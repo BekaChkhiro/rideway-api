@@ -96,7 +96,9 @@ export class ServicesService {
       .andWhere('service.status = :status', { status: ServiceStatus.ACTIVE });
 
     if (categoryId) {
-      queryBuilder.andWhere('service.category_id = :categoryId', { categoryId });
+      queryBuilder.andWhere('service.category_id = :categoryId', {
+        categoryId,
+      });
     }
 
     if (city) {

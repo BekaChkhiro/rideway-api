@@ -16,9 +16,13 @@ export class EmailService {
   private readonly fromEmail: string;
   private readonly isConfigured: boolean;
 
-  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
-    this.fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || 'onboarding@resend.dev';
+    this.fromEmail =
+      this.configService.get<string>('RESEND_FROM_EMAIL') ||
+      'onboarding@resend.dev';
 
     if (apiKey) {
       this.resend = new Resend(apiKey);
@@ -27,7 +31,9 @@ export class EmailService {
     } else {
       this.resend = new Resend('');
       this.isConfigured = false;
-      this.logger.warn('RESEND_API_KEY not configured - emails will be logged only');
+      this.logger.warn(
+        'RESEND_API_KEY not configured - emails will be logged only',
+      );
     }
   }
 
@@ -35,7 +41,9 @@ export class EmailService {
     const { to, subject, html, text } = options;
 
     if (!this.isConfigured) {
-      this.logger.debug(`[EMAIL NOT SENT - No API Key] To: ${to}, Subject: ${subject}`);
+      this.logger.debug(
+        `[EMAIL NOT SENT - No API Key] To: ${to}, Subject: ${subject}`,
+      );
       this.logger.debug(`Content: ${text || html}`);
       return false;
     }
@@ -50,11 +58,15 @@ export class EmailService {
       });
 
       if (result.error) {
-        this.logger.error(`Failed to send email to ${to}: ${result.error.message}`);
+        this.logger.error(
+          `Failed to send email to ${to}: ${result.error.message}`,
+        );
         return false;
       }
 
-      this.logger.log(`Email sent successfully to ${to} (ID: ${result.data?.id})`);
+      this.logger.log(
+        `Email sent successfully to ${to} (ID: ${result.data?.id})`,
+      );
       return true;
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}:`, error);
@@ -62,7 +74,11 @@ export class EmailService {
     }
   }
 
-  async sendOtpEmail(to: string, code: string, type: 'verify' | 'reset'): Promise<boolean> {
+  async sendOtpEmail(
+    to: string,
+    code: string,
+    type: 'verify' | 'reset',
+  ): Promise<boolean> {
     const isVerify = type === 'verify';
 
     const subject = isVerify
@@ -112,9 +128,10 @@ export class EmailService {
             <h2>${isVerify ? 'Verify Your Email' : 'Password Reset'}</h2>
 
             <p>
-              ${isVerify
-                ? 'Thank you for registering with Bike Area! Please use the code below to verify your email address:'
-                : 'You requested to reset your password. Use the code below to complete the process:'
+              ${
+                isVerify
+                  ? 'Thank you for registering with Bike Area! Please use the code below to verify your email address:'
+                  : 'You requested to reset your password. Use the code below to complete the process:'
               }
             </p>
 

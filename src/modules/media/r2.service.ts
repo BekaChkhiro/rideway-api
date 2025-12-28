@@ -17,7 +17,9 @@ export class R2Service {
   private readonly bucketName: string;
   private readonly publicUrl: string;
 
-  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
+  constructor(
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {
     const r2Config = this.configService.get<R2Config>('r2');
 
     if (!r2Config) {

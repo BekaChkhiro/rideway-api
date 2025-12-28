@@ -162,7 +162,9 @@ describe('ServicesService', () => {
 
       const result = await service.create('user-uuid-1234', dto);
 
-      expect(mockCategoriesService.findOne).toHaveBeenCalledWith('category-uuid-1234');
+      expect(mockCategoriesService.findOne).toHaveBeenCalledWith(
+        'category-uuid-1234',
+      );
       expect(mockServiceRepo.save).toHaveBeenCalled();
       expect(mockImageRepo.save).toHaveBeenCalled();
       expect(result).toBeDefined();
@@ -176,7 +178,10 @@ describe('ServicesService', () => {
       };
 
       mockServiceRepo.create.mockReturnValue(mockServiceEntity);
-      mockServiceRepo.save.mockResolvedValue({ ...mockServiceEntity, id: 'new-id' });
+      mockServiceRepo.save.mockResolvedValue({
+        ...mockServiceEntity,
+        id: 'new-id',
+      });
       mockServiceRepo.findOne.mockResolvedValue(mockServiceEntity);
       mockImageRepo.create.mockImplementation((data) => data);
       mockImageRepo.save.mockResolvedValue([]);
@@ -223,7 +228,10 @@ describe('ServicesService', () => {
 
   describe('findAll', () => {
     it('should return paginated services', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[mockServiceEntity], 1]);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([
+        [mockServiceEntity],
+        1,
+      ]);
 
       const result = await service.findAll({ page: 1, limit: 20 });
 
@@ -371,7 +379,10 @@ describe('ServicesService', () => {
     it('should mark isOwner for current user', async () => {
       mockServiceRepo.findOne.mockResolvedValue({ ...mockServiceEntity });
 
-      const result = await service.findOne('service-uuid-1234', 'user-uuid-1234');
+      const result = await service.findOne(
+        'service-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isOwner).toBe(true);
     });
@@ -381,9 +392,13 @@ describe('ServicesService', () => {
     it('should update service', async () => {
       mockServiceRepo.findOne.mockResolvedValue({ ...mockServiceEntity });
 
-      const result = await service.update('service-uuid-1234', 'user-uuid-1234', {
-        name: 'Updated Name',
-      });
+      const result = await service.update(
+        'service-uuid-1234',
+        'user-uuid-1234',
+        {
+          name: 'Updated Name',
+        },
+      );
 
       expect(mockServiceRepo.update).toHaveBeenCalledWith('service-uuid-1234', {
         name: 'Updated Name',
@@ -420,7 +435,9 @@ describe('ServicesService', () => {
 
       await service.delete('service-uuid-1234', 'user-uuid-1234');
 
-      expect(mockServiceRepo.softDelete).toHaveBeenCalledWith('service-uuid-1234');
+      expect(mockServiceRepo.softDelete).toHaveBeenCalledWith(
+        'service-uuid-1234',
+      );
     });
 
     it('should throw ForbiddenException if not owner', async () => {
@@ -479,7 +496,10 @@ describe('ServicesService', () => {
       });
       mockReviewRepo.findOne.mockResolvedValueOnce(null); // No existing review
       mockReviewRepo.create.mockReturnValue(mockReview);
-      mockReviewRepo.save.mockResolvedValue({ ...mockReview, id: 'new-review-id' });
+      mockReviewRepo.save.mockResolvedValue({
+        ...mockReview,
+        id: 'new-review-id',
+      });
       mockReviewRepo.findOne.mockResolvedValue({
         ...mockReview,
         id: 'new-review-id',
@@ -524,7 +544,9 @@ describe('ServicesService', () => {
       mockServiceRepo.findOne.mockResolvedValue(mockServiceEntity);
 
       await expect(
-        service.createReview('service-uuid-1234', 'user-uuid-1234', { rating: 5 }),
+        service.createReview('service-uuid-1234', 'user-uuid-1234', {
+          rating: 5,
+        }),
       ).rejects.toThrow(ForbiddenException);
     });
 

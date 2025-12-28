@@ -1,0 +1,13 @@
+[build]
+builder = "NIXPACKS"
+
+[build.nixpacksConfigPath]
+configPath = "nixpacks.toml"
+
+[deploy]
+numReplicas = 1
+startCommand = "npm run start:prod"
+healthcheckPath = "/api/v1/health/live"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

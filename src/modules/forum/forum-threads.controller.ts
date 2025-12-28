@@ -18,7 +18,11 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard, OptionalAuthGuard, CurrentUser } from '@modules/auth/index.js';
+import {
+  JwtAuthGuard,
+  OptionalAuthGuard,
+  CurrentUser,
+} from '@modules/auth/index.js';
 import { ForumThreadsService } from './forum-threads.service.js';
 import { CreateThreadDto } from './dto/create-thread.dto.js';
 import { UpdateThreadDto } from './dto/update-thread.dto.js';

@@ -19,7 +19,12 @@ export class PostImage {
   @Column({ type: 'varchar', length: 500 })
   url!: string;
 
-  @Column({ name: 'thumbnail_url', type: 'varchar', length: 500, nullable: true })
+  @Column({
+    name: 'thumbnail_url',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
   thumbnailUrl?: string;
 
   @Column({ type: 'int', nullable: true })

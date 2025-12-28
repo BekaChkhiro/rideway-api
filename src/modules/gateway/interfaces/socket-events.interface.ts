@@ -1,7 +1,7 @@
 // Client -> Server Events
 export interface ClientToServerEvents {
   // Connection
-  'auth': (token: string) => void;
+  auth: (token: string) => void;
 
   // Chat
   'join:conversation': (conversationId: string) => void;
@@ -25,7 +25,7 @@ export interface ServerToClientEvents {
   // Connection
   'auth:success': (user: UserPayload) => void;
   'auth:error': (error: string) => void;
-  'error': (error: { message: string; code?: string }) => void;
+  error: (error: { message: string; code?: string }) => void;
 
   // Chat
   'message:new': (message: MessagePayload) => void;

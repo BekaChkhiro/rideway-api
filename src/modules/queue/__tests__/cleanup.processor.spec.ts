@@ -9,14 +9,19 @@ describe('CleanupProcessor', () => {
 
   const jobId = 'job-uuid-1234';
 
-  const createMockJob = (name: string, data: any = {}, options: Partial<Job> = {}): Job => ({
-    id: jobId,
-    name,
-    data: { type: name, ...data },
-    attemptsMade: 0,
-    opts: { attempts: 3 },
-    ...options,
-  } as unknown as Job);
+  const createMockJob = (
+    name: string,
+    data: any = {},
+    options: Partial<Job> = {},
+  ): Job =>
+    ({
+      id: jobId,
+      name,
+      data: { type: name, ...data },
+      attemptsMade: 0,
+      opts: { attempts: 3 },
+      ...options,
+    }) as unknown as Job;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -74,7 +79,9 @@ describe('CleanupProcessor', () => {
 
       it('should handle notification cleanup error', async () => {
         // Arrange
-        mockNotificationsService.deleteOld.mockRejectedValue(new Error('DB error'));
+        mockNotificationsService.deleteOld.mockRejectedValue(
+          new Error('DB error'),
+        );
         const job = createMockJob(CLEANUP_JOBS.OLD_NOTIFICATIONS);
 
         // Act

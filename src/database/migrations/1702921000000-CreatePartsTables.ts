@@ -20,8 +20,12 @@ export class CreatePartsTables1702921000000 implements MigrationInterface {
           REFERENCES "parts_categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_categories_slug" ON "parts_categories" ("slug")`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_categories_parent_id" ON "parts_categories" ("parent_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_categories_slug" ON "parts_categories" ("slug")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_categories_parent_id" ON "parts_categories" ("parent_id")`,
+    );
 
     // Create parts table
     await queryRunner.query(`
@@ -50,14 +54,28 @@ export class CreatePartsTables1702921000000 implements MigrationInterface {
           REFERENCES "parts_categories"("id") ON DELETE SET NULL ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_user_id" ON "parts" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_category_id" ON "parts" ("category_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_status" ON "parts" ("status")`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_created_at" ON "parts" ("created_at" DESC)`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_price" ON "parts" ("price")`);
-    await queryRunner.query(`CREATE INDEX "IDX_parts_brand" ON "parts" ("brand")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_user_id" ON "parts" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_category_id" ON "parts" ("category_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_status" ON "parts" ("status")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_created_at" ON "parts" ("created_at" DESC)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_price" ON "parts" ("price")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_brand" ON "parts" ("brand")`,
+    );
     // GIN index for JSON array containment search
-    await queryRunner.query(`CREATE INDEX "IDX_parts_compatibility" ON "parts" USING GIN ("compatibility")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_parts_compatibility" ON "parts" USING GIN ("compatibility")`,
+    );
 
     // Create part_images table
     await queryRunner.query(`
@@ -73,7 +91,9 @@ export class CreatePartsTables1702921000000 implements MigrationInterface {
           REFERENCES "parts"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_part_images_part_id" ON "part_images" ("part_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_part_images_part_id" ON "part_images" ("part_id")`,
+    );
 
     // Seed initial parts categories
     await queryRunner.query(`

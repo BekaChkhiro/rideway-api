@@ -23,14 +23,21 @@ export class NotificationProcessor extends WorkerHost {
   }
 
   async process(job: Job<NotificationJobData>): Promise<NotificationJobResult> {
-    this.logger.debug(`Processing notification job ${job.id}: ${job.data.type}`);
+    this.logger.debug(
+      `Processing notification job ${job.id}: ${job.data.type}`,
+    );
 
     if (!this.notificationsService) {
       this.logger.warn('NotificationsService not available, skipping job');
-      return { skipped: true, pushQueued: false, reason: 'NotificationsService not available' };
+      return {
+        skipped: true,
+        pushQueued: false,
+        reason: 'NotificationsService not available',
+      };
     }
 
-    const { type, recipientId, senderId, title, body, data, variables } = job.data;
+    const { type, recipientId, senderId, title, body, data, variables } =
+      job.data;
 
     try {
       // Create in-app notification
@@ -59,7 +66,9 @@ export class NotificationProcessor extends WorkerHost {
       }
 
       // Check if user is offline and should receive push notification
-      const isOnline = this.gatewayService ? await this.gatewayService.isUserOnline(recipientId) : false;
+      const isOnline = this.gatewayService
+        ? await this.gatewayService.isUserOnline(recipientId)
+        : false;
 
       if (!isOnline) {
         // Queue push notification job

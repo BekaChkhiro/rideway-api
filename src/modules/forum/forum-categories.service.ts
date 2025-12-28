@@ -42,7 +42,7 @@ export class ForumCategoriesService {
     // Try cache first
     const cached = await this.redisService.get(this.CACHE_KEY);
     if (cached) {
-      return JSON.parse(cached);
+      return JSON.parse(cached) as ForumCategory[];
     }
 
     const categories = await this.categoryRepository.find({

@@ -11,18 +11,24 @@ export class FCMService implements OnModuleInit {
 
   constructor(
     @Inject(ConfigService) private readonly configService: ConfigService,
-    @Inject(DeviceTokensService) private readonly deviceTokensService: DeviceTokensService,
+    @Inject(DeviceTokensService)
+    private readonly deviceTokensService: DeviceTokensService,
   ) {}
 
   async onModuleInit(): Promise<void> {
     try {
       // Add timeout to prevent blocking startup
       const timeoutPromise = new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error('FCM initialization timed out after 10s')), 10000)
+        setTimeout(
+          () => reject(new Error('FCM initialization timed out after 10s')),
+          10000,
+        ),
       );
       await Promise.race([this.initialize(), timeoutPromise]);
     } catch (error) {
-      this.logger.warn(`FCM initialization failed: ${(error as Error).message}`);
+      this.logger.warn(
+        `FCM initialization failed: ${(error as Error).message}`,
+      );
       // Don't block startup if FCM fails to initialize
     }
   }
@@ -92,7 +98,10 @@ export class FCMService implements OnModuleInit {
   /**
    * Send push notification to multiple tokens
    */
-  async sendToTokens(tokens: string[], payload: PushPayload): Promise<SendResult> {
+  async sendToTokens(
+    tokens: string[],
+    payload: PushPayload,
+  ): Promise<SendResult> {
     if (!this.isInitialized) {
       return { successCount: 0, failureCount: 0, failedTokens: [] };
     }
@@ -117,9 +126,7 @@ export class FCMService implements OnModuleInit {
           ) {
             failedTokens.push(tokens[idx]);
           }
-          this.logger.debug(
-            `Failed to send to token: ${resp.error?.message}`,
-          );
+          this.logger.debug(`Failed to send to token: ${resp.error?.message}`);
         }
       });
 
@@ -138,7 +145,9 @@ export class FCMService implements OnModuleInit {
         failedTokens,
       };
     } catch (error) {
-      this.logger.error(`Failed to send push notifications: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to send push notifications: ${(error as Error).message}`,
+      );
       return {
         successCount: 0,
         failureCount: tokens.length,
@@ -211,7 +220,9 @@ export class FCMService implements OnModuleInit {
     }
 
     try {
-      const response = await admin.messaging().unsubscribeFromTopic(tokens, topic);
+      const response = await admin
+        .messaging()
+        .unsubscribeFromTopic(tokens, topic);
       this.logger.debug(
         `Unsubscribed ${response.successCount} tokens from topic ${topic}`,
       );
@@ -247,7 +258,9 @@ export class FCMService implements OnModuleInit {
   /**
    * Get Android-specific configuration
    */
-  private getAndroidConfig(payload: PushPayload): admin.messaging.AndroidConfig {
+  private getAndroidConfig(
+    payload: PushPayload,
+  ): admin.messaging.AndroidConfig {
     return {
       priority: 'high',
       ttl: 86400 * 1000, // 24 hours in milliseconds

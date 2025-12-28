@@ -3,7 +3,10 @@ import { Server } from 'socket.io';
 import { GatewayService } from '../gateway.service.js';
 import { AppGateway } from '../gateway.gateway.js';
 import { UserActivity, UserFollow } from '@database/index.js';
-import { AuthenticatedSocket, SocketUser } from '../interfaces/authenticated-socket.interface.js';
+import {
+  AuthenticatedSocket,
+  SocketUser,
+} from '../interfaces/authenticated-socket.interface.js';
 
 /**
  * Online Status Tests
@@ -128,7 +131,10 @@ describe('Online Status', () => {
       await gatewayService.registerSocket(socketId1, userId1);
 
       // Assert
-      expect(mockRedisClient.sadd).toHaveBeenCalledWith('online:users', userId1);
+      expect(mockRedisClient.sadd).toHaveBeenCalledWith(
+        'online:users',
+        userId1,
+      );
       expect(mockUserActivityRepo.insert).toHaveBeenCalled();
     });
 
@@ -140,7 +146,10 @@ describe('Online Status', () => {
       await gatewayService.setUserOnline(userId1);
 
       // Assert
-      expect(mockRedisClient.sadd).toHaveBeenCalledWith('online:users', userId1);
+      expect(mockRedisClient.sadd).toHaveBeenCalledWith(
+        'online:users',
+        userId1,
+      );
     });
 
     it('should update user activity in database on first connect', async () => {
@@ -207,7 +216,10 @@ describe('Online Status', () => {
 
       // Assert
       expect(result).toBe(userId1);
-      expect(mockRedisClient.srem).toHaveBeenCalledWith('online:users', userId1);
+      expect(mockRedisClient.srem).toHaveBeenCalledWith(
+        'online:users',
+        userId1,
+      );
     });
 
     it('should remove from online set in Redis on last disconnect', async () => {
@@ -215,14 +227,20 @@ describe('Online Status', () => {
       await gatewayService.setUserOffline(userId1);
 
       // Assert
-      expect(mockRedisClient.srem).toHaveBeenCalledWith('online:users', userId1);
+      expect(mockRedisClient.srem).toHaveBeenCalledWith(
+        'online:users',
+        userId1,
+      );
     });
 
     it('should update database when going offline', async () => {
       // Arrange
       mockRedisClient.get.mockResolvedValue(userId1);
       mockRedisClient.smembers.mockResolvedValue([]);
-      mockUserActivityRepo.findOne.mockResolvedValue({ userId: userId1, isOnline: true });
+      mockUserActivityRepo.findOne.mockResolvedValue({
+        userId: userId1,
+        isOnline: true,
+      });
 
       // Act
       await gatewayService.unregisterSocket(socketId1);
@@ -246,7 +264,10 @@ describe('Online Status', () => {
 
       // Assert
       expect(result).toBeNull(); // Not went offline
-      expect(mockRedisClient.srem).not.toHaveBeenCalledWith('online:users', userId1);
+      expect(mockRedisClient.srem).not.toHaveBeenCalledWith(
+        'online:users',
+        userId1,
+      );
     });
 
     it('should decrement connection count when one device disconnects', async () => {
@@ -438,8 +459,12 @@ describe('Online Status', () => {
         sismember: vi.fn().mockReturnThis(),
         get: vi.fn().mockReturnThis(),
         exec: vi.fn().mockResolvedValue([
-          [null, 1], [null, null], [null, Date.now().toString()],
-          [null, 0], [null, null], [null, Date.now().toString()],
+          [null, 1],
+          [null, null],
+          [null, Date.now().toString()],
+          [null, 0],
+          [null, null],
+          [null, Date.now().toString()],
         ]),
       };
       mockRedisClient.pipeline.mockReturnValue(pipelineMock);

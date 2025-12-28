@@ -3,7 +3,10 @@ import { Server } from 'socket.io';
 import { ChatGateway } from '../chat.gateway.js';
 import { ChatService } from '../chat.service.js';
 import { GatewayService } from '@modules/gateway/gateway.service.js';
-import { AuthenticatedSocket, SocketUser } from '@modules/gateway/interfaces/index.js';
+import {
+  AuthenticatedSocket,
+  SocketUser,
+} from '@modules/gateway/interfaces/index.js';
 import { Message, MessageType } from '../entities/index.js';
 
 describe('ChatGateway', () => {
@@ -82,11 +85,16 @@ describe('ChatGateway', () => {
       mockChatService.isParticipant.mockResolvedValue(true);
 
       // Act
-      const result = await gateway.handleJoinConversation(mockSocket, conversationId);
+      const result = await gateway.handleJoinConversation(
+        mockSocket,
+        conversationId,
+      );
 
       // Assert
       expect(result).toEqual({ success: true });
-      expect(mockSocket.join).toHaveBeenCalledWith(`conversation:${conversationId}`);
+      expect(mockSocket.join).toHaveBeenCalledWith(
+        `conversation:${conversationId}`,
+      );
       expect(mockChatService.isParticipant).toHaveBeenCalledWith(
         conversationId,
         mockUser.id,
@@ -99,7 +107,10 @@ describe('ChatGateway', () => {
       mockChatService.isParticipant.mockResolvedValue(false);
 
       // Act
-      const result = await gateway.handleJoinConversation(mockSocket, conversationId);
+      const result = await gateway.handleJoinConversation(
+        mockSocket,
+        conversationId,
+      );
 
       // Assert
       expect(result).toEqual({
@@ -116,11 +127,16 @@ describe('ChatGateway', () => {
       const mockSocket = createAuthenticatedSocket(mockUser);
 
       // Act
-      const result = await gateway.handleLeaveConversation(mockSocket, conversationId);
+      const result = await gateway.handleLeaveConversation(
+        mockSocket,
+        conversationId,
+      );
 
       // Assert
       expect(result).toEqual({ success: true });
-      expect(mockSocket.leave).toHaveBeenCalledWith(`conversation:${conversationId}`);
+      expect(mockSocket.leave).toHaveBeenCalledWith(
+        `conversation:${conversationId}`,
+      );
     });
   });
 
@@ -144,7 +160,9 @@ describe('ChatGateway', () => {
         mockUser.id,
         expect.objectContaining({ content: 'Hello World' }),
       );
-      expect(mockServer.to).toHaveBeenCalledWith(`conversation:${conversationId}`);
+      expect(mockServer.to).toHaveBeenCalledWith(
+        `conversation:${conversationId}`,
+      );
       expect(emitMock).toHaveBeenCalledWith(
         'message:new',
         expect.objectContaining({
@@ -261,7 +279,9 @@ describe('ChatGateway', () => {
     it('should handle read error gracefully', async () => {
       // Arrange
       const mockSocket = createAuthenticatedSocket(mockUser);
-      mockChatService.markAsRead.mockRejectedValue(new Error('Not participant'));
+      mockChatService.markAsRead.mockRejectedValue(
+        new Error('Not participant'),
+      );
 
       // Act
       const result = await gateway.handleMessageRead(mockSocket, {

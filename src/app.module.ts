@@ -4,6 +4,9 @@ import { AppService } from './app.service.js';
 import { ConfigModule } from './config/config.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { RedisModule } from './redis/redis.module.js';
+import { SecurityModule } from './common/security/security.module.js';
+import { CacheModule } from './common/cache/cache.module.js';
+import { LoggingModule } from './common/logging/logging.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { EmailModule } from './modules/email/email.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -17,25 +20,30 @@ import { GatewayModule } from './modules/gateway/gateway.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { QueueModule } from './modules/queue/queue.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
 
 @Module({
   imports: [
     ConfigModule,
     DatabaseModule,
     RedisModule,
+    LoggingModule,
+    SecurityModule,
+    CacheModule,
     EmailModule,
     HealthModule,
     AuthModule,
     MediaModule,
-    // UsersModule, // Depends on MediaModule - testing MediaModule first
-    // MarketplaceModule, // Depends on MediaModule
-    // SocialModule, // Depends on MediaModule
+    GatewayModule,
+    UsersModule,
+    MarketplaceModule,
+    SocialModule,
     ForumModule,
     ServicesModule,
-    GatewayModule,
     ChatModule,
     NotificationsModule,
     QueueModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

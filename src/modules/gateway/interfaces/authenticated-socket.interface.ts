@@ -10,8 +10,10 @@ export interface SocketUser {
   username?: string;
 }
 
-export interface AuthenticatedSocket
-  extends Socket<ClientToServerEvents, ServerToClientEvents> {
+export interface AuthenticatedSocket extends Socket<
+  ClientToServerEvents,
+  ServerToClientEvents
+> {
   user: SocketUser;
 }
 

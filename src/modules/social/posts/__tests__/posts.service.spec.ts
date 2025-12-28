@@ -204,7 +204,10 @@ describe('PostsService', () => {
 
       mockPostRepo.create.mockReturnValue(mockPost);
       mockPostRepo.save.mockResolvedValue(mockPost);
-      mockPostRepo.findOne.mockResolvedValue({ ...mockPost, images: [mockImage] });
+      mockPostRepo.findOne.mockResolvedValue({
+        ...mockPost,
+        images: [mockImage],
+      });
       mockImageRepo.count.mockResolvedValue(0);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -226,14 +229,26 @@ describe('PostsService', () => {
 
     it('should create a post with uploaded files', async () => {
       const files = [
-        { buffer: Buffer.from('test'), mimetype: 'image/jpeg', originalname: 'test.jpg' },
+        {
+          buffer: Buffer.from('test'),
+          mimetype: 'image/jpeg',
+          originalname: 'test.jpg',
+        },
       ] as Express.Multer.File[];
 
       mockPostRepo.create.mockReturnValue(mockPost);
       mockPostRepo.save.mockResolvedValue(mockPost);
-      mockPostRepo.findOne.mockResolvedValue({ ...mockPost, images: [mockImage] });
+      mockPostRepo.findOne.mockResolvedValue({
+        ...mockPost,
+        images: [mockImage],
+      });
       mockMediaService.uploadImages.mockResolvedValue([
-        { url: 'https://r2.example.com/uploaded.jpg', thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg', width: 800, height: 600 },
+        {
+          url: 'https://r2.example.com/uploaded.jpg',
+          thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg',
+          width: 800,
+          height: 600,
+        },
       ]);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -250,7 +265,11 @@ describe('PostsService', () => {
       const result = await service.create('user-uuid-1234', createDto, files);
 
       expect(result).toBeDefined();
-      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(files, 'posts', 'user-uuid-1234');
+      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(
+        files,
+        'posts',
+        'user-uuid-1234',
+      );
     });
 
     it('should create and link hashtags from content', async () => {
@@ -314,9 +333,18 @@ describe('PostsService', () => {
         originalPostId: 'original-post-uuid',
       };
 
-      mockPostRepo.create.mockReturnValue({ ...mockPost, originalPostId: 'original-post-uuid' });
-      mockPostRepo.save.mockResolvedValue({ ...mockPost, originalPostId: 'original-post-uuid' });
-      mockPostRepo.findOne.mockResolvedValue({ ...mockPost, originalPostId: 'original-post-uuid' });
+      mockPostRepo.create.mockReturnValue({
+        ...mockPost,
+        originalPostId: 'original-post-uuid',
+      });
+      mockPostRepo.save.mockResolvedValue({
+        ...mockPost,
+        originalPostId: 'original-post-uuid',
+      });
+      mockPostRepo.findOne.mockResolvedValue({
+        ...mockPost,
+        originalPostId: 'original-post-uuid',
+      });
       mockPostRepo.increment.mockResolvedValue({});
       mockHashtagRepo.findOne.mockResolvedValue(null);
       mockProfileRepo.findOne.mockResolvedValue(null);
@@ -346,26 +374,31 @@ describe('PostsService', () => {
     it('should throw NotFoundException for non-existent post', async () => {
       mockPostRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException for private post accessed by non-owner', async () => {
       const privatePost = { ...mockPost, visibility: PostVisibility.PRIVATE };
       mockPostRepo.findOne.mockResolvedValue(privatePost);
 
-      await expect(service.findOne('post-uuid-1234', 'other-user-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.findOne('post-uuid-1234', 'other-user-id'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw ForbiddenException for followers-only post accessed by non-follower', async () => {
-      const followersPost = { ...mockPost, visibility: PostVisibility.FOLLOWERS };
+      const followersPost = {
+        ...mockPost,
+        visibility: PostVisibility.FOLLOWERS,
+      };
       mockPostRepo.findOne.mockResolvedValue(followersPost);
       mockFollowRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('post-uuid-1234', 'other-user-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.findOne('post-uuid-1234', 'other-user-id'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should allow owner to see private post', async () => {
@@ -408,7 +441,11 @@ describe('PostsService', () => {
       mockProfileRepo.findOne.mockResolvedValue(null);
       mockLikeRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.update('post-uuid-1234', 'user-uuid-1234', updateDto);
+      const result = await service.update(
+        'post-uuid-1234',
+        'user-uuid-1234',
+        updateDto,
+      );
 
       expect(result).toBeDefined();
       expect(mockPostRepo.update).toHaveBeenCalledWith('post-uuid-1234', {
@@ -429,7 +466,9 @@ describe('PostsService', () => {
     it('should reprocess hashtags on content update', async () => {
       mockPostRepo.findOne.mockResolvedValue(mockPost);
       mockPostRepo.update.mockResolvedValue({ affected: 1 });
-      mockPostHashtagRepo.find.mockResolvedValue([{ hashtagId: 'old-hashtag-id' }]);
+      mockPostHashtagRepo.find.mockResolvedValue([
+        { hashtagId: 'old-hashtag-id' },
+      ]);
       mockHashtagRepo.decrement.mockResolvedValue({});
       mockPostHashtagRepo.delete.mockResolvedValue({});
       mockHashtagRepo.findOne.mockResolvedValue(null);
@@ -447,7 +486,9 @@ describe('PostsService', () => {
       // Should decrement old hashtag count
       expect(mockHashtagRepo.decrement).toHaveBeenCalled();
       // Should delete old hashtag relations
-      expect(mockPostHashtagRepo.delete).toHaveBeenCalledWith({ postId: 'post-uuid-1234' });
+      expect(mockPostHashtagRepo.delete).toHaveBeenCalledWith({
+        postId: 'post-uuid-1234',
+      });
       // Should create new hashtag
       expect(mockPostHashtagRepo.save).toHaveBeenCalled();
     });
@@ -467,13 +508,16 @@ describe('PostsService', () => {
     it('should throw ForbiddenException for non-owner', async () => {
       mockPostRepo.findOne.mockResolvedValue(mockPost);
 
-      await expect(service.delete('post-uuid-1234', 'different-user-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.delete('post-uuid-1234', 'different-user-id'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should delete associated images from R2', async () => {
-      mockPostRepo.findOne.mockResolvedValue({ ...mockPost, images: [mockImage] });
+      mockPostRepo.findOne.mockResolvedValue({
+        ...mockPost,
+        images: [mockImage],
+      });
       mockPostRepo.softDelete.mockResolvedValue({ affected: 1 });
       mockMediaService.deleteImage.mockResolvedValue(undefined);
       mockPostHashtagRepo.find.mockResolvedValue([]);
@@ -486,18 +530,26 @@ describe('PostsService', () => {
     it('should decrement hashtag counts on delete', async () => {
       mockPostRepo.findOne.mockResolvedValue({ ...mockPost, images: [] });
       mockPostRepo.softDelete.mockResolvedValue({ affected: 1 });
-      mockPostHashtagRepo.find.mockResolvedValue([{ hashtagId: 'hashtag-uuid-1234' }]);
+      mockPostHashtagRepo.find.mockResolvedValue([
+        { hashtagId: 'hashtag-uuid-1234' },
+      ]);
       mockHashtagRepo.decrement.mockResolvedValue({});
       mockPostHashtagRepo.delete.mockResolvedValue({});
 
       await service.delete('post-uuid-1234', 'user-uuid-1234');
 
       expect(mockHashtagRepo.decrement).toHaveBeenCalled();
-      expect(mockPostHashtagRepo.delete).toHaveBeenCalledWith({ postId: 'post-uuid-1234' });
+      expect(mockPostHashtagRepo.delete).toHaveBeenCalledWith({
+        postId: 'post-uuid-1234',
+      });
     });
 
     it('should decrement share count if deleting a repost', async () => {
-      const repost = { ...mockPost, originalPostId: 'original-post-uuid', images: [] };
+      const repost = {
+        ...mockPost,
+        originalPostId: 'original-post-uuid',
+        images: [],
+      };
       mockPostRepo.findOne.mockResolvedValue(repost);
       mockPostRepo.softDelete.mockResolvedValue({ affected: 1 });
       mockPostRepo.decrement.mockResolvedValue({});
@@ -523,7 +575,9 @@ describe('PostsService', () => {
         // Second call is to get updated likes count
         return Promise.resolve({ ...mockPost, likesCount: 11 });
       });
-      mockLikeRepo.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+      mockLikeRepo.findOne
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
       mockLikeRepo.create.mockReturnValue(mockLike);
       mockLikeRepo.save.mockResolvedValue(mockLike);
       mockPostRepo.increment.mockResolvedValue({});
@@ -549,7 +603,9 @@ describe('PostsService', () => {
         // Second call is to get updated likes count
         return Promise.resolve({ ...mockPost, likesCount: 9 });
       });
-      mockLikeRepo.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(mockLike);
+      mockLikeRepo.findOne
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockLike);
       mockLikeRepo.delete.mockResolvedValue({ affected: 1 });
       mockPostRepo.decrement.mockResolvedValue({});
 
@@ -568,7 +624,11 @@ describe('PostsService', () => {
 
   describe('share', () => {
     it('should create a repost successfully', async () => {
-      const repost = { ...mockPost, id: 'repost-uuid', originalPostId: 'post-uuid-1234' };
+      const repost = {
+        ...mockPost,
+        id: 'repost-uuid',
+        originalPostId: 'post-uuid-1234',
+      };
 
       // Mock findOne to return the right data based on which post is being queried
       mockPostRepo.findOne.mockImplementation((options: any) => {
@@ -585,7 +645,11 @@ describe('PostsService', () => {
       mockPostRepo.save.mockResolvedValue(repost);
       mockPostRepo.increment.mockResolvedValue({});
 
-      const result = await service.share('post-uuid-1234', 'user-uuid-5678', 'Check this out!');
+      const result = await service.share(
+        'post-uuid-1234',
+        'user-uuid-5678',
+        'Check this out!',
+      );
 
       expect(result).toBeDefined();
       expect(mockPostRepo.create).toHaveBeenCalledWith({
@@ -602,7 +666,12 @@ describe('PostsService', () => {
     });
 
     it('should create a repost with empty content', async () => {
-      const repost = { ...mockPost, id: 'repost-uuid', originalPostId: 'post-uuid-1234', content: '' };
+      const repost = {
+        ...mockPost,
+        id: 'repost-uuid',
+        originalPostId: 'post-uuid-1234',
+        content: '',
+      };
 
       mockPostRepo.findOne.mockImplementation((options: any) => {
         if (options?.where?.id === 'post-uuid-1234') {
@@ -642,7 +711,9 @@ describe('PostsService', () => {
       };
 
       mockBlockRepo.find.mockResolvedValue([]);
-      mockFollowRepo.find.mockResolvedValue([{ followingId: 'followed-user-uuid' }]);
+      mockFollowRepo.find.mockResolvedValue([
+        { followingId: 'followed-user-uuid' },
+      ]);
       mockPostRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockLikeRepo.find.mockResolvedValue([]);
 
@@ -694,13 +765,20 @@ describe('PostsService', () => {
 
       await service.getFeed('user-uuid-1234', { limit: 20 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('post.visibility = :public', {
-        public: PostVisibility.PUBLIC,
-      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'post.visibility = :public',
+        {
+          public: PostVisibility.PUBLIC,
+        },
+      );
     });
 
     it('should support cursor-based pagination', async () => {
-      const cursorPost = { ...mockPost, id: 'cursor-post-id', createdAt: new Date('2024-01-01') };
+      const cursorPost = {
+        ...mockPost,
+        id: 'cursor-post-id',
+        createdAt: new Date('2024-01-01'),
+      };
       const mockQueryBuilder = {
         leftJoinAndSelect: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
@@ -716,11 +794,17 @@ describe('PostsService', () => {
       mockPostRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockLikeRepo.find.mockResolvedValue([]);
 
-      await service.getFeed('user-uuid-1234', { limit: 20, cursor: 'cursor-post-id' });
-
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('post.created_at < :cursorDate', {
-        cursorDate: cursorPost.createdAt,
+      await service.getFeed('user-uuid-1234', {
+        limit: 20,
+        cursor: 'cursor-post-id',
       });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'post.created_at < :cursorDate',
+        {
+          cursorDate: cursorPost.createdAt,
+        },
+      );
     });
   });
 
@@ -741,7 +825,10 @@ describe('PostsService', () => {
       mockPostRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockLikeRepo.find.mockResolvedValue([]);
 
-      const result = await service.getUserPosts('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getUserPosts('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.data).toHaveLength(1);
       expect(result.meta.total).toBe(1);
@@ -750,7 +837,11 @@ describe('PostsService', () => {
     it('should return empty for blocked users', async () => {
       mockBlockRepo.findOne.mockResolvedValue({ id: 'block-id' });
 
-      const result = await service.getUserPosts('blocked-user', { page: 1, limit: 20 }, 'user-uuid-1234');
+      const result = await service.getUserPosts(
+        'blocked-user',
+        { page: 1, limit: 20 },
+        'user-uuid-1234',
+      );
 
       expect(result.data).toHaveLength(0);
       expect(result.meta.total).toBe(0);
@@ -825,10 +916,16 @@ describe('PostsService', () => {
 
       mockHashtagRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.getTrendingHashtags({ limit: 10, hours: 24 });
+      const result = await service.getTrendingHashtags({
+        limit: 10,
+        hours: 24,
+      });
 
       expect(result).toHaveLength(1);
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('COUNT(ph.post_id)', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'COUNT(ph.post_id)',
+        'DESC',
+      );
     });
   });
 
@@ -850,18 +947,27 @@ describe('PostsService', () => {
       mockPostRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockLikeRepo.find.mockResolvedValue([]);
 
-      const result = await service.getByHashtag('trending', { page: 1, limit: 20 });
+      const result = await service.getByHashtag('trending', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.data).toHaveLength(1);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('ph.hashtag_id = :hashtagId', {
-        hashtagId: mockHashtag.id,
-      });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'ph.hashtag_id = :hashtagId',
+        {
+          hashtagId: mockHashtag.id,
+        },
+      );
     });
 
     it('should return empty for non-existent hashtag', async () => {
       mockHashtagRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.getByHashtag('nonexistent', { page: 1, limit: 20 });
+      const result = await service.getByHashtag('nonexistent', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.data).toHaveLength(0);
       expect(result.meta.total).toBe(0);

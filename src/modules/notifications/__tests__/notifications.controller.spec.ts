@@ -93,7 +93,10 @@ describe('NotificationsController', () => {
       expect(result.notifications).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.unreadCount).toBe(1);
-      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(mockUser.id, {});
+      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(
+        mockUser.id,
+        {},
+      );
     });
 
     it('should pass query params to service', async () => {
@@ -104,7 +107,10 @@ describe('NotificationsController', () => {
       await controller.getNotifications(mockUser as User, query);
 
       // Assert
-      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(mockUser.id, query);
+      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(
+        mockUser.id,
+        query,
+      );
     });
 
     it('should filter by notification type', async () => {
@@ -115,7 +121,10 @@ describe('NotificationsController', () => {
       await controller.getNotifications(mockUser as User, query);
 
       // Assert
-      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(mockUser.id, query);
+      expect(mockNotificationsService.findAll).toHaveBeenCalledWith(
+        mockUser.id,
+        query,
+      );
     });
   });
 
@@ -126,18 +135,26 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual({ unreadCount: 5 });
-      expect(mockNotificationsService.getUnreadCount).toHaveBeenCalledWith(mockUser.id);
+      expect(mockNotificationsService.getUnreadCount).toHaveBeenCalledWith(
+        mockUser.id,
+      );
     });
   });
 
   describe('getNotification', () => {
     it('should return single notification by id', async () => {
       // Act
-      const result = await controller.getNotification(mockUser as User, notificationId);
+      const result = await controller.getNotification(
+        mockUser as User,
+        notificationId,
+      );
 
       // Assert
       expect(result.id).toBe(notificationId);
-      expect(mockNotificationsService.findOne).toHaveBeenCalledWith(notificationId, mockUser.id);
+      expect(mockNotificationsService.findOne).toHaveBeenCalledWith(
+        notificationId,
+        mockUser.id,
+      );
     });
   });
 
@@ -147,7 +164,10 @@ describe('NotificationsController', () => {
       await controller.markAsRead(mockUser as User, notificationId);
 
       // Assert
-      expect(mockNotificationsService.markAsRead).toHaveBeenCalledWith(notificationId, mockUser.id);
+      expect(mockNotificationsService.markAsRead).toHaveBeenCalledWith(
+        notificationId,
+        mockUser.id,
+      );
     });
   });
 
@@ -158,7 +178,9 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual({ markedCount: 5 });
-      expect(mockNotificationsService.markAllAsRead).toHaveBeenCalledWith(mockUser.id);
+      expect(mockNotificationsService.markAllAsRead).toHaveBeenCalledWith(
+        mockUser.id,
+      );
     });
   });
 
@@ -168,7 +190,10 @@ describe('NotificationsController', () => {
       await controller.deleteNotification(mockUser as User, notificationId);
 
       // Assert
-      expect(mockNotificationsService.delete).toHaveBeenCalledWith(notificationId, mockUser.id);
+      expect(mockNotificationsService.delete).toHaveBeenCalledWith(
+        notificationId,
+        mockUser.id,
+      );
     });
   });
 
@@ -182,7 +207,9 @@ describe('NotificationsController', () => {
         expect(result.pushEnabled).toBe(true);
         expect(result.newFollower).toBe(true);
         expect(result.postLike).toBe(true);
-        expect(mockNotificationsService.getPreferences).toHaveBeenCalledWith(mockUser.id);
+        expect(mockNotificationsService.getPreferences).toHaveBeenCalledWith(
+          mockUser.id,
+        );
       });
     });
 
@@ -196,7 +223,10 @@ describe('NotificationsController', () => {
         });
 
         // Act
-        const result = await controller.updatePreferences(mockUser as User, updateDto);
+        const result = await controller.updatePreferences(
+          mockUser as User,
+          updateDto,
+        );
 
         // Assert
         expect(result.postLike).toBe(false);
@@ -216,7 +246,10 @@ describe('NotificationsController', () => {
         });
 
         // Act
-        const result = await controller.updatePreferences(mockUser as User, updateDto);
+        const result = await controller.updatePreferences(
+          mockUser as User,
+          updateDto,
+        );
 
         // Assert
         expect(result.pushEnabled).toBe(false);
@@ -233,7 +266,9 @@ describe('NotificationsController', () => {
         // Assert
         expect(result.devices).toHaveLength(1);
         expect(result.devices[0].deviceType).toBe(DeviceType.IOS);
-        expect(mockDeviceTokensService.getUserDevices).toHaveBeenCalledWith(mockUser.id);
+        expect(mockDeviceTokensService.getUserDevices).toHaveBeenCalledWith(
+          mockUser.id,
+        );
       });
 
       it('should return empty array if no devices registered', async () => {
@@ -267,12 +302,18 @@ describe('NotificationsController', () => {
         mockDeviceTokensService.register.mockResolvedValue(newDevice);
 
         // Act
-        const result = await controller.registerDevice(mockUser as User, registerDto);
+        const result = await controller.registerDevice(
+          mockUser as User,
+          registerDto,
+        );
 
         // Assert
         expect(result.id).toBe('new-device-id');
         expect(result.deviceType).toBe(DeviceType.ANDROID);
-        expect(mockDeviceTokensService.register).toHaveBeenCalledWith(mockUser.id, registerDto);
+        expect(mockDeviceTokensService.register).toHaveBeenCalledWith(
+          mockUser.id,
+          registerDto,
+        );
       });
 
       it('should register iOS device', async () => {
@@ -291,7 +332,10 @@ describe('NotificationsController', () => {
         });
 
         // Act
-        const result = await controller.registerDevice(mockUser as User, registerDto);
+        const result = await controller.registerDevice(
+          mockUser as User,
+          registerDto,
+        );
 
         // Assert
         expect(result.deviceType).toBe(DeviceType.IOS);
@@ -312,7 +356,10 @@ describe('NotificationsController', () => {
         });
 
         // Act
-        const result = await controller.registerDevice(mockUser as User, registerDto);
+        const result = await controller.registerDevice(
+          mockUser as User,
+          registerDto,
+        );
 
         // Assert
         expect(result.deviceType).toBe(DeviceType.WEB);
@@ -328,7 +375,10 @@ describe('NotificationsController', () => {
         await controller.unregisterDevice(mockUser as User, token);
 
         // Assert
-        expect(mockDeviceTokensService.unregister).toHaveBeenCalledWith(mockUser.id, token);
+        expect(mockDeviceTokensService.unregister).toHaveBeenCalledWith(
+          mockUser.id,
+          token,
+        );
       });
     });
 
@@ -338,7 +388,9 @@ describe('NotificationsController', () => {
         await controller.unregisterAllDevices(mockUser as User);
 
         // Assert
-        expect(mockDeviceTokensService.unregisterAll).toHaveBeenCalledWith(mockUser.id);
+        expect(mockDeviceTokensService.unregisterAll).toHaveBeenCalledWith(
+          mockUser.id,
+        );
       });
     });
   });

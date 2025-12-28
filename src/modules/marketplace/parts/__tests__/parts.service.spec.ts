@@ -138,7 +138,10 @@ describe('PartsService', () => {
 
       mockPartRepo.create.mockReturnValue(mockPart);
       mockPartRepo.save.mockResolvedValue(mockPart);
-      mockPartRepo.findOne.mockResolvedValue({ ...mockPart, images: [mockImage] });
+      mockPartRepo.findOne.mockResolvedValue({
+        ...mockPart,
+        images: [mockImage],
+      });
       mockImageRepo.count.mockResolvedValue(0);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -151,14 +154,24 @@ describe('PartsService', () => {
 
     it('should create a part with uploaded files', async () => {
       const files = [
-        { buffer: Buffer.from('test'), mimetype: 'image/jpeg', originalname: 'test.jpg' },
+        {
+          buffer: Buffer.from('test'),
+          mimetype: 'image/jpeg',
+          originalname: 'test.jpg',
+        },
       ] as Express.Multer.File[];
 
       mockPartRepo.create.mockReturnValue(mockPart);
       mockPartRepo.save.mockResolvedValue(mockPart);
-      mockPartRepo.findOne.mockResolvedValue({ ...mockPart, images: [mockImage] });
+      mockPartRepo.findOne.mockResolvedValue({
+        ...mockPart,
+        images: [mockImage],
+      });
       mockMediaService.uploadImages.mockResolvedValue([
-        { url: 'https://r2.example.com/uploaded.jpg', thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg' },
+        {
+          url: 'https://r2.example.com/uploaded.jpg',
+          thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg',
+        },
       ]);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -166,7 +179,11 @@ describe('PartsService', () => {
       const result = await service.create('user-uuid-1234', createDto, files);
 
       expect(result).toBeDefined();
-      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(files, 'listings', 'user-uuid-1234');
+      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(
+        files,
+        'listings',
+        'user-uuid-1234',
+      );
     });
   });
 
@@ -201,7 +218,11 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, categoryId: 'category-uuid-1234' });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        categoryId: 'category-uuid-1234',
+      });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'part.category_id = :categoryId',
@@ -241,7 +262,11 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, condition: PartCondition.NEW });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        condition: PartCondition.NEW,
+      });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'part.condition = :condition',
@@ -261,7 +286,11 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, compatibleWith: 'CBR 600RR' });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        compatibleWith: 'CBR 600RR',
+      });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         expect.stringContaining('jsonb_array_elements_text'),
@@ -281,9 +310,16 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, sortBy: PartSortBy.PRICE_ASC });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        sortBy: PartSortBy.PRICE_ASC,
+      });
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('part.price', 'ASC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'part.price',
+        'ASC',
+      );
     });
   });
 
@@ -300,7 +336,9 @@ describe('PartsService', () => {
     it('should throw NotFoundException for non-existent part', async () => {
       mockPartRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -314,10 +352,17 @@ describe('PartsService', () => {
       mockPartRepo.findOne.mockResolvedValue(mockPart);
       mockPartRepo.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.update('part-uuid-1234', 'user-uuid-1234', updateDto);
+      const result = await service.update(
+        'part-uuid-1234',
+        'user-uuid-1234',
+        updateDto,
+      );
 
       expect(result).toBeDefined();
-      expect(mockPartRepo.update).toHaveBeenCalledWith('part-uuid-1234', updateDto);
+      expect(mockPartRepo.update).toHaveBeenCalledWith(
+        'part-uuid-1234',
+        updateDto,
+      );
     });
 
     it('should throw ForbiddenException for non-owner', async () => {
@@ -342,13 +387,16 @@ describe('PartsService', () => {
     it('should throw ForbiddenException for non-owner', async () => {
       mockPartRepo.findOne.mockResolvedValue(mockPart);
 
-      await expect(service.delete('part-uuid-1234', 'different-user-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.delete('part-uuid-1234', 'different-user-id'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should delete associated images from R2', async () => {
-      mockPartRepo.findOne.mockResolvedValue({ ...mockPart, images: [mockImage] });
+      mockPartRepo.findOne.mockResolvedValue({
+        ...mockPart,
+        images: [mockImage],
+      });
       mockPartRepo.softDelete.mockResolvedValue({ affected: 1 });
       mockMediaService.deleteImage.mockResolvedValue(undefined);
 
@@ -363,7 +411,10 @@ describe('PartsService', () => {
       mockPartRepo.findOne.mockResolvedValue(mockPart);
       mockPartRepo.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.markAsSold('part-uuid-1234', 'user-uuid-1234');
+      const result = await service.markAsSold(
+        'part-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toBeDefined();
       expect(mockPartRepo.update).toHaveBeenCalledWith('part-uuid-1234', {
@@ -457,9 +508,12 @@ describe('PartsService', () => {
       await service.searchByCompatibility({ page: 1, limit: 20 });
 
       // Should only filter by status, not by model
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('part.status = :status', {
-        status: PartStatus.ACTIVE,
-      });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'part.status = :status',
+        {
+          status: PartStatus.ACTIVE,
+        },
+      );
     });
   });
 
@@ -493,7 +547,10 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.getByUser('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getByUser('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.data).toHaveLength(1);
     });
@@ -511,7 +568,11 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.getByUser('user-uuid-1234', { page: 1, limit: 20 }, 'user-uuid-1234');
+      await service.getByUser(
+        'user-uuid-1234',
+        { page: 1, limit: 20 },
+        'user-uuid-1234',
+      );
 
       // Should NOT filter by status when viewing own profile
       const andWhereCalls = mockQueryBuilder.andWhere.mock.calls;
@@ -534,11 +595,18 @@ describe('PartsService', () => {
 
       mockPartRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.getByUser('user-uuid-1234', { page: 1, limit: 20 }, 'other-user-id');
+      await service.getByUser(
+        'user-uuid-1234',
+        { page: 1, limit: 20 },
+        'other-user-id',
+      );
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('part.status = :status', {
-        status: PartStatus.ACTIVE,
-      });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'part.status = :status',
+        {
+          status: PartStatus.ACTIVE,
+        },
+      );
     });
   });
 });

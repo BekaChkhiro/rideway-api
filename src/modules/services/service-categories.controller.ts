@@ -36,7 +36,9 @@ export class ServiceCategoriesController {
     type: ServiceCategory,
   })
   @ApiResponse({ status: 409, description: 'Category slug already exists' })
-  async create(@Body() dto: CreateServiceCategoryDto): Promise<ServiceCategory> {
+  async create(
+    @Body() dto: CreateServiceCategoryDto,
+  ): Promise<ServiceCategory> {
     return this.categoriesService.create(dto);
   }
 

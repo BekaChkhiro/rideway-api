@@ -29,7 +29,10 @@ export interface NotificationTemplate {
   body: string;
 }
 
-export const NotificationTemplates: Record<NotificationType, NotificationTemplate> = {
+export const NotificationTemplates: Record<
+  NotificationType,
+  NotificationTemplate
+> = {
   [NotificationType.NEW_FOLLOWER]: {
     title: '{username} started following you',
     body: 'Tap to view their profile',
@@ -89,7 +92,9 @@ export const NotificationTemplates: Record<NotificationType, NotificationTemplat
 };
 
 // Preference keys that correspond to notification types
-export const NotificationPreferenceKeys: Partial<Record<NotificationType, string>> = {
+export const NotificationPreferenceKeys: Partial<
+  Record<NotificationType, string>
+> = {
   [NotificationType.NEW_FOLLOWER]: 'newFollower',
   [NotificationType.POST_LIKE]: 'postLike',
   [NotificationType.POST_COMMENT]: 'postComment',

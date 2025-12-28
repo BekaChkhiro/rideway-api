@@ -33,7 +33,10 @@ export class PartsCategory {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-  @ManyToOne('PartsCategory', 'children', { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne('PartsCategory', 'children', {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'parent_id' })
   parent?: PartsCategory;
 

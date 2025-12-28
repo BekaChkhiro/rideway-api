@@ -48,7 +48,7 @@ export class CleanupProcessor extends WorkerHost {
   }
 
   private async cleanupExpiredStories(
-    job: Job<CleanupJobData>,
+    _job: Job<CleanupJobData>,
   ): Promise<CleanupJobResult> {
     this.logger.log('Cleaning up expired stories...');
 
@@ -67,7 +67,9 @@ export class CleanupProcessor extends WorkerHost {
 
       return { deletedCount };
     } catch (error) {
-      this.logger.error(`Error cleaning up stories: ${(error as Error).message}`);
+      this.logger.error(
+        `Error cleaning up stories: ${(error as Error).message}`,
+      );
       return { deletedCount: 0, errors: [(error as Error).message] };
     }
   }
@@ -80,7 +82,10 @@ export class CleanupProcessor extends WorkerHost {
 
     if (!this.notificationsService) {
       this.logger.warn('NotificationsService not available, skipping cleanup');
-      return { deletedCount: 0, errors: ['NotificationsService not available'] };
+      return {
+        deletedCount: 0,
+        errors: ['NotificationsService not available'],
+      };
     }
 
     try {
@@ -89,13 +94,15 @@ export class CleanupProcessor extends WorkerHost {
 
       return { deletedCount };
     } catch (error) {
-      this.logger.error(`Error cleaning up notifications: ${(error as Error).message}`);
+      this.logger.error(
+        `Error cleaning up notifications: ${(error as Error).message}`,
+      );
       return { deletedCount: 0, errors: [(error as Error).message] };
     }
   }
 
   private async cleanupInactiveTokens(
-    job: Job<CleanupJobData>,
+    _job: Job<CleanupJobData>,
   ): Promise<CleanupJobResult> {
     this.logger.log('Cleaning up inactive device tokens...');
 
@@ -111,13 +118,15 @@ export class CleanupProcessor extends WorkerHost {
 
       return { deletedCount };
     } catch (error) {
-      this.logger.error(`Error cleaning up tokens: ${(error as Error).message}`);
+      this.logger.error(
+        `Error cleaning up tokens: ${(error as Error).message}`,
+      );
       return { deletedCount: 0, errors: [(error as Error).message] };
     }
   }
 
   private async cleanupOrphanedMedia(
-    job: Job<CleanupJobData>,
+    _job: Job<CleanupJobData>,
   ): Promise<CleanupJobResult> {
     this.logger.log('Cleaning up orphaned media files...');
 

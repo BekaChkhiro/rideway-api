@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, vi, Mock, afterEach } from 'vitest';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { NotificationsService } from '../notifications.service.js';
-import { NotificationType, NotificationTemplates } from '../constants/notification-types.constant.js';
+import {
+  NotificationType,
+  NotificationTemplates,
+} from '../constants/notification-types.constant.js';
 import { Notification, NotificationPreferences } from '../entities/index.js';
 
 describe('NotificationsService', () => {
@@ -46,8 +49,14 @@ describe('NotificationsService', () => {
     vi.resetAllMocks();
 
     mockNotificationRepo = {
-      create: vi.fn().mockImplementation((data) => ({ ...mockNotification, ...data })),
-      save: vi.fn().mockImplementation((data) => Promise.resolve({ ...data, id: notificationId })),
+      create: vi
+        .fn()
+        .mockImplementation((data) => ({ ...mockNotification, ...data })),
+      save: vi
+        .fn()
+        .mockImplementation((data) =>
+          Promise.resolve({ ...data, id: notificationId }),
+        ),
       findOne: vi.fn().mockResolvedValue(mockNotification),
       findAndCount: vi.fn().mockResolvedValue([[mockNotification], 1]),
       count: vi.fn().mockResolvedValue(5),
@@ -57,7 +66,9 @@ describe('NotificationsService', () => {
 
     mockPreferencesRepo = {
       findOne: vi.fn().mockResolvedValue(mockPreferences),
-      create: vi.fn().mockImplementation((data) => ({ ...mockPreferences, ...data })),
+      create: vi
+        .fn()
+        .mockImplementation((data) => ({ ...mockPreferences, ...data })),
       save: vi.fn().mockImplementation((data) => Promise.resolve(data)),
     };
 
@@ -212,7 +223,11 @@ describe('NotificationsService', () => {
         recipientId: userId,
         senderId,
         variables: { username: 'testuser' },
-        data: { entityType: 'user', entityId: senderId, deepLink: '/users/123' },
+        data: {
+          entityType: 'user',
+          entityId: senderId,
+          deepLink: '/users/123',
+        },
       });
 
       // Assert
@@ -256,14 +271,19 @@ describe('NotificationsService', () => {
       });
 
       // Assert
-      expect(mockRedisService.del).toHaveBeenCalledWith(`notification:unread:${userId}`);
+      expect(mockRedisService.del).toHaveBeenCalledWith(
+        `notification:unread:${userId}`,
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return paginated notifications', async () => {
       // Arrange
-      mockNotificationRepo.findAndCount.mockResolvedValue([[mockNotification], 1]);
+      mockNotificationRepo.findAndCount.mockResolvedValue([
+        [mockNotification],
+        1,
+      ]);
 
       // Act
       const result = await service.findAll(userId, { limit: 20, offset: 0 });
@@ -340,7 +360,9 @@ describe('NotificationsService', () => {
       mockNotificationRepo.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findOne('unknown-id', userId)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('unknown-id', userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -360,7 +382,9 @@ describe('NotificationsService', () => {
         isRead: true,
         readAt: expect.any(Date),
       });
-      expect(mockRedisService.del).toHaveBeenCalledWith(`notification:unread:${userId}`);
+      expect(mockRedisService.del).toHaveBeenCalledWith(
+        `notification:unread:${userId}`,
+      );
     });
 
     it('should throw NotFoundException if notification not found', async () => {
@@ -368,7 +392,9 @@ describe('NotificationsService', () => {
       mockNotificationRepo.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.markAsRead('unknown-id', userId)).rejects.toThrow(NotFoundException);
+      await expect(service.markAsRead('unknown-id', userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException if notification belongs to another user', async () => {
@@ -379,7 +405,9 @@ describe('NotificationsService', () => {
       });
 
       // Act & Assert
-      await expect(service.markAsRead(notificationId, userId)).rejects.toThrow(ForbiddenException);
+      await expect(service.markAsRead(notificationId, userId)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should not update if notification already read', async () => {
@@ -411,7 +439,9 @@ describe('NotificationsService', () => {
         { userId, isRead: false },
         { isRead: true, readAt: expect.any(Date) },
       );
-      expect(mockRedisService.del).toHaveBeenCalledWith(`notification:unread:${userId}`);
+      expect(mockRedisService.del).toHaveBeenCalledWith(
+        `notification:unread:${userId}`,
+      );
     });
 
     it('should return 0 if no unread notifications', async () => {
@@ -523,7 +553,9 @@ describe('NotificationsService', () => {
       mockNotificationRepo.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.delete('unknown-id', userId)).rejects.toThrow(NotFoundException);
+      await expect(service.delete('unknown-id', userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should invalidate cache if deleted notification was unread', async () => {
@@ -537,7 +569,9 @@ describe('NotificationsService', () => {
       await service.delete(notificationId, userId);
 
       // Assert
-      expect(mockRedisService.del).toHaveBeenCalledWith(`notification:unread:${userId}`);
+      expect(mockRedisService.del).toHaveBeenCalledWith(
+        `notification:unread:${userId}`,
+      );
     });
 
     it('should not invalidate cache if deleted notification was read', async () => {
@@ -577,7 +611,9 @@ describe('NotificationsService', () => {
 
     beforeEach(() => {
       // Spy on the create method and make it skip preferences check
-      createSpy = vi.spyOn(service, 'create').mockResolvedValue(mockNotification as Notification);
+      createSpy = vi
+        .spyOn(service, 'create')
+        .mockResolvedValue(mockNotification as Notification);
     });
 
     afterEach(() => {
@@ -604,7 +640,13 @@ describe('NotificationsService', () => {
     describe('notifyPostLike', () => {
       it('should create post like notification', async () => {
         // Act
-        await service.notifyPostLike(senderId, userId, 'post-123', 'liker', 'My post content');
+        await service.notifyPostLike(
+          senderId,
+          userId,
+          'post-123',
+          'liker',
+          'My post content',
+        );
 
         // Assert
         expect(createSpy).toHaveBeenCalledWith(
@@ -622,7 +664,13 @@ describe('NotificationsService', () => {
 
       it('should not notify if user likes own post', async () => {
         // Act
-        await service.notifyPostLike(userId, userId, 'post-123', 'self', 'My post');
+        await service.notifyPostLike(
+          userId,
+          userId,
+          'post-123',
+          'self',
+          'My post',
+        );
 
         // Assert
         expect(createSpy).not.toHaveBeenCalled();
@@ -790,7 +838,10 @@ describe('NotificationsService', () => {
           type: NotificationType.POST_LIKE,
           recipientId: userId,
           senderId,
-          variables: { username: 'biker123', postPreview: 'Check out my ride!' },
+          variables: {
+            username: 'biker123',
+            postPreview: 'Check out my ride!',
+          },
         },
         { skipPreferenceCheck: true },
       );

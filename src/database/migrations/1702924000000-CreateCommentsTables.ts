@@ -27,10 +27,18 @@ export class CreateCommentsTables1702924000000 implements MigrationInterface {
           REFERENCES "comments"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_comments_user_id" ON "comments" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_comments_post_id" ON "comments" ("post_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_comments_parent_id" ON "comments" ("parent_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_comments_created_at" ON "comments" ("created_at" DESC)`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comments_user_id" ON "comments" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comments_post_id" ON "comments" ("post_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comments_parent_id" ON "comments" ("parent_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comments_created_at" ON "comments" ("created_at" DESC)`,
+    );
 
     // Create comment_likes table
     await queryRunner.query(`
@@ -47,8 +55,12 @@ export class CreateCommentsTables1702924000000 implements MigrationInterface {
           REFERENCES "comments"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_comment_likes_user_id" ON "comment_likes" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_comment_likes_comment_id" ON "comment_likes" ("comment_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comment_likes_user_id" ON "comment_likes" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_comment_likes_comment_id" ON "comment_likes" ("comment_id")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

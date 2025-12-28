@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -201,9 +200,10 @@ export class CommentsService {
       });
 
       // Filter blocked users from replies
-      const filteredReplies = blockedUsers.length > 0
-        ? replies.filter((r) => !blockedUsers.includes(r.userId))
-        : replies;
+      const filteredReplies =
+        blockedUsers.length > 0
+          ? replies.filter((r) => !blockedUsers.includes(r.userId))
+          : replies;
 
       commentsWithReplies.push({
         ...comment,

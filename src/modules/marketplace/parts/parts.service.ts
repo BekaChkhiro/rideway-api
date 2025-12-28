@@ -140,7 +140,11 @@ export class PartsService {
     }
 
     // Update part fields
-    const { deleteImageIds, imageUrls, ...updateData } = dto;
+    const {
+      deleteImageIds: _deleteImageIds,
+      imageUrls: _imageUrls,
+      ...updateData
+    } = dto;
     await this.partRepository.update(id, updateData);
 
     return this.findOne(id);
@@ -438,7 +442,10 @@ export class PartsService {
     return this.imageRepository.save(images);
   }
 
-  private async deleteImages(imageIds: string[], userId: string): Promise<void> {
+  private async deleteImages(
+    imageIds: string[],
+    userId: string,
+  ): Promise<void> {
     const images = await this.imageRepository.find({
       where: { id: In(imageIds) },
       relations: ['part'],
@@ -470,6 +477,8 @@ export class PartsService {
   }
 
   private async syncViewCounts(): Promise<void> {
+    if (!this.redisService) return;
+
     const keys = await this.redisService.keys(`${this.VIEWS_CACHE_KEY}*`);
 
     if (keys.length === 0) return;

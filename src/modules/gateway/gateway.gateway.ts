@@ -16,7 +16,6 @@ import { ConfigService } from '@nestjs/config';
 import { RedisService } from '@redis/redis.service.js';
 import { GatewayService } from './gateway.service.js';
 import { WsAuthGuard } from './guards/ws-auth.guard.js';
-import { WsCurrentUser } from './decorators/ws-current-user.decorator.js';
 import {
   AuthenticatedSocket,
   SocketUser,
@@ -58,7 +57,9 @@ export class AppGateway
     // Redis adapter setup is disabled for now (single-server mode)
     // TODO: Enable for horizontal scaling in production
     // The ioredis duplicate() requires special handling that was causing startup delays
-    this.logger.log('Running Socket.io in single-server mode (Redis adapter disabled)');
+    this.logger.log(
+      'Running Socket.io in single-server mode (Redis adapter disabled)',
+    );
 
     // Pass server to gateway service
     this.gatewayService.setServer(server);
@@ -70,7 +71,9 @@ export class AppGateway
       const user = await this.authenticateClient(client);
 
       if (!user) {
-        this.logger.warn(`Client ${client.id} connection rejected: Invalid token`);
+        this.logger.warn(
+          `Client ${client.id} connection rejected: Invalid token`,
+        );
         client.emit('auth:error', 'Invalid authentication token');
         client.disconnect(true);
         return;
@@ -96,13 +99,18 @@ export class AppGateway
         await this.gatewayService.setUserOnline(user.id);
       }
 
-      const connectionCount = await this.gatewayService.getConnectionCount(user.id);
+      const connectionCount = await this.gatewayService.getConnectionCount(
+        user.id,
+      );
       this.logger.log(
         `Client connected: ${client.id} (User: ${user.id}, ${user.email}, connections: ${connectionCount})`,
       );
     } catch (error) {
       this.logger.error(`Connection error for ${client.id}:`, error);
-      client.emit('error', { message: 'Connection failed', code: 'CONNECTION_ERROR' });
+      client.emit('error', {
+        message: 'Connection failed',
+        code: 'CONNECTION_ERROR',
+      });
       client.disconnect(true);
     }
   }
@@ -114,15 +122,22 @@ export class AppGateway
 
       if (userId) {
         // Unregister socket and check if user went offline (last device disconnecting)
-        const wentOffline = await this.gatewayService.unregisterSocket(client.id);
+        const wentOffline = await this.gatewayService.unregisterSocket(
+          client.id,
+        );
 
         if (wentOffline) {
           // Broadcast offline status to followers
           await this.gatewayService.setUserOffline(userId);
-          this.logger.log(`User ${userId} went offline (all devices disconnected)`);
+          this.logger.log(
+            `User ${userId} went offline (all devices disconnected)`,
+          );
         } else {
-          const remaining = await this.gatewayService.getConnectionCount(userId);
-          this.logger.debug(`User ${userId} still has ${remaining} active connection(s)`);
+          const remaining =
+            await this.gatewayService.getConnectionCount(userId);
+          this.logger.debug(
+            `User ${userId} still has ${remaining} active connection(s)`,
+          );
         }
       }
 
@@ -162,7 +177,9 @@ export class AppGateway
   async handleGetPresenceStatus(
     @ConnectedSocket() client: AuthenticatedSocket,
     @MessageBody() userIds: string[],
-  ): Promise<{ statuses: Record<string, { isOnline: boolean; lastSeen?: Date }> }> {
+  ): Promise<{
+    statuses: Record<string, { isOnline: boolean; lastSeen?: Date }>;
+  }> {
     const statusMap = await this.gatewayService.getOnlineStatusBatch(userIds);
     const statuses: Record<string, { isOnline: boolean; lastSeen?: Date }> = {};
 

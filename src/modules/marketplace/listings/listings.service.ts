@@ -161,7 +161,11 @@ export class ListingsService {
     }
 
     // Update listing fields
-    const { deleteImageIds, imageUrls, ...updateData } = dto;
+    const {
+      deleteImageIds: _deleteImageIds,
+      imageUrls: _imageUrls,
+      ...updateData
+    } = dto;
     await this.listingRepository.update(id, updateData);
 
     return this.findOne(id);
@@ -532,6 +536,8 @@ export class ListingsService {
   }
 
   private async syncViewCounts(): Promise<void> {
+    if (!this.redisService) return;
+
     const keys = await this.redisService.keys(`${this.VIEWS_CACHE_KEY}*`);
 
     if (keys.length === 0) return;

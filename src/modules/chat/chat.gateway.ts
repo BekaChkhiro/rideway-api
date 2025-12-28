@@ -50,7 +50,10 @@ export class ChatGateway {
     );
 
     if (!isParticipant) {
-      return { success: false, error: 'Not a participant of this conversation' };
+      return {
+        success: false,
+        error: 'Not a participant of this conversation',
+      };
     }
 
     await client.join(`conversation:${conversationId}`);
@@ -83,11 +86,15 @@ export class ChatGateway {
 
     try {
       // Send message via service
-      const message = await this.chatService.sendMessage(conversationId, userId, {
-        content,
-        messageType: messageType || MessageType.TEXT,
-        mediaUrl,
-      });
+      const message = await this.chatService.sendMessage(
+        conversationId,
+        userId,
+        {
+          content,
+          messageType: messageType || MessageType.TEXT,
+          mediaUrl,
+        },
+      );
 
       // Emit to all participants in the conversation room
       this.server.to(`conversation:${conversationId}`).emit('message:new', {
@@ -108,7 +115,8 @@ export class ChatGateway {
       );
 
       if (otherParticipantId) {
-        const isOnline = await this.gatewayService.isUserOnline(otherParticipantId);
+        const isOnline =
+          await this.gatewayService.isUserOnline(otherParticipantId);
 
         if (!isOnline) {
           // TODO: Queue push notification via BullMQ
@@ -120,9 +128,8 @@ export class ChatGateway {
           const roomMembers = this.gatewayService.getRoomMembers(
             `conversation:${conversationId}`,
           );
-          const otherSocket = await this.gatewayService.getUserSocket(
-            otherParticipantId,
-          );
+          const otherSocket =
+            await this.gatewayService.getUserSocket(otherParticipantId);
 
           if (otherSocket && !roomMembers.includes(otherSocket)) {
             // User is online but not viewing this conversation

@@ -9,7 +9,10 @@ import {
   PushProcessor,
   CleanupProcessor,
 } from './processors/index.js';
-import { QUEUE_NAMES, DEFAULT_JOB_OPTIONS } from './interfaces/job-data.interface.js';
+import {
+  QUEUE_NAMES,
+  DEFAULT_JOB_OPTIONS,
+} from './interfaces/job-data.interface.js';
 
 @Module({
   imports: [
@@ -19,12 +22,21 @@ import { QUEUE_NAMES, DEFAULT_JOB_OPTIONS } from './interfaces/job-data.interfac
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
-          host: new URL(configService.get<string>('redis.url') || 'redis://localhost:6379').hostname,
+          host: new URL(
+            configService.get<string>('redis.url') || 'redis://localhost:6379',
+          ).hostname,
           port: parseInt(
-            new URL(configService.get<string>('redis.url') || 'redis://localhost:6379').port || '6379',
+            new URL(
+              configService.get<string>('redis.url') ||
+                'redis://localhost:6379',
+            ).port || '6379',
             10,
           ),
-          password: new URL(configService.get<string>('redis.url') || 'redis://localhost:6379').password || undefined,
+          password:
+            new URL(
+              configService.get<string>('redis.url') ||
+                'redis://localhost:6379',
+            ).password || undefined,
         },
         defaultJobOptions: DEFAULT_JOB_OPTIONS,
       }),

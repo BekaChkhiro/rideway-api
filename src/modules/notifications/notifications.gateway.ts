@@ -22,14 +22,19 @@ export class NotificationsGateway {
 
   private readonly logger = new Logger(NotificationsGateway.name);
 
-  constructor(@Inject(NotificationsService) private readonly notificationsService: NotificationsService) {}
+  constructor(
+    @Inject(NotificationsService)
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @SubscribeMessage('notifications:get-unread-count')
   @UseGuards(WsAuthGuard)
   async handleGetUnreadCount(
     @ConnectedSocket() client: AuthenticatedSocket,
   ): Promise<{ unreadCount: number }> {
-    const count = await this.notificationsService.getUnreadCount(client.user.id);
+    const count = await this.notificationsService.getUnreadCount(
+      client.user.id,
+    );
     return { unreadCount: count };
   }
 
@@ -40,7 +45,10 @@ export class NotificationsGateway {
     @MessageBody() notificationId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await this.notificationsService.markAsRead(notificationId, client.user.id);
+      await this.notificationsService.markAsRead(
+        notificationId,
+        client.user.id,
+      );
       return { success: true };
     } catch (error) {
       return { success: false, error: (error as Error).message };

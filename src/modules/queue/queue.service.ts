@@ -28,11 +28,16 @@ export class QueueService implements OnModuleInit {
     try {
       // Add timeout to prevent hanging during startup
       const timeoutPromise = new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error('Scheduling jobs timed out after 10s')), 10000)
+        setTimeout(
+          () => reject(new Error('Scheduling jobs timed out after 10s')),
+          10000,
+        ),
       );
       await Promise.race([this.scheduleRecurringJobs(), timeoutPromise]);
     } catch (error) {
-      this.logger.warn(`Failed to schedule recurring jobs: ${(error as Error).message}`);
+      this.logger.warn(
+        `Failed to schedule recurring jobs: ${(error as Error).message}`,
+      );
       // Don't block startup if scheduling fails
     }
   }
@@ -45,15 +50,11 @@ export class QueueService implements OnModuleInit {
     data: NotificationJobData,
     options?: Partial<JobsOptions>,
   ): Promise<Job<NotificationJobData>> {
-    const job = await this.notificationsQueue.add(
-      'notification',
-      data,
-      {
-        ...DEFAULT_JOB_OPTIONS,
-        priority: JOB_PRIORITIES.MEDIUM,
-        ...options,
-      },
-    );
+    const job = await this.notificationsQueue.add('notification', data, {
+      ...DEFAULT_JOB_OPTIONS,
+      priority: JOB_PRIORITIES.MEDIUM,
+      ...options,
+    });
 
     this.logger.debug(
       `Added notification job ${job.id}: ${data.type} for user ${data.recipientId}`,
@@ -89,15 +90,11 @@ export class QueueService implements OnModuleInit {
     data: PushJobData,
     options?: Partial<JobsOptions>,
   ): Promise<Job<PushJobData>> {
-    const job = await this.pushQueue.add(
-      'push',
-      data,
-      {
-        ...DEFAULT_JOB_OPTIONS,
-        priority: JOB_PRIORITIES.HIGH, // Push notifications are high priority
-        ...options,
-      },
-    );
+    const job = await this.pushQueue.add('push', data, {
+      ...DEFAULT_JOB_OPTIONS,
+      priority: JOB_PRIORITIES.HIGH, // Push notifications are high priority
+      ...options,
+    });
 
     this.logger.debug(
       `Added push notification job ${job.id} for user ${data.userId}`,
@@ -111,7 +108,7 @@ export class QueueService implements OnModuleInit {
   // ==========================================
 
   async addCleanupJob(
-    jobName: typeof CLEANUP_JOBS[keyof typeof CLEANUP_JOBS],
+    jobName: (typeof CLEANUP_JOBS)[keyof typeof CLEANUP_JOBS],
     data: Partial<CleanupJobData> = {},
     options?: Partial<JobsOptions>,
   ): Promise<Job<CleanupJobData>> {
@@ -213,7 +210,16 @@ export class QueueService implements OnModuleInit {
   }
 
   async getAllQueuesStats(): Promise<
-    Record<string, { waiting: number; active: number; completed: number; failed: number; delayed: number }>
+    Record<
+      string,
+      {
+        waiting: number;
+        active: number;
+        completed: number;
+        failed: number;
+        delayed: number;
+      }
+    >
   > {
     const [notifications, push, cleanup] = await Promise.all([
       this.getQueueStats(QUEUE_NAMES.NOTIFICATIONS),
@@ -232,7 +238,10 @@ export class QueueService implements OnModuleInit {
   // Queue Management
   // ==========================================
 
-  async retryFailedJobs(queueName: string, limit: number = 100): Promise<number> {
+  async retryFailedJobs(
+    queueName: string,
+    limit: number = 100,
+  ): Promise<number> {
     let queue: Queue;
 
     switch (queueName) {
@@ -257,7 +266,9 @@ export class QueueService implements OnModuleInit {
       retriedCount++;
     }
 
-    this.logger.log(`Retried ${retriedCount} failed jobs in ${queueName} queue`);
+    this.logger.log(
+      `Retried ${retriedCount} failed jobs in ${queueName} queue`,
+    );
 
     return retriedCount;
   }

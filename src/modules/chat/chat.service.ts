@@ -17,10 +17,7 @@ import {
   Message,
   MessageType,
 } from './entities/index.js';
-import {
-  SendMessageDto,
-  MessageQueryDto,
-} from './dto/index.js';
+import { SendMessageDto, MessageQueryDto } from './dto/index.js';
 import {
   ConversationResponse,
   ConversationListResponse,
@@ -116,7 +113,12 @@ export class ChatService {
   async getConversations(userId: string): Promise<ConversationListResponse> {
     const participations = await this.participantRepository.find({
       where: { userId, leftAt: undefined },
-      relations: ['conversation', 'conversation.participants', 'conversation.participants.user', 'conversation.participants.user.profile'],
+      relations: [
+        'conversation',
+        'conversation.participants',
+        'conversation.participants.user',
+        'conversation.participants.user.profile',
+      ],
       order: { conversation: { updatedAt: 'DESC' } },
     });
 
@@ -195,7 +197,12 @@ export class ChatService {
   ): Promise<ConversationResponse> {
     const participation = await this.participantRepository.findOne({
       where: { conversationId, userId, leftAt: undefined },
-      relations: ['conversation', 'conversation.participants', 'conversation.participants.user', 'conversation.participants.user.profile'],
+      relations: [
+        'conversation',
+        'conversation.participants',
+        'conversation.participants.user',
+        'conversation.participants.user.profile',
+      ],
     });
 
     if (!participation) {
@@ -266,7 +273,9 @@ export class ChatService {
     // Verify user is participant
     const isParticipant = await this.isParticipant(conversationId, userId);
     if (!isParticipant) {
-      throw new ForbiddenException('You are not a participant of this conversation');
+      throw new ForbiddenException(
+        'You are not a participant of this conversation',
+      );
     }
 
     const limit = query.limit || 50;
@@ -326,7 +335,9 @@ export class ChatService {
     // Verify sender is participant
     const isParticipant = await this.isParticipant(conversationId, senderId);
     if (!isParticipant) {
-      throw new ForbiddenException('You are not a participant of this conversation');
+      throw new ForbiddenException(
+        'You are not a participant of this conversation',
+      );
     }
 
     // Get other participant to check blocking
@@ -384,7 +395,9 @@ export class ChatService {
     });
 
     if (!participation) {
-      throw new ForbiddenException('You are not a participant of this conversation');
+      throw new ForbiddenException(
+        'You are not a participant of this conversation',
+      );
     }
 
     let readAt = new Date();
@@ -419,7 +432,9 @@ export class ChatService {
     });
 
     if (!message) {
-      throw new NotFoundException('Message not found or you are not the sender');
+      throw new NotFoundException(
+        'Message not found or you are not the sender',
+      );
     }
 
     await this.messageRepository.softDelete(messageId);
@@ -439,7 +454,9 @@ export class ChatService {
     });
 
     if (!participation) {
-      throw new ForbiddenException('You are not a participant of this conversation');
+      throw new ForbiddenException(
+        'You are not a participant of this conversation',
+      );
     }
 
     await this.participantRepository.update(participation.id, {
@@ -478,7 +495,10 @@ export class ChatService {
   /**
    * Check if user is participant in conversation
    */
-  async isParticipant(conversationId: string, userId: string): Promise<boolean> {
+  async isParticipant(
+    conversationId: string,
+    userId: string,
+  ): Promise<boolean> {
     const count = await this.participantRepository.count({
       where: { conversationId, userId, leftAt: undefined },
     });
@@ -541,15 +561,19 @@ export class ChatService {
   ): Promise<number> {
     if (!lastReadAt) {
       // Count all messages not sent by user
-      return this.messageRepository.count({
-        where: {
-          conversationId,
-        },
-      }).then((total) =>
-        this.messageRepository.count({
-          where: { conversationId, senderId: userId },
-        }).then((own) => total - own)
-      );
+      return this.messageRepository
+        .count({
+          where: {
+            conversationId,
+          },
+        })
+        .then((total) =>
+          this.messageRepository
+            .count({
+              where: { conversationId, senderId: userId },
+            })
+            .then((own) => total - own),
+        );
     }
 
     return this.messageRepository

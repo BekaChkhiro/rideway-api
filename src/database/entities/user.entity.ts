@@ -1,5 +1,6 @@
 import { Entity, Column, OneToOne, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity.js';
+import { UserRole } from './enums/user-role.enum.js';
 import type { UserProfile } from './user-profile.entity.js';
 import type { RefreshToken } from './refresh-token.entity.js';
 
@@ -8,6 +9,13 @@ export class User extends BaseEntity {
   @Index()
   @Column({ type: 'varchar', length: 255, unique: true })
   email!: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role!: UserRole;
 
   @Index()
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })

@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ListingsService } from '../listings.service.js';
-import { Listing, ListingStatus, ListingCondition } from '../entities/listing.entity.js';
+import {
+  Listing,
+  ListingStatus,
+  ListingCondition,
+} from '../entities/listing.entity.js';
 import { ListingImage } from '../entities/listing-image.entity.js';
 import { ListingFavorite } from '../entities/listing-favorite.entity.js';
 import { ListingSortBy } from '../dto/listing-query.dto.js';
@@ -144,12 +148,18 @@ describe('ListingsService', () => {
     it('should create a listing with image URLs', async () => {
       const dtoWithImages = {
         ...createDto,
-        imageUrls: ['https://r2.example.com/image1.jpg', 'https://r2.example.com/image2.jpg'],
+        imageUrls: [
+          'https://r2.example.com/image1.jpg',
+          'https://r2.example.com/image2.jpg',
+        ],
       };
 
       mockListingRepo.create.mockReturnValue(mockListing);
       mockListingRepo.save.mockResolvedValue(mockListing);
-      mockListingRepo.findOne.mockResolvedValue({ ...mockListing, images: [mockImage] });
+      mockListingRepo.findOne.mockResolvedValue({
+        ...mockListing,
+        images: [mockImage],
+      });
       mockImageRepo.count.mockResolvedValue(0);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -162,14 +172,24 @@ describe('ListingsService', () => {
 
     it('should create a listing with uploaded files', async () => {
       const files = [
-        { buffer: Buffer.from('test'), mimetype: 'image/jpeg', originalname: 'test.jpg' },
+        {
+          buffer: Buffer.from('test'),
+          mimetype: 'image/jpeg',
+          originalname: 'test.jpg',
+        },
       ] as Express.Multer.File[];
 
       mockListingRepo.create.mockReturnValue(mockListing);
       mockListingRepo.save.mockResolvedValue(mockListing);
-      mockListingRepo.findOne.mockResolvedValue({ ...mockListing, images: [mockImage] });
+      mockListingRepo.findOne.mockResolvedValue({
+        ...mockListing,
+        images: [mockImage],
+      });
       mockMediaService.uploadImages.mockResolvedValue([
-        { url: 'https://r2.example.com/uploaded.jpg', thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg' },
+        {
+          url: 'https://r2.example.com/uploaded.jpg',
+          thumbnailUrl: 'https://r2.example.com/uploaded_thumb.jpg',
+        },
       ]);
       mockImageRepo.create.mockReturnValue(mockImage);
       mockImageRepo.save.mockResolvedValue([mockImage]);
@@ -177,7 +197,11 @@ describe('ListingsService', () => {
       const result = await service.create('user-uuid-1234', createDto, files);
 
       expect(result).toBeDefined();
-      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(files, 'listings', 'user-uuid-1234');
+      expect(mockMediaService.uploadImages).toHaveBeenCalledWith(
+        files,
+        'listings',
+        'user-uuid-1234',
+      );
     });
   });
 
@@ -218,7 +242,11 @@ describe('ListingsService', () => {
 
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, categoryId: 'category-uuid-1234' });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        categoryId: 'category-uuid-1234',
+      });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'listing.category_id = :categoryId',
@@ -239,10 +267,21 @@ describe('ListingsService', () => {
 
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, minPrice: 5000, maxPrice: 10000 });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        minPrice: 5000,
+        maxPrice: 10000,
+      });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('listing.price >= :minPrice', { minPrice: 5000 });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('listing.price <= :maxPrice', { maxPrice: 10000 });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'listing.price >= :minPrice',
+        { minPrice: 5000 },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'listing.price <= :maxPrice',
+        { maxPrice: 10000 },
+      );
     });
 
     it('should filter by location', async () => {
@@ -279,9 +318,16 @@ describe('ListingsService', () => {
 
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      await service.findAll({ page: 1, limit: 20, sortBy: ListingSortBy.PRICE_ASC });
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        sortBy: ListingSortBy.PRICE_ASC,
+      });
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('listing.price', 'ASC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'listing.price',
+        'ASC',
+      );
     });
 
     it('should mark favorites for authenticated user', async () => {
@@ -298,7 +344,10 @@ describe('ListingsService', () => {
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockFavoriteRepo.find.mockResolvedValue([mockFavorite]);
 
-      const result = await service.findAll({ page: 1, limit: 20 }, 'user-uuid-1234');
+      const result = await service.findAll(
+        { page: 1, limit: 20 },
+        'user-uuid-1234',
+      );
 
       expect(result.data[0].isFavorited).toBe(true);
     });
@@ -339,14 +388,19 @@ describe('ListingsService', () => {
     it('should throw NotFoundException for non-existent listing', async () => {
       mockListingRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should check favorite status for authenticated user', async () => {
       mockListingRepo.findOne.mockResolvedValue({ ...mockListing });
       mockFavoriteRepo.findOne.mockResolvedValue(mockFavorite);
 
-      const result = await service.findOne('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.findOne(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result.isFavorited).toBe(true);
     });
@@ -362,10 +416,17 @@ describe('ListingsService', () => {
       mockListingRepo.findOne.mockResolvedValue(mockListing);
       mockListingRepo.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.update('listing-uuid-1234', 'user-uuid-1234', updateDto);
+      const result = await service.update(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+        updateDto,
+      );
 
       expect(result).toBeDefined();
-      expect(mockListingRepo.update).toHaveBeenCalledWith('listing-uuid-1234', updateDto);
+      expect(mockListingRepo.update).toHaveBeenCalledWith(
+        'listing-uuid-1234',
+        updateDto,
+      );
     });
 
     it('should throw ForbiddenException for non-owner', async () => {
@@ -382,13 +443,22 @@ describe('ListingsService', () => {
         deleteImageIds: ['image-uuid-1234'],
       };
 
-      mockListingRepo.findOne.mockResolvedValue({ ...mockListing, images: [mockImage] });
+      mockListingRepo.findOne.mockResolvedValue({
+        ...mockListing,
+        images: [mockImage],
+      });
       mockListingRepo.update.mockResolvedValue({ affected: 1 });
-      mockImageRepo.find.mockResolvedValue([{ ...mockImage, listing: mockListing }]);
+      mockImageRepo.find.mockResolvedValue([
+        { ...mockImage, listing: mockListing },
+      ]);
       mockMediaService.deleteImage.mockResolvedValue(undefined);
       mockImageRepo.delete.mockResolvedValue({ affected: 1 });
 
-      await service.update('listing-uuid-1234', 'user-uuid-1234', dtoWithImageDeletion);
+      await service.update(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+        dtoWithImageDeletion,
+      );
 
       expect(mockMediaService.deleteImage).toHaveBeenCalled();
       expect(mockImageRepo.delete).toHaveBeenCalled();
@@ -402,19 +472,24 @@ describe('ListingsService', () => {
 
       await service.delete('listing-uuid-1234', 'user-uuid-1234');
 
-      expect(mockListingRepo.softDelete).toHaveBeenCalledWith('listing-uuid-1234');
+      expect(mockListingRepo.softDelete).toHaveBeenCalledWith(
+        'listing-uuid-1234',
+      );
     });
 
     it('should throw ForbiddenException for non-owner', async () => {
       mockListingRepo.findOne.mockResolvedValue(mockListing);
 
-      await expect(service.delete('listing-uuid-1234', 'different-user-id')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.delete('listing-uuid-1234', 'different-user-id'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should delete associated images from R2', async () => {
-      mockListingRepo.findOne.mockResolvedValue({ ...mockListing, images: [mockImage] });
+      mockListingRepo.findOne.mockResolvedValue({
+        ...mockListing,
+        images: [mockImage],
+      });
       mockListingRepo.softDelete.mockResolvedValue({ affected: 1 });
       mockMediaService.deleteImage.mockResolvedValue(undefined);
 
@@ -429,7 +504,10 @@ describe('ListingsService', () => {
       mockListingRepo.findOne.mockResolvedValue(mockListing);
       mockListingRepo.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.markAsSold('listing-uuid-1234', 'user-uuid-1234');
+      const result = await service.markAsSold(
+        'listing-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toBeDefined();
       expect(mockListingRepo.update).toHaveBeenCalledWith('listing-uuid-1234', {
@@ -516,7 +594,9 @@ describe('ListingsService', () => {
         andWhere: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
         take: vi.fn().mockReturnThis(),
-        getMany: vi.fn().mockResolvedValue([{ ...mockListing, id: 'other-listing' }]),
+        getMany: vi
+          .fn()
+          .mockResolvedValue([{ ...mockListing, id: 'other-listing' }]),
       };
 
       mockListingRepo.findOne.mockResolvedValue(mockListing);
@@ -547,7 +627,10 @@ describe('ListingsService', () => {
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockFavoriteRepo.find.mockResolvedValue([]);
 
-      const result = await service.getByUser('user-uuid-1234', { page: 1, limit: 20 });
+      const result = await service.getByUser('user-uuid-1234', {
+        page: 1,
+        limit: 20,
+      });
 
       expect(result.data).toHaveLength(1);
     });
@@ -566,7 +649,11 @@ describe('ListingsService', () => {
       mockListingRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
       mockFavoriteRepo.find.mockResolvedValue([]);
 
-      await service.getByUser('user-uuid-1234', { page: 1, limit: 20 }, 'user-uuid-1234');
+      await service.getByUser(
+        'user-uuid-1234',
+        { page: 1, limit: 20 },
+        'user-uuid-1234',
+      );
 
       // Should NOT filter by status when viewing own profile
       const andWhereCalls = mockQueryBuilder.andWhere.mock.calls;

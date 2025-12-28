@@ -146,7 +146,9 @@ describe('StoriesService', () => {
       );
       expect(mockStoryRepo.create).toHaveBeenCalled();
       expect(mockStoryRepo.save).toHaveBeenCalled();
-      expect(result.mediaUrl).toBe('https://r2.example.com/stories/uploaded.jpg');
+      expect(result.mediaUrl).toBe(
+        'https://r2.example.com/stories/uploaded.jpg',
+      );
     });
 
     it('should create story with pre-uploaded media URL', async () => {
@@ -227,9 +229,9 @@ describe('StoriesService', () => {
       const expectedExpiry = new Date(now + 24 * 60 * 60 * 1000);
 
       // Allow 1 second tolerance
-      expect(Math.abs(expiresAt.getTime() - expectedExpiry.getTime())).toBeLessThan(
-        1000,
-      );
+      expect(
+        Math.abs(expiresAt.getTime() - expectedExpiry.getTime()),
+      ).toBeLessThan(1000);
 
       vi.useRealTimers();
     });
@@ -267,7 +269,10 @@ describe('StoriesService', () => {
       mockBlockRepo.findOne.mockResolvedValue(null);
       mockViewRepo.findOne.mockResolvedValue(mockStoryView);
 
-      const result = await service.findOne('story-uuid-1234', 'viewer-uuid-1234');
+      const result = await service.findOne(
+        'story-uuid-1234',
+        'viewer-uuid-1234',
+      );
 
       expect(result.hasViewed).toBe(true);
     });
@@ -277,7 +282,10 @@ describe('StoriesService', () => {
       mockBlockRepo.findOne.mockResolvedValue(null);
       mockViewRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.findOne('story-uuid-1234', 'viewer-uuid-1234');
+      const result = await service.findOne(
+        'story-uuid-1234',
+        'viewer-uuid-1234',
+      );
 
       expect(result.hasViewed).toBe(false);
     });
@@ -425,8 +433,18 @@ describe('StoriesService', () => {
       mockBlockRepo.find.mockResolvedValue([]);
 
       const stories = [
-        { ...mockStory, id: 'story-1', userId: 'user-1', createdAt: new Date() },
-        { ...mockStory, id: 'story-2', userId: 'user-2', createdAt: new Date() },
+        {
+          ...mockStory,
+          id: 'story-1',
+          userId: 'user-1',
+          createdAt: new Date(),
+        },
+        {
+          ...mockStory,
+          id: 'story-2',
+          userId: 'user-2',
+          createdAt: new Date(),
+        },
       ];
 
       mockQueryBuilder.getMany.mockResolvedValue(stories);
@@ -450,8 +468,18 @@ describe('StoriesService', () => {
       mockBlockRepo.find.mockResolvedValue([]);
 
       const stories = [
-        { ...mockStory, id: 'story-1', userId: 'user-1', createdAt: new Date() },
-        { ...mockStory, id: 'story-2', userId: 'user-1', createdAt: new Date() },
+        {
+          ...mockStory,
+          id: 'story-1',
+          userId: 'user-1',
+          createdAt: new Date(),
+        },
+        {
+          ...mockStory,
+          id: 'story-2',
+          userId: 'user-1',
+          createdAt: new Date(),
+        },
       ];
 
       mockQueryBuilder.getMany.mockResolvedValue(stories);
@@ -464,7 +492,9 @@ describe('StoriesService', () => {
 
       const userStories = result.users[0].stories;
       expect(userStories.find((s) => s.id === 'story-1')?.hasViewed).toBe(true);
-      expect(userStories.find((s) => s.id === 'story-2')?.hasViewed).toBe(false);
+      expect(userStories.find((s) => s.id === 'story-2')?.hasViewed).toBe(
+        false,
+      );
     });
   });
 
@@ -545,7 +575,10 @@ describe('StoriesService', () => {
         { userId: 'viewer-2', username: 'viewer2', fullName: 'Viewer Two' },
       ]);
 
-      const result = await service.getViewers('story-uuid-1234', 'user-uuid-1234');
+      const result = await service.getViewers(
+        'story-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0].username).toBe('viewer1');
@@ -572,7 +605,10 @@ describe('StoriesService', () => {
       mockStoryRepo.findOne.mockResolvedValue(mockStory);
       mockViewRepo.find.mockResolvedValue([]);
 
-      const result = await service.getViewers('story-uuid-1234', 'user-uuid-1234');
+      const result = await service.getViewers(
+        'story-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result).toHaveLength(0);
     });
@@ -580,14 +616,15 @@ describe('StoriesService', () => {
     it('should include viewedAt timestamp for each viewer', async () => {
       const viewedAt = new Date('2024-01-15T10:30:00Z');
       mockStoryRepo.findOne.mockResolvedValue(mockStory);
-      mockViewRepo.find.mockResolvedValue([
-        { userId: 'viewer-1', viewedAt },
-      ]);
+      mockViewRepo.find.mockResolvedValue([{ userId: 'viewer-1', viewedAt }]);
       mockProfileRepo.find.mockResolvedValue([
         { userId: 'viewer-1', username: 'viewer1' },
       ]);
 
-      const result = await service.getViewers('story-uuid-1234', 'user-uuid-1234');
+      const result = await service.getViewers(
+        'story-uuid-1234',
+        'user-uuid-1234',
+      );
 
       expect(result[0].viewedAt).toEqual(viewedAt);
     });
@@ -600,7 +637,9 @@ describe('StoriesService', () => {
 
       await service.delete('story-uuid-1234', 'user-uuid-1234');
 
-      expect(mockMediaService.deleteImage).toHaveBeenCalledWith(mockStory.mediaUrl);
+      expect(mockMediaService.deleteImage).toHaveBeenCalledWith(
+        mockStory.mediaUrl,
+      );
       expect(mockStoryRepo.delete).toHaveBeenCalledWith('story-uuid-1234');
     });
 
@@ -634,8 +673,16 @@ describe('StoriesService', () => {
   describe('deleteExpired', () => {
     it('should delete expired stories and their media', async () => {
       const expiredStories = [
-        { ...mockStory, id: 'expired-1', mediaUrl: 'https://r2.example.com/1.jpg' },
-        { ...mockStory, id: 'expired-2', mediaUrl: 'https://r2.example.com/2.jpg' },
+        {
+          ...mockStory,
+          id: 'expired-1',
+          mediaUrl: 'https://r2.example.com/1.jpg',
+        },
+        {
+          ...mockStory,
+          id: 'expired-2',
+          mediaUrl: 'https://r2.example.com/2.jpg',
+        },
       ];
 
       mockStoryRepo.find.mockResolvedValue(expiredStories);
@@ -664,8 +711,16 @@ describe('StoriesService', () => {
 
     it('should continue deleting even if some R2 deletions fail', async () => {
       const expiredStories = [
-        { ...mockStory, id: 'expired-1', mediaUrl: 'https://r2.example.com/1.jpg' },
-        { ...mockStory, id: 'expired-2', mediaUrl: 'https://r2.example.com/2.jpg' },
+        {
+          ...mockStory,
+          id: 'expired-1',
+          mediaUrl: 'https://r2.example.com/1.jpg',
+        },
+        {
+          ...mockStory,
+          id: 'expired-2',
+          mediaUrl: 'https://r2.example.com/2.jpg',
+        },
       ];
 
       mockStoryRepo.find.mockResolvedValue(expiredStories);

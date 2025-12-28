@@ -12,6 +12,8 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -42,9 +44,144 @@ import { User } from '@database/index.js';
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly usersService: UsersService,
+    @Inject(UsersService) private readonly usersService: UsersService,
+    @Inject(forwardRef(() => GatewayService))
     private readonly gatewayService: GatewayService,
   ) {}
+
+  // 1. მიმდინარე მომხმარებლის მიღება
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'Current user profile' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getMe(@CurrentUser() user: User) {
+    const userData = await this.usersService.getUserById(user.id, user.id);
+    return { success: true, data: userData };
+  }
+
+  // 2. პროფილის განახლება
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated' })
+  @ApiResponse({ status: 409, description: 'Username already taken' })
+  async updateMe(@CurrentUser() user: User, @Body() dto: UpdateProfileDto) {
+    const updated = await this.usersService.updateProfile(user.id, dto);
+    return { success: true, data: updated };
+  }
+
+  // 3. ავატარის ატვირთვა
+  @Post('me/avatar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Upload user avatar' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        avatar: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Avatar uploaded successfully' })
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, callback) => {
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException(
+              'Only jpeg, png, and webp images are allowed',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  async uploadMeAvatar(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    const result = await this.usersService.uploadAvatar(user.id, file);
+    return { success: true, data: { avatarUrl: result.avatarUrl } };
+  }
+
+  // 4. ქავერის ატვირთვა
+  @Post('me/cover')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Upload user cover image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        cover: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Cover uploaded successfully' })
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, callback) => {
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException(
+              'Only jpeg, png, and webp images are allowed',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  async uploadMeCover(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    const result = await this.usersService.uploadCover(user.id, file);
+    return { success: true, data: { coverUrl: result.coverUrl } };
+  }
+
+  // 5. ავატარის წაშლა
+  @Delete('me/avatar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete user avatar' })
+  @ApiResponse({ status: 200, description: 'Avatar deleted successfully' })
+  async deleteMeAvatar(@CurrentUser() user: User) {
+    await this.usersService.deleteAvatar(user.id);
+    return { success: true };
+  }
+
+  // 6. ქავერის წაშლა
+  @Delete('me/cover')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete user cover image' })
+  @ApiResponse({ status: 200, description: 'Cover deleted successfully' })
+  async deleteMeCover(@CurrentUser() user: User) {
+    await this.usersService.deleteCover(user.id);
+    return { success: true };
+  }
 
   @Get('online-status')
   @UseGuards(JwtAuthGuard)
@@ -144,19 +281,6 @@ export class UsersController {
     return this.usersService.getUserById(id, currentUser?.id);
   }
 
-  @Patch('profile')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile updated' })
-  @ApiResponse({ status: 409, description: 'Username already taken' })
-  async updateProfile(
-    @CurrentUser() user: User,
-    @Body() dto: UpdateProfileDto,
-  ) {
-    return this.usersService.updateProfile(user.id, dto);
-  }
-
   @Get(':id/followers')
   @UseGuards(OptionalAuthGuard)
   @ApiOperation({ summary: 'Get user followers' })
@@ -244,125 +368,5 @@ export class UsersController {
   ) {
     await this.usersService.unblockUser(user.id, id);
     return { message: 'User unblocked successfully' };
-  }
-
-  @Post('avatar')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Upload user avatar' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 201, description: 'Avatar uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid file' })
-  @ApiResponse({ status: 413, description: 'File too large' })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
-      },
-      fileFilter: (_req, file, callback) => {
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (allowedMimeTypes.includes(file.mimetype)) {
-          callback(null, true);
-        } else {
-          callback(
-            new BadRequestException(
-              'Only jpeg, png, and webp images are allowed',
-            ),
-            false,
-          );
-        }
-      },
-    }),
-  )
-  async uploadAvatar(
-    @CurrentUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file provided');
-    }
-    return this.usersService.uploadAvatar(user.id, file);
-  }
-
-  @Delete('avatar')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete user avatar' })
-  @ApiResponse({ status: 200, description: 'Avatar deleted successfully' })
-  @ApiResponse({ status: 400, description: 'No avatar to delete' })
-  async deleteAvatar(@CurrentUser() user: User) {
-    await this.usersService.deleteAvatar(user.id);
-    return { message: 'Avatar deleted successfully' };
-  }
-
-  @Post('cover')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Upload user cover image' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 201, description: 'Cover uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid file' })
-  @ApiResponse({ status: 413, description: 'File too large' })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
-      },
-      fileFilter: (_req, file, callback) => {
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (allowedMimeTypes.includes(file.mimetype)) {
-          callback(null, true);
-        } else {
-          callback(
-            new BadRequestException(
-              'Only jpeg, png, and webp images are allowed',
-            ),
-            false,
-          );
-        }
-      },
-    }),
-  )
-  async uploadCover(
-    @CurrentUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file provided');
-    }
-    return this.usersService.uploadCover(user.id, file);
-  }
-
-  @Delete('cover')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete user cover image' })
-  @ApiResponse({ status: 200, description: 'Cover deleted successfully' })
-  @ApiResponse({ status: 400, description: 'No cover to delete' })
-  async deleteCover(@CurrentUser() user: User) {
-    await this.usersService.deleteCover(user.id);
-    return { message: 'Cover deleted successfully' };
   }
 }

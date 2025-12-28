@@ -8,7 +8,9 @@ import { RedisService } from './redis.service.js';
 
 @Injectable()
 export class RedisHealthIndicator extends HealthIndicator {
-  constructor(@Inject(RedisService) private readonly redisService: RedisService) {
+  constructor(
+    @Inject(RedisService) private readonly redisService: RedisService,
+  ) {
     super();
   }
 

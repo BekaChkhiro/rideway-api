@@ -62,7 +62,10 @@ export class StoriesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get stories feed from followed users' })
-  @ApiResponse({ status: 200, description: 'Stories feed retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stories feed retrieved successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getFeed(@CurrentUser() user: JwtPayload) {
     const result = await this.storiesService.getFeedStories(user.sub);

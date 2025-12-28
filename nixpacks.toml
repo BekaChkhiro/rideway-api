@@ -1,8 +1,14 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
 [phases.install]
-cmds = ["npm install --legacy-peer-deps"]
+cmds = ["npm ci --legacy-peer-deps"]
 
 [phases.build]
 cmds = ["npm run build"]
 
 [start]
-cmd = "node dist/main.js"
+cmd = "npm run start:prod"
+
+[variables]
+NODE_ENV = "production"

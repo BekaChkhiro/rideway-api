@@ -1,0 +1,264 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip tests before deployment'
+        required: false
+        default: 'false'
+        type: boolean
+      create_release:
+        description: 'Create a new release'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  RAILWAY_SERVICE: bike-area-api
+
+jobs:
+  test:
+    name: Run Full Test Suite
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bike_area_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run unit tests with coverage
+        run: npm run test:cov
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/bike_area_test
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: test-jwt-access-secret-32chars-min
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret-32chars-min
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/bike_area_test
+          REDIS_URL: redis://localhost:6379
+          JWT_ACCESS_SECRET: test-jwt-access-secret-32chars-min
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret-32chars-min
+
+      - name: Build application
+        run: npm run build
+
+  deploy:
+    name: Deploy to Railway Production
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    environment:
+      name: production
+      url: https://api.bikearea.ge
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ env.RAILWAY_SERVICE }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
+
+      - name: Wait for deployment
+        run: sleep 45
+
+      - name: Run smoke tests
+        id: smoke_tests
+        run: |
+          # Health check
+          echo "Running health check..."
+          for i in {1..5}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://api.bikearea.ge/api/v1/health/live)
+            if [ "$response" == "200" ]; then
+              echo "Health check passed!"
+              break
+            fi
+            echo "Attempt $i: Health check returned $response, retrying..."
+            sleep 10
+          done
+
+          if [ "$response" != "200" ]; then
+            echo "Health check failed after 5 attempts"
+            exit 1
+          fi
+
+          # Ready check
+          echo "Running ready check..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://api.bikearea.ge/api/v1/health/ready)
+          if [ "$response" != "200" ]; then
+            echo "Ready check failed with status: $response"
+            exit 1
+          fi
+          echo "Ready check passed!"
+
+          # Detailed health check
+          echo "Running detailed health check..."
+          curl -s https://api.bikearea.ge/api/v1/health/detailed | jq .
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: success() && (github.event.inputs.create_release != 'false')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-${{ github.run_number }}
+          release_name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Changes
+
+            ${{ steps.changelog.outputs.commits }}
+
+            ## Deployment Info
+            - **Environment:** Production
+            - **Commit:** ${{ github.sha }}
+            - **Deployed at:** ${{ github.event.head_commit.timestamp }}
+          draft: false
+          prerelease: false
+
+  notify:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [deploy, create-release]
+    if: always()
+
+    steps:
+      - name: Notify on success
+        if: needs.deploy.result == 'success'
+        run: |
+          echo "Production deployment successful!"
+          # Uncomment to enable Slack notification
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{
+          #     "text":"🚀 Production deployment successful!",
+          #     "blocks": [
+          #       {"type": "header", "text": {"type": "plain_text", "text": "🚀 Production Deployment Successful"}},
+          #       {"type": "section", "fields": [
+          #         {"type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}"},
+          #         {"type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}"}
+          #       ]},
+          #       {"type": "section", "text": {"type": "mrkdwn", "text": "<https://api.bikearea.ge|View API>"}}
+          #     ]
+          #   }' \
+          #   ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify on failure
+        if: needs.deploy.result == 'failure'
+        run: |
+          echo "Production deployment failed!"
+          # Uncomment to enable Slack notification
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{
+          #     "text":"❌ Production deployment failed!",
+          #     "blocks": [
+          #       {"type": "header", "text": {"type": "plain_text", "text": "❌ Production Deployment Failed"}},
+          #       {"type": "section", "fields": [
+          #         {"type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}"},
+          #         {"type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}"}
+          #       ]},
+          #       {"type": "section", "text": {"type": "mrkdwn", "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"}}
+          #     ]
+          #   }' \
+          #   ${{ secrets.SLACK_WEBHOOK }}
+
+  rollback:
+    name: Rollback (Manual)
+    runs-on: ubuntu-latest
+    if: failure() && needs.deploy.result == 'failure'
+    needs: [deploy]
+    environment: production-rollback
+
+    steps:
+      - name: Rollback notice
+        run: |
+          echo "Deployment failed. Manual rollback may be required."
+          echo "To rollback, run: railway rollback --service ${{ env.RAILWAY_SERVICE }}"
+          echo "Or use the Railway dashboard to revert to the previous deployment."

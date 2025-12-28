@@ -1,4 +1,11 @@
-import { IsOptional, IsInt, Min, Max, IsBoolean, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsBoolean,
+  IsEnum,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { NotificationType } from '../constants/notification-types.constant.js';
 

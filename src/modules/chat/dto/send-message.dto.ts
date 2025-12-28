@@ -11,7 +11,7 @@ import { MessageType } from '../entities/message.entity.js';
 export class SendMessageDto {
   @IsString()
   @MaxLength(5000)
-  @ValidateIf((o) => !o.mediaUrl)
+  @ValidateIf((o: SendMessageDto) => !o.mediaUrl)
   content?: string;
 
   @IsEnum(MessageType)

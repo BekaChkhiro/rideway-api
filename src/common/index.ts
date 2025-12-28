@@ -13,3 +13,12 @@ export { ValidationPipe } from './pipes/validation.pipe.js';
 
 // Decorators
 export * from './decorators/api-response.decorator.js';
+
+// Security
+export * from './security/index.js';
+
+// Cache
+export * from './cache/index.js';
+
+// Logging
+export * from './logging/index.js';

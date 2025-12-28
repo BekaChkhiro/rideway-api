@@ -54,7 +54,11 @@
       "Bash(grep:*)",
       "Bash(git rm:*)",
       "Bash(rm:*)",
-      "Bash(npm --version:*)"
+      "Bash(npm --version:*)",
+      "Bash(npx husky init)",
+      "Bash(chmod:*)",
+      "Bash(timeout 30 npm run start:dev:*)",
+      "Bash(gtimeout 30 npm run start:dev:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,6 +5,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -35,7 +36,7 @@ export class UsersService {
     @InjectRepository(UserBlock)
     private readonly blockRepository: Repository<UserBlock>,
     private readonly dataSource: DataSource,
-    private readonly mediaService: MediaService,
+    @Inject(MediaService) private readonly mediaService: MediaService,
   ) {}
 
   async getUserById(

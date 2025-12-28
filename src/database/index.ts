@@ -24,6 +24,4 @@ export {
   NotificationPreferences,
 } from '../modules/notifications/entities/index.js';
 
-export {
-  NotificationType,
-} from '../modules/notifications/constants/index.js';
+export { NotificationType } from '../modules/notifications/constants/index.js';

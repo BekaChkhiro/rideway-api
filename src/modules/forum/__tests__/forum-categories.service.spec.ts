@@ -168,9 +168,12 @@ describe('ForumCategoriesService', () => {
         name: 'Updated Name',
       });
 
-      expect(mockCategoryRepo.update).toHaveBeenCalledWith('category-uuid-1234', {
-        name: 'Updated Name',
-      });
+      expect(mockCategoryRepo.update).toHaveBeenCalledWith(
+        'category-uuid-1234',
+        {
+          name: 'Updated Name',
+        },
+      );
       expect(mockRedisService.del).toHaveBeenCalled();
       expect(result.name).toBe('Updated Name');
     });
@@ -192,7 +195,9 @@ describe('ForumCategoriesService', () => {
 
       await service.delete('category-uuid-1234');
 
-      expect(mockCategoryRepo.delete).toHaveBeenCalledWith('category-uuid-1234');
+      expect(mockCategoryRepo.delete).toHaveBeenCalledWith(
+        'category-uuid-1234',
+      );
       expect(mockRedisService.del).toHaveBeenCalled();
     });
 

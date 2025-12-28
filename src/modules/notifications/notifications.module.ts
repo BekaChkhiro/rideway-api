@@ -12,7 +12,11 @@ import { FCMService, DeviceTokensService } from './fcm/index.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Notification, NotificationPreferences, DeviceToken]),
+    TypeOrmModule.forFeature([
+      Notification,
+      NotificationPreferences,
+      DeviceToken,
+    ]),
     GatewayModule,
     forwardRef(() => QueueModule),
     AuthModule,

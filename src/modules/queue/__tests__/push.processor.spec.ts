@@ -21,13 +21,14 @@ describe('PushProcessor', () => {
     },
   };
 
-  const createMockJob = (data: any, options: Partial<Job> = {}): Job => ({
-    id: jobId,
-    data,
-    attemptsMade: 0,
-    opts: { attempts: 3 },
-    ...options,
-  } as unknown as Job);
+  const createMockJob = (data: any, options: Partial<Job> = {}): Job =>
+    ({
+      id: jobId,
+      data,
+      attemptsMade: 0,
+      opts: { attempts: 3 },
+      ...options,
+    }) as unknown as Job;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,7 +70,9 @@ describe('PushProcessor', () => {
         failureCount: 0,
         invalidTokens: [],
       });
-      expect(mockDeviceTokensService.getActiveTokens).toHaveBeenCalledWith(userId);
+      expect(mockDeviceTokensService.getActiveTokens).toHaveBeenCalledWith(
+        userId,
+      );
       expect(mockFCMService.sendToTokens).toHaveBeenCalledWith(
         tokens,
         expect.objectContaining({

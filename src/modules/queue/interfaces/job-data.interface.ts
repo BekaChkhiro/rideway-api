@@ -55,7 +55,7 @@ export interface EmailJobData {
 
 // Cleanup job data
 export interface CleanupJobData {
-  type: typeof CLEANUP_JOBS[keyof typeof CLEANUP_JOBS];
+  type: (typeof CLEANUP_JOBS)[keyof typeof CLEANUP_JOBS];
   params?: {
     olderThanDays?: number;
     batchSize?: number;

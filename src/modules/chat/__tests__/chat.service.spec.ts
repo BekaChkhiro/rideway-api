@@ -147,9 +147,7 @@ describe('ChatService', () => {
             id: 'new-uuid',
             ...data,
           })),
-          save: vi.fn().mockImplementation((entity) =>
-            Promise.resolve(entity),
-          ),
+          save: vi.fn().mockImplementation((entity) => Promise.resolve(entity)),
           update: vi.fn().mockResolvedValue({ affected: 1 }),
         };
         return callback(manager);
@@ -379,9 +377,9 @@ describe('ChatService', () => {
       mockParticipantRepo.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(
-        service.markAsRead(conversationId, userId1),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.markAsRead(conversationId, userId1)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should invalidate unread cache after marking as read', async () => {
@@ -590,7 +588,10 @@ describe('ChatService', () => {
       ]);
 
       // Act
-      const result = await service.getOtherParticipantId(conversationId, userId1);
+      const result = await service.getOtherParticipantId(
+        conversationId,
+        userId1,
+      );
 
       // Assert
       expect(result).toBe(userId2);
@@ -601,7 +602,10 @@ describe('ChatService', () => {
       mockParticipantRepo.find.mockResolvedValue([mockParticipation1]);
 
       // Act
-      const result = await service.getOtherParticipantId(conversationId, userId1);
+      const result = await service.getOtherParticipantId(
+        conversationId,
+        userId1,
+      );
 
       // Assert
       expect(result).toBeNull();

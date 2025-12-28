@@ -42,7 +42,10 @@ export class ThreadReply extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @ManyToOne('ThreadReply', 'childReplies', { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne('ThreadReply', 'childReplies', {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'parent_id' })
   parent?: ThreadReply;
 

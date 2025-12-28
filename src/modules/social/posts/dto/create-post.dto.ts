@@ -12,7 +12,8 @@ import { PostVisibility } from '../entities/post.entity.js';
 
 export class CreatePostDto {
   @ApiProperty({
-    example: 'Just finished an amazing ride through the mountains! #bikelife #adventure',
+    example:
+      'Just finished an amazing ride through the mountains! #bikelife #adventure',
     description: 'Post content (max 5000 characters)',
     maxLength: 5000,
     minLength: 1,

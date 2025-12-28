@@ -21,9 +21,15 @@ export class CreateStoriesTables1702923000000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_stories_user_id" ON "stories" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_stories_expires_at" ON "stories" ("expires_at")`);
-    await queryRunner.query(`CREATE INDEX "IDX_stories_created_at" ON "stories" ("created_at" DESC)`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_stories_user_id" ON "stories" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_stories_expires_at" ON "stories" ("expires_at")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_stories_created_at" ON "stories" ("created_at" DESC)`,
+    );
 
     // Create story_views table
     await queryRunner.query(`
@@ -40,8 +46,12 @@ export class CreateStoriesTables1702923000000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_story_views_story_id" ON "story_views" ("story_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_story_views_user_id" ON "story_views" ("user_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_story_views_story_id" ON "story_views" ("story_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_story_views_user_id" ON "story_views" ("user_id")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

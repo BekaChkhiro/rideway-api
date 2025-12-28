@@ -26,10 +26,18 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
           REFERENCES "posts"("id") ON DELETE SET NULL ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_posts_user_id" ON "posts" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_posts_original_post_id" ON "posts" ("original_post_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_posts_created_at" ON "posts" ("created_at" DESC)`);
-    await queryRunner.query(`CREATE INDEX "IDX_posts_visibility" ON "posts" ("visibility")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_posts_user_id" ON "posts" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_posts_original_post_id" ON "posts" ("original_post_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_posts_created_at" ON "posts" ("created_at" DESC)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_posts_visibility" ON "posts" ("visibility")`,
+    );
 
     // Create post_images table
     await queryRunner.query(`
@@ -47,7 +55,9 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
           REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_post_images_post_id" ON "post_images" ("post_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_images_post_id" ON "post_images" ("post_id")`,
+    );
 
     // Create post_likes table
     await queryRunner.query(`
@@ -64,8 +74,12 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
           REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_post_likes_user_id" ON "post_likes" ("user_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_post_likes_post_id" ON "post_likes" ("post_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_likes_user_id" ON "post_likes" ("user_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_likes_post_id" ON "post_likes" ("post_id")`,
+    );
 
     // Create hashtags table
     await queryRunner.query(`
@@ -78,7 +92,9 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
         CONSTRAINT "PK_hashtags" PRIMARY KEY ("id")
       )
     `);
-    await queryRunner.query(`CREATE UNIQUE INDEX "IDX_hashtags_name" ON "hashtags" ("name")`);
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "IDX_hashtags_name" ON "hashtags" ("name")`,
+    );
 
     // Create post_hashtags table (composite PK)
     await queryRunner.query(`
@@ -93,8 +109,12 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
           REFERENCES "hashtags"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_post_hashtags_post_id" ON "post_hashtags" ("post_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_post_hashtags_hashtag_id" ON "post_hashtags" ("hashtag_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_hashtags_post_id" ON "post_hashtags" ("post_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_hashtags_hashtag_id" ON "post_hashtags" ("hashtag_id")`,
+    );
 
     // Create post_mentions table
     await queryRunner.query(`
@@ -111,8 +131,12 @@ export class CreateSocialTables1702922000000 implements MigrationInterface {
           REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
       )
     `);
-    await queryRunner.query(`CREATE INDEX "IDX_post_mentions_post_id" ON "post_mentions" ("post_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_post_mentions_user_id" ON "post_mentions" ("mentioned_user_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_mentions_post_id" ON "post_mentions" ("post_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_post_mentions_user_id" ON "post_mentions" ("mentioned_user_id")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
