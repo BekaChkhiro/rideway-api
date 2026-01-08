@@ -10,6 +10,7 @@ import { errorHandler } from './middleware';
 import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import mediaRoutes from './routes/media.routes';
+import postsRoutes from './routes/posts.routes';
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/media', mediaRoutes);
+app.use('/api/v1/posts', postsRoutes);
 
 // 404 handler
 app.use((_req, res) => {
