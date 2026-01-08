@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 
 import { config, isDev } from './config';
 import { errorHandler } from './middleware';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -37,8 +38,8 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API routes will be added here
-// app.use('/api/v1', routes);
+// API routes
+app.use('/api/v1/auth', authRoutes);
 
 // 404 handler
 app.use((_req, res) => {

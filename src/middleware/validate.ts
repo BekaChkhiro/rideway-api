@@ -1,24 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { AnyZodObject, ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 
-interface ValidationSchemas {
-  body?: AnyZodObject;
-  query?: AnyZodObject;
-  params?: AnyZodObject;
-}
-
-export const validate = (schemas: ValidationSchemas) => {
+export const validate = (schema: z.ZodSchema) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (schemas.body) {
-        req.body = await schemas.body.parseAsync(req.body);
-      }
-      if (schemas.query) {
-        req.query = await schemas.query.parseAsync(req.query);
-      }
-      if (schemas.params) {
-        req.params = await schemas.params.parseAsync(req.params);
-      }
+      req.body = await schema.parseAsync(req.body);
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -26,8 +12,8 @@ export const validate = (schemas: ValidationSchemas) => {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Invalid request data',
-            details: { errors: error.errors },
+            message: 'არასწორი მონაცემები',
+            details: { errors: error.issues },
           },
         });
         return;
