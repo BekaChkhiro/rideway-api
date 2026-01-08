@@ -21,6 +21,7 @@
   "author": "Rideway",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.965.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "bcryptjs": "^3.0.3",
@@ -33,6 +34,7 @@
     "ioredis": "^5.9.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
+    "multer": "^2.0.2",
     "pg": "^8.16.3",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
@@ -45,6 +47,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.0.3",
     "@types/pg": "^8.16.0",
     "@types/uuid": "^10.0.0",
