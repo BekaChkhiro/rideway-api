@@ -10,17 +10,7 @@ import {
   ForgotPasswordInput,
   ResetPasswordInput,
 } from '../validators/auth';
-
-export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public code: string,
-    message: string
-  ) {
-    super(message);
-    this.name = 'AppError';
-  }
-}
+import { AppError } from '../middleware/error-handler';
 
 interface RegisterResult {
   userId: string;

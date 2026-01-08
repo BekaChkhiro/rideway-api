@@ -1,10 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 
-export const validate = (schema: z.ZodSchema) => {
+type ValidationTarget = 'body' | 'params' | 'query';
+
+export const validate = (schema: z.ZodSchema, target: ValidationTarget = 'body') => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.body = await schema.parseAsync(req.body);
+      const data = await schema.parseAsync(req[target]);
+      // Only assign to mutable targets (body and params can be modified, query is read-only)
+      if (target === 'body') {
+        req.body = data;
+      } else if (target === 'params') {
+        Object.assign(req.params, data);
+      }
+      // For query, we just validate but don't reassign since it's read-only
       next();
     } catch (error) {
       if (error instanceof ZodError) {
