@@ -13,6 +13,7 @@ import mediaRoutes from './routes/media.routes';
 import postsRoutes from './routes/posts.routes';
 import storiesRoutes from './routes/stories.routes';
 import chatRoutes from './routes/chat.routes';
+import notificationsRoutes from './routes/notifications.routes';
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.use('/api/v1/media', mediaRoutes);
 app.use('/api/v1/posts', postsRoutes);
 app.use('/api/v1/stories', storiesRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/notifications', notificationsRoutes);
 
 // 404 handler
 app.use((_req, res) => {
