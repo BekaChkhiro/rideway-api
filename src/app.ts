@@ -12,6 +12,7 @@ import usersRoutes from './routes/users.routes';
 import mediaRoutes from './routes/media.routes';
 import postsRoutes from './routes/posts.routes';
 import storiesRoutes from './routes/stories.routes';
+import chatRoutes from './routes/chat.routes';
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/media', mediaRoutes);
 app.use('/api/v1/posts', postsRoutes);
 app.use('/api/v1/stories', storiesRoutes);
+app.use('/api/v1/chat', chatRoutes);
 
 // 404 handler
 app.use((_req, res) => {
