@@ -15,6 +15,8 @@ import storiesRoutes from './routes/stories.routes';
 import chatRoutes from './routes/chat.routes';
 import notificationsRoutes from './routes/notifications.routes';
 import listingsRoutes from './routes/listings.routes';
+import forumRoutes from './routes/forum.routes';
+import servicesRoutes from './routes/services.routes';
 
 const app = express();
 
@@ -54,6 +56,8 @@ app.use('/api/v1/stories', storiesRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/notifications', notificationsRoutes);
 app.use('/api/v1/listings', listingsRoutes);
+app.use('/api/v1/forum', forumRoutes);
+app.use('/api/v1/services', servicesRoutes);
 
 // 404 handler
 app.use((_req, res) => {

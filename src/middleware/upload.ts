@@ -66,6 +66,13 @@ export const uploadListingImages = multer({
   fileFilter: imageFileFilter,
 }).array('images', 20);
 
+// Service images upload (multiple files, max 10, 10MB each)
+export const uploadServiceImages = multer({
+  storage,
+  limits: { fileSize: FILE_LIMITS.postImage },
+  fileFilter: imageFileFilter,
+}).array('images', 10);
+
 // Generic single image upload
 export const uploadSingleImage = multer({
   storage,
