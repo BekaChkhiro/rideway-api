@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import mediaRoutes from './routes/media.routes';
 import postsRoutes from './routes/posts.routes';
+import storiesRoutes from './routes/stories.routes';
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/media', mediaRoutes);
 app.use('/api/v1/posts', postsRoutes);
+app.use('/api/v1/stories', storiesRoutes);
 
 // 404 handler
 app.use((_req, res) => {

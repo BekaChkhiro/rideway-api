@@ -7,6 +7,7 @@ export const FILE_LIMITS = {
   cover: 10 * 1024 * 1024, // 10MB
   postImage: 10 * 1024 * 1024, // 10MB
   listingImage: 10 * 1024 * 1024, // 10MB
+  storyMedia: 50 * 1024 * 1024, // 50MB (for video support)
 } as const;
 
 // Allowed MIME types
@@ -16,6 +17,10 @@ export const ALLOWED_IMAGE_TYPES = [
   'image/png',
   'image/webp',
 ];
+
+export const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm'];
+
+export const ALLOWED_STORY_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
 
 // Multer memory storage (files stored in memory buffer)
 const storage = multer.memoryStorage();
@@ -67,3 +72,29 @@ export const uploadSingleImage = multer({
   limits: { fileSize: FILE_LIMITS.postImage },
   fileFilter: imageFileFilter,
 }).single('image');
+
+// Story media file filter (images + videos)
+const storyFileFilter = (
+  _req: Express.Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  if (ALLOWED_STORY_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new AppError(
+        400,
+        'INVALID_FILE_TYPE',
+        'Only JPEG, PNG, WebP images and MP4, MOV, WebM videos are allowed'
+      )
+    );
+  }
+};
+
+// Story upload (single file, 50MB limit for video support)
+export const uploadStoryMedia = multer({
+  storage,
+  limits: { fileSize: FILE_LIMITS.storyMedia },
+  fileFilter: storyFileFilter,
+}).single('media');
