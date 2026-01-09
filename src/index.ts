@@ -1,6 +1,8 @@
+import { createServer } from 'http';
 import { app } from './app';
 import { config } from './config';
 import { prisma } from './config/database';
+import { initializeSocket } from './socket';
 
 const start = async () => {
   try {
@@ -8,11 +10,19 @@ const start = async () => {
     await prisma.$connect();
     console.log('Database connected successfully');
 
+    // Create HTTP server
+    const server = createServer(app);
+
+    // Initialize Socket.io
+    initializeSocket(server);
+    console.log('Socket.io initialized');
+
     // Start server
-    app.listen(config.port, () => {
+    server.listen(config.port, () => {
       console.log(`Server running on port ${config.port}`);
       console.log(`Environment: ${config.nodeEnv}`);
       console.log(`Health check: http://localhost:${config.port}/health`);
+      console.log(`WebSocket: ws://localhost:${config.port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
