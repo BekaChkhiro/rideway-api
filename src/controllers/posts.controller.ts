@@ -77,6 +77,23 @@ export const postsController = {
     });
   },
 
+  async getLikedPosts(req: Request, res: Response) {
+    const { userId } = req.params;
+    const currentUserId = req.user?.userId;
+    const { page, limit } = req.query as { page?: string; limit?: string };
+
+    const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || '20', 10) || 20));
+
+    const result = await postsService.getLikedPosts(userId, pageNum, limitNum, currentUserId);
+
+    res.json({
+      success: true,
+      data: result.items,
+      meta: result.meta,
+    });
+  },
+
   async getPostsByHashtag(req: Request, res: Response) {
     const { tag } = req.params;
     const currentUserId = req.user?.userId;
@@ -98,8 +115,9 @@ export const postsController = {
     const userId = req.user!.userId;
     const { id } = req.params;
     const data = req.body as UpdatePostInput;
+    const files = req.files as Express.Multer.File[] | undefined;
 
-    const post = await postsService.updatePost(id, userId, data);
+    const post = await postsService.updatePost(id, userId, data, files);
 
     res.json({
       success: true,
@@ -128,6 +146,46 @@ export const postsController = {
     res.json({
       success: true,
       data: result,
+    });
+  },
+
+  async getSavedPosts(req: Request, res: Response) {
+    const userId = req.user!.userId;
+    const { page, limit } = req.query as { page?: string; limit?: string };
+
+    const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || '20', 10) || 20));
+
+    const result = await postsService.getSavedPosts(userId, pageNum, limitNum);
+
+    res.json({
+      success: true,
+      data: result.items,
+      meta: result.meta,
+    });
+  },
+
+  async toggleSave(req: Request, res: Response) {
+    const userId = req.user!.userId;
+    const { id } = req.params;
+
+    const result = await postsService.toggleSave(id, userId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  },
+
+  async getTrendingHashtags(req: Request, res: Response) {
+    const { limit } = req.query as { limit?: string };
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || '10', 10) || 10));
+
+    const hashtags = await postsService.getTrendingHashtags(limitNum);
+
+    res.json({
+      success: true,
+      data: hashtags,
     });
   },
 };

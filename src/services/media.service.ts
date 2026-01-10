@@ -4,7 +4,7 @@ import { AppError } from '../middleware/error-handler';
 import crypto from 'crypto';
 import path from 'path';
 
-export type MediaFolder = 'avatars' | 'covers' | 'posts' | 'stories' | 'listings' | 'services' | 'forum';
+export type MediaFolder = 'avatars' | 'covers' | 'posts' | 'stories' | 'listings' | 'services' | 'forum' | 'chat';
 
 interface UploadResult {
   key: string;

@@ -11,6 +11,7 @@ import {
   ResetPasswordInput,
 } from '../validators/auth';
 import { AppError } from '../middleware/error-handler';
+import { emailService } from './email.service';
 
 interface RegisterResult {
   userId: string;
@@ -97,8 +98,11 @@ export const authService = {
       },
     });
 
-    // TODO: Send OTP via email/SMS
-    console.log(`[DEV] OTP for ${user.id}: ${otpCode}`);
+    // Send OTP via email
+    if (data.email) {
+      await emailService.sendOtp(data.email, otpCode);
+    }
+    // TODO: Add SMS support for phone
 
     return {
       userId: user.id,
@@ -215,7 +219,10 @@ export const authService = {
         },
       });
 
-      console.log(`[DEV] OTP for ${user.id}: ${otpCode}`);
+      // Send OTP via email
+      if (user.email) {
+        await emailService.sendOtp(user.email, otpCode);
+      }
 
       throw new AppError(403, 'NOT_VERIFIED', 'გთხოვთ დაადასტუროთ ანგარიში. ახალი კოდი გაიგზავნა.');
     }
@@ -338,8 +345,11 @@ export const authService = {
       },
     });
 
-    // TODO: Send OTP via email/SMS
-    console.log(`[DEV] Password reset OTP for ${user.id}: ${otpCode}`);
+    // Send OTP via email
+    if (data.email && user.email) {
+      await emailService.sendPasswordResetOtp(user.email, otpCode);
+    }
+    // TODO: Add SMS support for phone
 
     return { message: 'თუ ანგარიში არსებობს, კოდი გაიგზავნება' };
   },
@@ -420,7 +430,11 @@ export const authService = {
       },
     });
 
-    console.log(`[DEV] Resent OTP for ${userId}: ${otpCode}`);
+    // Send OTP via email
+    if (type === 'EMAIL' && user.email) {
+      await emailService.sendOtp(user.email, otpCode);
+    }
+    // TODO: Add SMS support for phone
 
     return { message: 'ახალი კოდი გაიგზავნა' };
   },

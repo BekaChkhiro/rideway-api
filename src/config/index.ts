@@ -33,6 +33,7 @@ export const config = {
   // Email
   resend: {
     apiKey: process.env.RESEND_API_KEY,
+    fromEmail: process.env.EMAIL_FROM || 'Rideway <noreply@rideway.ge>',
   },
 
   // CORS

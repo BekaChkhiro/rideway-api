@@ -362,26 +362,31 @@ export async function getUserStories(
   }));
 }
 
-// Get feed stories (from followed users)
+// Get feed stories (from all users)
 export async function getFeedStories(userId: string): Promise<UserStoriesGroup[]> {
   const now = new Date();
 
-  // Get users I follow
-  const following = await prisma.follow.findMany({
-    where: { followerId: userId },
-    select: { followingId: true },
+  // Get blocked user IDs
+  const blocks = await prisma.block.findMany({
+    where: {
+      OR: [{ blockerId: userId }, { blockedId: userId }],
+    },
+    select: { blockerId: true, blockedId: true },
   });
 
-  const followingIds = following.map((f) => f.followingId);
+  const blockedIds = new Set<string>();
+  blocks.forEach((b) => {
+    blockedIds.add(b.blockerId);
+    blockedIds.add(b.blockedId);
+  });
+  blockedIds.delete(userId);
 
-  // Include own stories
-  followingIds.push(userId);
-
-  // Get all active stories from followed users
+  // Get all active stories from all users (except blocked)
   const stories = await prisma.story.findMany({
     where: {
-      userId: { in: followingIds },
       expiresAt: { gt: now },
+      user: { isActive: true },
+      ...(blockedIds.size > 0 && { userId: { notIn: Array.from(blockedIds) } }),
     },
     include: {
       user: {

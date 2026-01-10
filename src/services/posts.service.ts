@@ -249,21 +249,11 @@ export const postsService = {
     });
     blockedIds.delete(userId);
 
-    // Get following IDs
-    const following = await prisma.follow.findMany({
-      where: { followerId: userId },
-      select: { followingId: true },
-    });
-
-    const followingIds = following.map((f) => f.followingId);
-
-    // Include own posts and following posts
-    const userIds = [userId, ...followingIds].filter((id) => !blockedIds.has(id));
-
+    // Show all users' posts except blocked ones
     const where = {
-      userId: { in: userIds },
       isDeleted: false,
       user: { isActive: true },
+      ...(blockedIds.size > 0 && { userId: { notIn: Array.from(blockedIds) } }),
     };
 
     const [posts, total] = await Promise.all([
@@ -675,12 +665,14 @@ export const postsService = {
   async updatePost(
     postId: string,
     userId: string,
-    data: UpdatePostInput
+    data: UpdatePostInput,
+    files?: Express.Multer.File[]
   ): Promise<PostResponse> {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
         hashtags: { include: { hashtag: true } },
+        images: true,
       },
     });
 
@@ -700,6 +692,23 @@ export const postsService = {
     const hashtagsToAdd = newHashtags.filter((h) => !oldHashtags.includes(h));
     // Hashtags to remove
     const hashtagsToRemove = oldHashtags.filter((h) => !newHashtags.includes(h));
+
+    // Handle image deletion
+    const deleteImageIds = data.deleteImageIds || [];
+    const imagesToDelete = post.images.filter((img) => deleteImageIds.includes(img.id));
+
+    // Upload new images
+    let newImageUrls: { url: string }[] = [];
+    if (files && files.length > 0) {
+      const remainingImagesCount = post.images.length - imagesToDelete.length;
+      const maxNewImages = 10 - remainingImagesCount;
+      const filesToUpload = files.slice(0, maxNewImages);
+
+      if (filesToUpload.length > 0) {
+        const uploadResults = await uploadFiles(filesToUpload, 'posts', userId);
+        newImageUrls = uploadResults.map((r) => ({ url: r.url }));
+      }
+    }
 
     const updatedPost = await prisma.$transaction(async (tx) => {
       // Decrement count for removed hashtags
@@ -745,6 +754,35 @@ export const postsService = {
         });
       }
 
+      // Delete specified images from database
+      if (deleteImageIds.length > 0) {
+        await tx.postImage.deleteMany({
+          where: {
+            id: { in: deleteImageIds },
+            postId,
+          },
+        });
+      }
+
+      // Get current max order
+      const remainingImages = await tx.postImage.findMany({
+        where: { postId },
+        orderBy: { order: 'desc' },
+        take: 1,
+      });
+      const maxOrder = remainingImages.length > 0 ? remainingImages[0].order : -1;
+
+      // Add new images
+      if (newImageUrls.length > 0) {
+        await tx.postImage.createMany({
+          data: newImageUrls.map((img, index) => ({
+            postId,
+            url: img.url,
+            order: maxOrder + 1 + index,
+          })),
+        });
+      }
+
       // Update post
       return tx.post.update({
         where: { id: postId },
@@ -767,6 +805,17 @@ export const postsService = {
         },
       });
     });
+
+    // Delete images from R2 after successful transaction
+    if (imagesToDelete.length > 0) {
+      const imageKeys = imagesToDelete
+        .map((img) => extractKeyFromUrl(img.url))
+        .filter((key): key is string => key !== null);
+
+      if (imageKeys.length > 0) {
+        await deleteFiles(imageKeys);
+      }
+    }
 
     return {
       id: updatedPost.id,
@@ -832,6 +881,265 @@ export const postsService = {
 
     if (imageKeys.length > 0) {
       await deleteFiles(imageKeys);
+    }
+  },
+
+  async getTrendingHashtags(limit: number = 10): Promise<{ id: string; name: string; postsCount: number }[]> {
+    const hashtags = await prisma.hashtag.findMany({
+      where: {
+        postCount: { gt: 0 },
+      },
+      orderBy: { postCount: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        name: true,
+        postCount: true,
+      },
+    });
+
+    return hashtags.map((h) => ({
+      id: h.id,
+      name: h.name,
+      postsCount: h.postCount,
+    }));
+  },
+
+  async getLikedPosts(
+    targetUserId: string,
+    page: number,
+    limit: number,
+    currentUserId?: string
+  ): Promise<PaginatedResult<PostResponse>> {
+    const skip = (page - 1) * limit;
+
+    // Check if user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true, isActive: true },
+    });
+
+    if (!targetUser || !targetUser.isActive) {
+      throw new AppError(404, 'NOT_FOUND', 'მომხმარებელი ვერ მოიძებნა');
+    }
+
+    // Check if blocked
+    if (currentUserId && currentUserId !== targetUserId) {
+      const isBlocked = await prisma.block.findFirst({
+        where: {
+          OR: [
+            { blockerId: targetUserId, blockedId: currentUserId },
+            { blockerId: currentUserId, blockedId: targetUserId },
+          ],
+        },
+      });
+
+      if (isBlocked) {
+        throw new AppError(403, 'BLOCKED', 'პროფილი მიუწვდომელია');
+      }
+    }
+
+    // Get liked post IDs for the target user
+    const [likes, total] = await Promise.all([
+      prisma.like.findMany({
+        where: { userId: targetUserId },
+        include: {
+          post: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  fullName: true,
+                  avatarUrl: true,
+                  isActive: true,
+                },
+              },
+              images: {
+                orderBy: { order: 'asc' },
+              },
+              hashtags: {
+                include: { hashtag: true },
+              },
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.like.count({ where: { userId: targetUserId } }),
+    ]);
+
+    // Filter out deleted posts and inactive users
+    const validLikes = likes.filter(
+      (like) => like.post && !like.post.isDeleted && like.post.user.isActive
+    );
+
+    // Get current user's liked posts
+    let currentUserLikedPostIds = new Set<string>();
+    if (currentUserId) {
+      const postIds = validLikes.map((l) => l.post.id);
+      const currentUserLikes = await prisma.like.findMany({
+        where: {
+          userId: currentUserId,
+          postId: { in: postIds },
+        },
+        select: { postId: true },
+      });
+      currentUserLikedPostIds = new Set(currentUserLikes.map((l) => l.postId));
+    }
+
+    const items: PostResponse[] = validLikes.map((like) => ({
+      id: like.post.id,
+      content: like.post.content,
+      author: {
+        id: like.post.user.id,
+        username: like.post.user.username,
+        fullName: like.post.user.fullName,
+        avatarUrl: like.post.user.avatarUrl,
+      },
+      images: like.post.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        order: img.order,
+      })),
+      likeCount: like.post.likeCount,
+      commentCount: like.post.commentCount,
+      viewCount: like.post.viewCount,
+      isLiked: currentUserId === targetUserId || currentUserLikedPostIds.has(like.post.id),
+      hashtags: like.post.hashtags.map((h) => h.hashtag.name),
+      createdAt: like.post.createdAt,
+      updatedAt: like.post.updatedAt,
+    }));
+
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  },
+
+  async getSavedPosts(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<PaginatedResult<PostResponse>> {
+    const skip = (page - 1) * limit;
+
+    const [savedPosts, total] = await Promise.all([
+      prisma.savedPost.findMany({
+        where: { userId },
+        include: {
+          post: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  fullName: true,
+                  avatarUrl: true,
+                  isActive: true,
+                },
+              },
+              images: {
+                orderBy: { order: 'asc' },
+              },
+              hashtags: {
+                include: { hashtag: true },
+              },
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.savedPost.count({ where: { userId } }),
+    ]);
+
+    // Filter out deleted posts and inactive users
+    const validSaved = savedPosts.filter(
+      (saved) => saved.post && !saved.post.isDeleted && saved.post.user.isActive
+    );
+
+    // Get user's liked posts
+    const postIds = validSaved.map((s) => s.post.id);
+    const likes = await prisma.like.findMany({
+      where: {
+        userId,
+        postId: { in: postIds },
+      },
+      select: { postId: true },
+    });
+    const likedPostIds = new Set(likes.map((l) => l.postId));
+
+    const items: PostResponse[] = validSaved.map((saved) => ({
+      id: saved.post.id,
+      content: saved.post.content,
+      author: {
+        id: saved.post.user.id,
+        username: saved.post.user.username,
+        fullName: saved.post.user.fullName,
+        avatarUrl: saved.post.user.avatarUrl,
+      },
+      images: saved.post.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        order: img.order,
+      })),
+      likeCount: saved.post.likeCount,
+      commentCount: saved.post.commentCount,
+      viewCount: saved.post.viewCount,
+      isLiked: likedPostIds.has(saved.post.id),
+      hashtags: saved.post.hashtags.map((h) => h.hashtag.name),
+      createdAt: saved.post.createdAt,
+      updatedAt: saved.post.updatedAt,
+    }));
+
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  },
+
+  async toggleSave(postId: string, userId: string): Promise<{ saved: boolean }> {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, isDeleted: true },
+    });
+
+    if (!post || post.isDeleted) {
+      throw new AppError(404, 'NOT_FOUND', 'პოსტი ვერ მოიძებნა');
+    }
+
+    const existingSave = await prisma.savedPost.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+
+    if (existingSave) {
+      // Unsave
+      await prisma.savedPost.delete({
+        where: { id: existingSave.id },
+      });
+      return { saved: false };
+    } else {
+      // Save
+      await prisma.savedPost.create({
+        data: { userId, postId },
+      });
+      return { saved: true };
     }
   },
 

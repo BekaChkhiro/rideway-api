@@ -105,3 +105,10 @@ export const uploadStoryMedia = multer({
   limits: { fileSize: FILE_LIMITS.storyMedia },
   fileFilter: storyFileFilter,
 }).single('media');
+
+// Chat images upload (multiple files, max 5, 10MB each)
+export const uploadChatImages = multer({
+  storage,
+  limits: { fileSize: FILE_LIMITS.postImage },
+  fileFilter: imageFileFilter,
+}).array('images', 5);

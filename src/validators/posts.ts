@@ -16,6 +16,17 @@ export const updatePostSchema = z.object({
     .string()
     .min(1, 'კონტენტი სავალდებულოა')
     .max(2000, 'მაქსიმუმ 2000 სიმბოლო'),
+  deleteImageIds: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return [];
+      try {
+        return JSON.parse(val) as string[];
+      } catch {
+        return val.split(',').filter(Boolean);
+      }
+    }),
 });
 
 export type UpdatePostInput = z.infer<typeof updatePostSchema>;

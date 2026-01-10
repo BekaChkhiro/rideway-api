@@ -20,8 +20,14 @@ const router = Router();
 // Get feed (authenticated)
 router.get('/feed', authenticate, asyncHandler(postsController.getFeed));
 
+// Get saved posts (authenticated - only own)
+router.get('/saved', authenticate, asyncHandler(postsController.getSavedPosts));
+
 // Get trending posts (optionally authenticated)
 router.get('/trending', optionalAuth, asyncHandler(postsController.getTrending));
+
+// Get trending hashtags
+router.get('/hashtags/trending', asyncHandler(postsController.getTrendingHashtags));
 
 // Get posts by hashtag (optionally authenticated)
 router.get(
@@ -37,6 +43,14 @@ router.get(
   optionalAuth,
   validate(userIdParamSchema, 'params'),
   asyncHandler(postsController.getUserPosts)
+);
+
+// Get user's liked posts (optionally authenticated)
+router.get(
+  '/liked/:userId',
+  optionalAuth,
+  validate(userIdParamSchema, 'params'),
+  asyncHandler(postsController.getLikedPosts)
 );
 
 // Create post (authenticated)
@@ -60,6 +74,7 @@ router.get(
 router.patch(
   '/:id',
   authenticate,
+  uploadPostImages,
   validate(postIdParamSchema, 'params'),
   validate(updatePostSchema),
   asyncHandler(postsController.updatePost)
@@ -79,6 +94,14 @@ router.post(
   authenticate,
   validate(postIdParamSchema, 'params'),
   asyncHandler(postsController.toggleLike)
+);
+
+// Toggle save/bookmark (authenticated)
+router.post(
+  '/:id/save',
+  authenticate,
+  validate(postIdParamSchema, 'params'),
+  asyncHandler(postsController.toggleSave)
 );
 
 // ============================================

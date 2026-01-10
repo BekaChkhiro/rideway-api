@@ -20,9 +20,44 @@ export const sendMessageSchema = z.object({
     .string()
     .min(1, 'შეტყობინება სავალდებულოა')
     .max(5000, 'მაქსიმუმ 5000 სიმბოლო'),
+  replyToId: z.string().uuid('არასწორი message ID').optional(),
 });
 
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
+
+// Message ID param
+export const messageIdParamSchema = z.object({
+  messageId: z.string().uuid('არასწორი message ID'),
+});
+
+export type MessageIdParams = z.infer<typeof messageIdParamSchema>;
+
+// Update Message
+export const updateMessageSchema = z.object({
+  content: z
+    .string()
+    .min(1, 'შეტყობინება სავალდებულოა')
+    .max(5000, 'მაქსიმუმ 5000 სიმბოლო'),
+});
+
+export type UpdateMessageInput = z.infer<typeof updateMessageSchema>;
+
+// Reaction
+export const reactionSchema = z.object({
+  emoji: z
+    .string()
+    .min(1, 'emoji სავალდებულოა')
+    .max(10, 'მაქსიმუმ 10 სიმბოლო'),
+});
+
+export type ReactionInput = z.infer<typeof reactionSchema>;
+
+// Emoji param (for delete)
+export const emojiParamSchema = z.object({
+  emoji: z.string().min(1),
+});
+
+export type EmojiParams = z.infer<typeof emojiParamSchema>;
 
 // Pagination
 export const paginationSchema = z.object({

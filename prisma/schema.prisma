@@ -100,6 +100,7 @@ model User {
   stories                  Story[]
   comments                 Comment[]
   likes                    Like[]
+  savedPosts               SavedPost[]
   commentLikes             CommentLike[]
   followers                Follow[]                    @relation("following")
   following                Follow[]                    @relation("follower")
@@ -120,6 +121,7 @@ model User {
   otpCodes                 OtpCode[]
   deviceTokens             DeviceToken[]
   storyViews               StoryView[]
+  messageReactions         MessageReaction[]
 
   @@index([email])
   @@index([phone])
@@ -177,6 +179,7 @@ model Post {
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   images   PostImage[]
   likes    Like[]
+  savedBy  SavedPost[]
   comments Comment[]
   hashtags PostHashtag[]
 
@@ -208,6 +211,20 @@ model Like {
 
   @@unique([userId, postId])
   @@map("likes")
+}
+
+model SavedPost {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  postId    String   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@map("saved_posts")
 }
 
 model Comment {
@@ -535,11 +552,12 @@ model ServiceReview {
 // ============================================
 
 model Conversation {
-  id            String    @id @default(uuid())
-  lastMessage   String?   @map("last_message")
-  lastMessageAt DateTime? @map("last_message_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id                  String    @id @default(uuid())
+  lastMessage         String?   @map("last_message")
+  lastMessageSenderId String?   @map("last_message_sender_id")
+  lastMessageAt       DateTime? @map("last_message_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   participants ConversationParticipant[]
   messages     Message[]
@@ -564,19 +582,53 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String   @id @default(uuid())
-  conversationId String   @map("conversation_id")
-  senderId       String   @map("sender_id")
+  id             String    @id @default(uuid())
+  conversationId String    @map("conversation_id")
+  senderId       String    @map("sender_id")
   content        String
-  isRead         Boolean  @default(false) @map("is_read")
-  createdAt      DateTime @default(now()) @map("created_at")
+  isRead         Boolean   @default(false) @map("is_read")
+  isDeleted      Boolean   @default(false) @map("is_deleted")
+  editedAt       DateTime? @map("edited_at")
+  replyToId      String?   @map("reply_to_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User               @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo      Message?           @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies      Message[]          @relation("MessageReplies")
+  reactions    MessageReaction[]
+  images       MessageImage[]
 
   @@index([conversationId])
   @@index([createdAt(sort: Desc)])
   @@map("messages")
+}
+
+model MessageImage {
+  id        String @id @default(uuid())
+  messageId String @map("message_id")
+  url       String
+  order     Int    @default(0)
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_images")
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  emoji     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("message_reactions")
 }
 
 // ============================================
