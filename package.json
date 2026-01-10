@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Rideway - Motorcycle Community Platform API",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "rimraf dist && tsc",
