@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm ci --include=dev && npx prisma generate && npm run build"
+buildCommand = "rm -rf node_modules && npm install && npx prisma generate && npm run build"
 
 [deploy]
 startCommand = "npx prisma migrate deploy && npm run start"
