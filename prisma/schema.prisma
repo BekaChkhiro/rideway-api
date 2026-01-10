@@ -42,6 +42,38 @@ enum ListingStatus {
   DELETED
 }
 
+enum ListingType {
+  MOTORCYCLE
+  PARTS
+  EQUIPMENT
+  ACCESSORIES
+}
+
+enum MotorcycleCategory {
+  MOPED
+  CITY
+  SPORT
+  TOURING
+  OFF_ROAD
+  CRUISER
+}
+
+enum CustomsStatus {
+  CLEARED
+  NOT_CLEARED
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum LocationType {
+  ON_THE_WAY
+  GEORGIA
+  ABROAD
+}
+
 enum OtpType {
   EMAIL
   PHONE
@@ -426,18 +458,30 @@ model Listing {
   title       String
   description String
   price       Decimal          @db.Decimal(12, 2)
-  currency    String           @default("GEL")
+  currency    String           @default("USD")
+  type        ListingType      @default(MOTORCYCLE)
   categoryId  String           @map("category_id")
   userId      String           @map("user_id")
   condition   ListingCondition
-  location    String
   status      ListingStatus    @default(ACTIVE)
   viewCount   Int              @default(0) @map("view_count")
+
+  // Common fields
   brand       String?
   model       String?
   year        Int?
-  mileage     Int?
-  engineSize  Int?             @map("engine_size")
+
+  // Location fields
+  locationType LocationType?   @map("location_type")
+  locationCity String?         @map("location_city")
+
+  // Motorcycle-specific fields
+  motorcycleCategory MotorcycleCategory? @map("motorcycle_category")
+  customsStatus      CustomsStatus?      @map("customs_status")
+  engineCC           Int?                @map("engine_cc")
+  mileage            Int?
+  transmission       Transmission?
+
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
@@ -449,6 +493,7 @@ model Listing {
   @@index([categoryId])
   @@index([userId])
   @@index([status])
+  @@index([type])
   @@index([price])
   @@index([createdAt(sort: Desc)])
   @@map("listings")

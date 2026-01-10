@@ -9,7 +9,16 @@ import {
   PopularListingsQuery,
   UserListingsQuery,
 } from '../validators/listings';
-import { ListingCondition, ListingStatus, Prisma } from '@prisma/client';
+import {
+  ListingCondition,
+  ListingStatus,
+  ListingType,
+  LocationType,
+  MotorcycleCategory,
+  CustomsStatus,
+  Transmission,
+  Prisma,
+} from '@prisma/client';
 
 interface ListingAuthor {
   id: string;
@@ -36,15 +45,27 @@ interface ListingResponse {
   description: string;
   price: number;
   currency: string;
+  type: ListingType;
   condition: ListingCondition;
-  location: string;
   status: ListingStatus;
   viewCount: number;
+
+  // Common fields
   brand: string | null;
   model: string | null;
   year: number | null;
+
+  // Location fields
+  locationType: LocationType | null;
+  locationCity: string | null;
+
+  // Motorcycle-specific fields
+  motorcycleCategory: MotorcycleCategory | null;
+  customsStatus: CustomsStatus | null;
+  engineCC: number | null;
   mileage: number | null;
-  engineSize: number | null;
+  transmission: Transmission | null;
+
   author: ListingAuthor;
   category: ListingCategory;
   images: ListingImage[];
@@ -135,15 +156,27 @@ export const listingsService = {
         description: data.description,
         price: data.price,
         currency: data.currency,
+        type: data.type as ListingType,
         categoryId: data.categoryId,
         userId,
         condition: data.condition as ListingCondition,
-        location: data.location,
+
+        // Common fields
         brand: data.brand,
         model: data.model,
         year: data.year,
+
+        // Location fields
+        locationType: data.locationType as LocationType | undefined,
+        locationCity: data.locationCity,
+
+        // Motorcycle-specific fields
+        motorcycleCategory: data.motorcycleCategory as MotorcycleCategory | undefined,
+        customsStatus: data.customsStatus as CustomsStatus | undefined,
+        engineCC: data.engineCC,
         mileage: data.mileage,
-        engineSize: data.engineSize,
+        transmission: data.transmission as Transmission | undefined,
+
         images: {
           create: imageUrls.map((img, index) => ({
             url: img.url,
@@ -182,15 +215,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -270,15 +308,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount + 1,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -306,23 +349,60 @@ export const listingsService = {
     query: GetListingsQuery,
     currentUserId?: string
   ): Promise<PaginatedResult<ListingResponse>> {
-    const { page, limit, categoryId, minPrice, maxPrice, condition, location, brand, status, sort } = query;
+    const {
+      page,
+      limit,
+      type,
+      categoryId,
+      minPrice,
+      maxPrice,
+      condition,
+      brand,
+      status,
+      sort,
+      locationType,
+      motorcycleCategory,
+      customsStatus,
+      transmission,
+      minYear,
+      maxYear,
+      minEngineCC,
+      maxEngineCC,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ListingWhereInput = {
       status: status as ListingStatus,
       user: { isActive: true },
+      ...(type && { type: type as ListingType }),
       ...(categoryId && { categoryId }),
       ...(condition && { condition: condition as ListingCondition }),
-      ...(location && { location: { contains: location, mode: 'insensitive' as const } }),
       ...(brand && { brand: { contains: brand, mode: 'insensitive' as const } }),
+      ...(locationType && { locationType: locationType as LocationType }),
+      ...(motorcycleCategory && { motorcycleCategory: motorcycleCategory as MotorcycleCategory }),
+      ...(customsStatus && { customsStatus: customsStatus as CustomsStatus }),
+      ...(transmission && { transmission: transmission as Transmission }),
     };
 
-    // Build price filter properly
+    // Build price filter
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) where.price.gte = minPrice;
       if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+
+    // Build year filter
+    if (minYear !== undefined || maxYear !== undefined) {
+      where.year = {};
+      if (minYear !== undefined) where.year.gte = minYear;
+      if (maxYear !== undefined) where.year.lte = maxYear;
+    }
+
+    // Build engine CC filter
+    if (minEngineCC !== undefined || maxEngineCC !== undefined) {
+      where.engineCC = {};
+      if (minEngineCC !== undefined) where.engineCC.gte = minEngineCC;
+      if (maxEngineCC !== undefined) where.engineCC.lte = maxEngineCC;
     }
 
     // Determine sort order
@@ -399,15 +479,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -513,15 +598,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -614,15 +704,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -723,15 +818,20 @@ export const listingsService = {
       description: listing.description,
       price: Number(listing.price),
       currency: listing.currency,
+      type: listing.type,
       condition: listing.condition,
-      location: listing.location,
       status: listing.status,
       viewCount: listing.viewCount,
       brand: listing.brand,
       model: listing.model,
       year: listing.year,
+      locationType: listing.locationType,
+      locationCity: listing.locationCity,
+      motorcycleCategory: listing.motorcycleCategory,
+      customsStatus: listing.customsStatus,
+      engineCC: listing.engineCC,
       mileage: listing.mileage,
-      engineSize: listing.engineSize,
+      transmission: listing.transmission,
       author: {
         id: listing.user.id,
         username: listing.user.username,
@@ -802,13 +902,23 @@ export const listingsService = {
         ...(data.currency && { currency: data.currency }),
         ...(data.categoryId && { categoryId: data.categoryId }),
         ...(data.condition && { condition: data.condition as ListingCondition }),
-        ...(data.location && { location: data.location }),
+        ...(data.status && { status: data.status as ListingStatus }),
+
+        // Common fields
         ...(data.brand !== undefined && { brand: data.brand }),
         ...(data.model !== undefined && { model: data.model }),
         ...(data.year !== undefined && { year: data.year }),
+
+        // Location fields
+        ...(data.locationType !== undefined && { locationType: data.locationType as LocationType }),
+        ...(data.locationCity !== undefined && { locationCity: data.locationCity }),
+
+        // Motorcycle-specific fields
+        ...(data.motorcycleCategory !== undefined && { motorcycleCategory: data.motorcycleCategory as MotorcycleCategory }),
+        ...(data.customsStatus !== undefined && { customsStatus: data.customsStatus as CustomsStatus }),
+        ...(data.engineCC !== undefined && { engineCC: data.engineCC }),
         ...(data.mileage !== undefined && { mileage: data.mileage }),
-        ...(data.engineSize !== undefined && { engineSize: data.engineSize }),
-        ...(data.status && { status: data.status as ListingStatus }),
+        ...(data.transmission !== undefined && { transmission: data.transmission as Transmission }),
       },
       include: {
         user: {
@@ -841,15 +951,20 @@ export const listingsService = {
       description: updatedListing.description,
       price: Number(updatedListing.price),
       currency: updatedListing.currency,
+      type: updatedListing.type,
       condition: updatedListing.condition,
-      location: updatedListing.location,
       status: updatedListing.status,
       viewCount: updatedListing.viewCount,
       brand: updatedListing.brand,
       model: updatedListing.model,
       year: updatedListing.year,
+      locationType: updatedListing.locationType,
+      locationCity: updatedListing.locationCity,
+      motorcycleCategory: updatedListing.motorcycleCategory,
+      customsStatus: updatedListing.customsStatus,
+      engineCC: updatedListing.engineCC,
       mileage: updatedListing.mileage,
-      engineSize: updatedListing.engineSize,
+      transmission: updatedListing.transmission,
       author: {
         id: updatedListing.user.id,
         username: updatedListing.user.username,
@@ -952,15 +1067,20 @@ export const listingsService = {
       description: updatedListing.description,
       price: Number(updatedListing.price),
       currency: updatedListing.currency,
+      type: updatedListing.type,
       condition: updatedListing.condition,
-      location: updatedListing.location,
       status: updatedListing.status,
       viewCount: updatedListing.viewCount,
       brand: updatedListing.brand,
       model: updatedListing.model,
       year: updatedListing.year,
+      locationType: updatedListing.locationType,
+      locationCity: updatedListing.locationCity,
+      motorcycleCategory: updatedListing.motorcycleCategory,
+      customsStatus: updatedListing.customsStatus,
+      engineCC: updatedListing.engineCC,
       mileage: updatedListing.mileage,
-      engineSize: updatedListing.engineSize,
+      transmission: updatedListing.transmission,
       author: {
         id: updatedListing.user.id,
         username: updatedListing.user.username,
@@ -1090,15 +1210,20 @@ export const listingsService = {
       description: fav.listing.description,
       price: Number(fav.listing.price),
       currency: fav.listing.currency,
+      type: fav.listing.type,
       condition: fav.listing.condition,
-      location: fav.listing.location,
       status: fav.listing.status,
       viewCount: fav.listing.viewCount,
       brand: fav.listing.brand,
       model: fav.listing.model,
       year: fav.listing.year,
+      locationType: fav.listing.locationType,
+      locationCity: fav.listing.locationCity,
+      motorcycleCategory: fav.listing.motorcycleCategory,
+      customsStatus: fav.listing.customsStatus,
+      engineCC: fav.listing.engineCC,
       mileage: fav.listing.mileage,
-      engineSize: fav.listing.engineSize,
+      transmission: fav.listing.transmission,
       author: {
         id: fav.listing.user.id,
         username: fav.listing.user.username,
