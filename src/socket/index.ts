@@ -21,7 +21,7 @@ let io: Server;
 export function initializeSocket(server: HTTPServer): Server {
   io = new Server(server, {
     cors: {
-      origin: config.cors.origin,
+      origin: config.cors.origins,
       credentials: true,
     },
     pingInterval: 25000,
