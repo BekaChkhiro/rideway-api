@@ -1,6 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -rf node_modules && npm install && npx prisma generate && npm run build"
+buildCommand = "npm install --legacy-peer-deps && npx prisma generate && npm run build"
+nixpacksConfigPath = "nixpacks.toml"
 
 [deploy]
 startCommand = "npx prisma migrate deploy && npm run start"
