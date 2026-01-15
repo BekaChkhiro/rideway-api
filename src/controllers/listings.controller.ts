@@ -59,10 +59,18 @@ export const listingsController = {
       minPrice: rawQuery.minPrice ? parseFloat(rawQuery.minPrice) : undefined,
       maxPrice: rawQuery.maxPrice ? parseFloat(rawQuery.maxPrice) : undefined,
       condition: rawQuery.condition as GetListingsQuery['condition'],
-      location: rawQuery.location,
       brand: rawQuery.brand,
       status: (rawQuery.status as GetListingsQuery['status']) || 'ACTIVE',
       sort: (rawQuery.sort as GetListingsQuery['sort']) || 'latest',
+      type: rawQuery.type as GetListingsQuery['type'],
+      locationType: rawQuery.locationType as GetListingsQuery['locationType'],
+      motorcycleCategory: rawQuery.motorcycleCategory as GetListingsQuery['motorcycleCategory'],
+      customsStatus: rawQuery.customsStatus as GetListingsQuery['customsStatus'],
+      transmission: rawQuery.transmission as GetListingsQuery['transmission'],
+      minYear: rawQuery.minYear ? parseInt(rawQuery.minYear, 10) : undefined,
+      maxYear: rawQuery.maxYear ? parseInt(rawQuery.maxYear, 10) : undefined,
+      minEngineCC: rawQuery.minEngineCC ? parseInt(rawQuery.minEngineCC, 10) : undefined,
+      maxEngineCC: rawQuery.maxEngineCC ? parseInt(rawQuery.maxEngineCC, 10) : undefined,
     };
 
     const result = await listingsService.getListings(query, currentUserId);

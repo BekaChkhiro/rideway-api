@@ -134,9 +134,16 @@ export const listingsService = {
     data: CreateListingInput,
     files?: Express.Multer.File[]
   ): Promise<ListingResponse> {
+    // categoryId is required
+    if (!data.categoryId) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'კატეგორია სავალდებულოა');
+    }
+
+    const categoryId = data.categoryId;
+
     // Verify category exists
     const category = await prisma.listingCategory.findUnique({
-      where: { id: data.categoryId },
+      where: { id: categoryId },
     });
 
     if (!category) {
@@ -157,7 +164,7 @@ export const listingsService = {
         price: data.price,
         currency: data.currency,
         type: data.type as ListingType,
-        categoryId: data.categoryId,
+        categoryId,
         userId,
         condition: data.condition as ListingCondition,
 
