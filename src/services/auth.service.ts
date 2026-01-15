@@ -9,6 +9,7 @@ import {
   VerifyOtpInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  ChangePasswordInput,
 } from '../validators/auth';
 import { AppError } from '../middleware/error-handler';
 import { emailService } from './email.service';
@@ -463,5 +464,38 @@ export const authService = {
     }
 
     return user;
+  },
+
+  async changePassword(userId: string, data: ChangePasswordInput): Promise<{ message: string }> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new AppError(404, 'NOT_FOUND', 'მომხმარებელი ვერ მოიძებნა');
+    }
+
+    // Verify current password
+    const isPasswordValid = await comparePassword(data.currentPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new AppError(400, 'INVALID_PASSWORD', 'მიმდინარე პაროლი არასწორია');
+    }
+
+    // Hash new password
+    const newPasswordHash = await hashPassword(data.newPassword);
+
+    // Update password and revoke all refresh tokens for security
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+      }),
+      prisma.refreshToken.updateMany({
+        where: { userId },
+        data: { isRevoked: true },
+      }),
+    ]);
+
+    return { message: 'პაროლი წარმატებით შეიცვალა' };
   },
 };

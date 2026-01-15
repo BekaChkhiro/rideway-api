@@ -123,4 +123,20 @@ export const usersController = {
       data: { message: 'ბლოკი მოხსნილია' },
     });
   },
+
+  async getBlockedUsers(req: Request, res: Response) {
+    const currentUserId = req.user!.userId;
+    const { page, limit } = req.query as { page?: string; limit?: string };
+
+    const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || '20', 10) || 20));
+
+    const result = await usersService.getBlockedUsers(currentUserId, pageNum, limitNum);
+
+    res.json({
+      success: true,
+      data: result.items,
+      meta: result.meta,
+    });
+  },
 };

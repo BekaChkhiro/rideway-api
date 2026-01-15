@@ -93,3 +93,11 @@ export const resendOtpSchema = z.object({
 });
 
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
+
+// Change Password
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'მიმდინარე პაროლი სავალდებულოა'),
+  newPassword: passwordSchema,
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

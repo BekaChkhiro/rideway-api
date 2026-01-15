@@ -10,6 +10,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   resendOtpSchema,
+  changePasswordSchema,
 } from '../validators/auth';
 
 const router = Router();
@@ -61,5 +62,12 @@ router.post(
 router.post('/logout', authenticate, asyncHandler(authController.logout));
 
 router.get('/me', authenticate, asyncHandler(authController.getMe));
+
+router.post(
+  '/change-password',
+  authenticate,
+  validate(changePasswordSchema),
+  asyncHandler(authController.changePassword)
+);
 
 export default router;

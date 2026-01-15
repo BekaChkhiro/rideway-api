@@ -19,6 +19,13 @@ router.get(
   asyncHandler(usersController.searchUsers)
 );
 
+// Get blocked users (authenticated)
+router.get(
+  '/blocked',
+  authenticate,
+  asyncHandler(usersController.getBlockedUsers)
+);
+
 // Update own profile (authenticated)
 router.patch(
   '/me',

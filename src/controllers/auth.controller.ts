@@ -8,6 +8,7 @@ import {
   ForgotPasswordInput,
   ResetPasswordInput,
   ResendOtpInput,
+  ChangePasswordInput,
 } from '../validators/auth';
 
 export const authController = {
@@ -89,6 +90,16 @@ export const authController = {
   async getMe(req: Request, res: Response) {
     const userId = req.user!.userId;
     const result = await authService.getMe(userId);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  },
+
+  async changePassword(req: Request<object, object, ChangePasswordInput>, res: Response) {
+    const userId = req.user!.userId;
+    const result = await authService.changePassword(userId, req.body);
 
     res.json({
       success: true,

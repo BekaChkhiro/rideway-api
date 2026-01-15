@@ -580,4 +580,52 @@ export const usersService = {
       throw new AppError(400, 'NOT_BLOCKED', 'არ გაქვთ დაბლოკილი');
     }
   },
+
+  async getBlockedUsers(
+    currentUserId: string,
+    page: number,
+    limit: number
+  ): Promise<PaginatedResult<UserListItem>> {
+    const skip = (page - 1) * limit;
+
+    const [blocks, total] = await Promise.all([
+      prisma.block.findMany({
+        where: { blockerId: currentUserId },
+        include: {
+          blocked: {
+            select: {
+              id: true,
+              username: true,
+              fullName: true,
+              avatarUrl: true,
+              bio: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.block.count({ where: { blockerId: currentUserId } }),
+    ]);
+
+    const items: UserListItem[] = blocks.map((b) => ({
+      id: b.blocked.id,
+      username: b.blocked.username,
+      fullName: b.blocked.fullName,
+      avatarUrl: b.blocked.avatarUrl,
+      bio: b.blocked.bio,
+      isFollowing: false, // blocked users can't be followed
+    }));
+
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  },
 };

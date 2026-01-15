@@ -694,6 +694,7 @@ model Notification {
 
   @@index([userId])
   @@index([createdAt(sort: Desc)])
+  @@index([userId, isRead]) // Composite index for getUnreadCount and markAllAsRead queries
   @@map("notifications")
 }
 

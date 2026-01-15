@@ -21,27 +21,30 @@ interface ThreadAuthor {
 interface CategoryResponse {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   icon: string | null;
   order: number;
-  threadCount?: number;
+  threadsCount: number;
 }
 
 interface ThreadResponse {
   id: string;
   title: string;
   content: string;
-  viewCount: number;
-  replyCount: number;
-  likeCount: number;
+  viewsCount: number;
+  repliesCount: number;
+  likesCount: number;
   isPinned: boolean;
   isLocked: boolean;
   author: ThreadAuthor;
   category: {
     id: string;
     name: string;
+    slug: string;
   };
   isLiked: boolean;
+  lastReplyAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,8 +59,9 @@ interface ReplyAuthor {
 interface ReplyResponse {
   id: string;
   content: string;
-  likeCount: number;
+  likesCount: number;
   author: ReplyAuthor;
+  threadId: string;
   isLiked: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -89,10 +93,11 @@ export const forumService = {
     return categories.map((cat) => ({
       id: cat.id,
       name: cat.name,
+      slug: cat.name.toLowerCase().replace(/\s+/g, '-'),
       description: cat.description,
       icon: cat.icon,
       order: cat.order,
-      threadCount: cat._count.threads,
+      threadsCount: cat._count.threads,
     }));
   },
 
@@ -137,9 +142,9 @@ export const forumService = {
       id: thread.id,
       title: thread.title,
       content: thread.content,
-      viewCount: thread.viewCount,
-      replyCount: thread.replyCount,
-      likeCount: thread.likeCount,
+      viewsCount: thread.viewCount,
+      repliesCount: thread.replyCount,
+      likesCount: thread.likeCount,
       isPinned: thread.isPinned,
       isLocked: thread.isLocked,
       author: {
@@ -151,8 +156,10 @@ export const forumService = {
       category: {
         id: thread.category.id,
         name: thread.category.name,
+        slug: thread.category.name.toLowerCase().replace(/\s+/g, '-'),
       },
       isLiked: false,
+      lastReplyAt: null,
       createdAt: thread.createdAt,
       updatedAt: thread.updatedAt,
     };
@@ -205,9 +212,9 @@ export const forumService = {
       id: thread.id,
       title: thread.title,
       content: thread.content,
-      viewCount: thread.viewCount + 1,
-      replyCount: thread.replyCount,
-      likeCount: thread.likeCount,
+      viewsCount: thread.viewCount + 1,
+      repliesCount: thread.replyCount,
+      likesCount: thread.likeCount,
       isPinned: thread.isPinned,
       isLocked: thread.isLocked,
       author: {
@@ -219,8 +226,10 @@ export const forumService = {
       category: {
         id: thread.category.id,
         name: thread.category.name,
+        slug: thread.category.name.toLowerCase().replace(/\s+/g, '-'),
       },
       isLiked,
+      lastReplyAt: null,
       createdAt: thread.createdAt,
       updatedAt: thread.updatedAt,
     };
@@ -300,9 +309,9 @@ export const forumService = {
       id: thread.id,
       title: thread.title,
       content: thread.content,
-      viewCount: thread.viewCount,
-      replyCount: thread.replyCount,
-      likeCount: thread.likeCount,
+      viewsCount: thread.viewCount,
+      repliesCount: thread.replyCount,
+      likesCount: thread.likeCount,
       isPinned: thread.isPinned,
       isLocked: thread.isLocked,
       author: {
@@ -314,8 +323,10 @@ export const forumService = {
       category: {
         id: thread.category.id,
         name: thread.category.name,
+        slug: thread.category.name.toLowerCase().replace(/\s+/g, '-'),
       },
       isLiked: likedIds.has(thread.id),
+      lastReplyAt: null,
       createdAt: thread.createdAt,
       updatedAt: thread.updatedAt,
     }));
@@ -380,9 +391,9 @@ export const forumService = {
       id: updatedThread.id,
       title: updatedThread.title,
       content: updatedThread.content,
-      viewCount: updatedThread.viewCount,
-      replyCount: updatedThread.replyCount,
-      likeCount: updatedThread.likeCount,
+      viewsCount: updatedThread.viewCount,
+      repliesCount: updatedThread.replyCount,
+      likesCount: updatedThread.likeCount,
       isPinned: updatedThread.isPinned,
       isLocked: updatedThread.isLocked,
       author: {
@@ -394,8 +405,10 @@ export const forumService = {
       category: {
         id: updatedThread.category.id,
         name: updatedThread.category.name,
+        slug: updatedThread.category.name.toLowerCase().replace(/\s+/g, '-'),
       },
       isLiked: false,
+      lastReplyAt: null,
       createdAt: updatedThread.createdAt,
       updatedAt: updatedThread.updatedAt,
     };
@@ -422,7 +435,7 @@ export const forumService = {
   async toggleThreadLike(
     threadId: string,
     userId: string
-  ): Promise<{ isLiked: boolean; likeCount: number }> {
+  ): Promise<{ isLiked: boolean; likesCount: number }> {
     const thread = await prisma.forumThread.findUnique({
       where: { id: threadId },
       select: { id: true, userId: true },
@@ -454,7 +467,7 @@ export const forumService = {
         where: { threadId },
       });
 
-      return { isLiked: false, likeCount: count };
+      return { isLiked: false, likesCount: count };
     } else {
       // Like
       await prisma.$transaction([
@@ -471,7 +484,7 @@ export const forumService = {
         where: { threadId },
       });
 
-      return { isLiked: true, likeCount: count };
+      return { isLiked: true, likesCount: count };
     }
   },
 
@@ -537,13 +550,14 @@ export const forumService = {
     return {
       id: reply.id,
       content: reply.content,
-      likeCount: reply.likeCount,
+      likesCount: reply.likeCount,
       author: {
         id: reply.user.id,
         username: reply.user.username,
         fullName: reply.user.fullName,
         avatarUrl: reply.user.avatarUrl,
       },
+      threadId,
       isLiked: false,
       createdAt: reply.createdAt,
       updatedAt: reply.updatedAt,
@@ -610,13 +624,14 @@ export const forumService = {
     const items: ReplyResponse[] = replies.map((reply) => ({
       id: reply.id,
       content: reply.content,
-      likeCount: reply.likeCount,
+      likesCount: reply.likeCount,
       author: {
         id: reply.user.id,
         username: reply.user.username,
         fullName: reply.user.fullName,
         avatarUrl: reply.user.avatarUrl,
       },
+      threadId,
       isLiked: likedIds.has(reply.id),
       createdAt: reply.createdAt,
       updatedAt: reply.updatedAt,
@@ -677,13 +692,14 @@ export const forumService = {
     return {
       id: updatedReply.id,
       content: updatedReply.content,
-      likeCount: updatedReply.likeCount,
+      likesCount: updatedReply.likeCount,
       author: {
         id: updatedReply.user.id,
         username: updatedReply.user.username,
         fullName: updatedReply.user.fullName,
         avatarUrl: updatedReply.user.avatarUrl,
       },
+      threadId: reply.threadId,
       isLiked: false,
       createdAt: updatedReply.createdAt,
       updatedAt: updatedReply.updatedAt,
@@ -722,7 +738,7 @@ export const forumService = {
   async toggleReplyLike(
     replyId: string,
     userId: string
-  ): Promise<{ isLiked: boolean; likeCount: number }> {
+  ): Promise<{ isLiked: boolean; likesCount: number }> {
     const reply = await prisma.threadReply.findUnique({
       where: { id: replyId },
       select: { id: true },
@@ -754,7 +770,7 @@ export const forumService = {
         where: { replyId },
       });
 
-      return { isLiked: false, likeCount: count };
+      return { isLiked: false, likesCount: count };
     } else {
       // Like
       await prisma.$transaction([
@@ -771,7 +787,7 @@ export const forumService = {
         where: { replyId },
       });
 
-      return { isLiked: true, likeCount: count };
+      return { isLiked: true, likesCount: count };
     }
   },
 };

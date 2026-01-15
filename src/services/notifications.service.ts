@@ -97,23 +97,20 @@ export const notificationsService = {
 
   /**
    * Mark a single notification as read
+   * Uses updateMany for atomic operation - returns 0 if not found
    */
   async markAsRead(userId: string, notificationId: string): Promise<void> {
-    const notification = await prisma.notification.findFirst({
+    const result = await prisma.notification.updateMany({
       where: {
         id: notificationId,
         userId,
       },
-    });
-
-    if (!notification) {
-      throw new AppError(404, 'NOTIFICATION_NOT_FOUND', 'ნოტიფიკაცია ვერ მოიძებნა');
-    }
-
-    await prisma.notification.update({
-      where: { id: notificationId },
       data: { isRead: true },
     });
+
+    if (result.count === 0) {
+      throw new AppError(404, 'NOTIFICATION_NOT_FOUND', 'ნოტიფიკაცია ვერ მოიძებნა');
+    }
   },
 
   /**
@@ -133,22 +130,19 @@ export const notificationsService = {
 
   /**
    * Delete a notification
+   * Uses deleteMany for atomic operation - returns 0 if not found
    */
   async deleteNotification(userId: string, notificationId: string): Promise<void> {
-    const notification = await prisma.notification.findFirst({
+    const result = await prisma.notification.deleteMany({
       where: {
         id: notificationId,
         userId,
       },
     });
 
-    if (!notification) {
+    if (result.count === 0) {
       throw new AppError(404, 'NOTIFICATION_NOT_FOUND', 'ნოტიფიკაცია ვერ მოიძებნა');
     }
-
-    await prisma.notification.delete({
-      where: { id: notificationId },
-    });
   },
 
   /**
